@@ -1,0 +1,14 @@
+torch
+torchvision
+fastapi
+uvicorn
+Pillow
+numpy
+scikit-learn
+matplotlib
+pandas
+requests
+imagehash
+onnx
+onnxruntime
+jinja2

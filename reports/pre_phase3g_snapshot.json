@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-08-23T07:31:40Z",
+  "models": {
+    "best_model.pth": {
+      "exists": true,
+      "sha256": "e3ce20a18fe90b69969d0e7c3c8181c2543a7c4b710966e334284496e3b64b41",
+      "size_bytes": 16320441,
+      "mtime": 1787292220.335283
+    },
+    "best_model.onnx": {
+      "exists": true,
+      "sha256": "a1c7d6b1782c347ec9f5dc4a3cf1a0eafa98f796a51d086dde263ed9ede0e4dd",
+      "size_bytes": 637407,
+      "mtime": 1787293830.826525
+    },
+    "best_model.onnx.data": {
+      "exists": true,
+      "sha256": "438796116d0b8689a3f3696c775ac1fdb3a9bee12b1e33142fcb6e9c53dd308b",
+      "size_bytes": 15990784,
+      "mtime": 1787293830.7748427
+    },
+    "best_model_multiclass.pth": {
+      "exists": true,
+      "sha256": "ebcb3e26fb9ace036346e2656af70d0251450e4da4cd18fa8d41bc94ae10cc64",
+      "size_bytes": 16350835,
+      "mtime": 1787459266.1148915
+    }
+  },
+  "datasets": {
+    "multiclass": 2139,
+    "multiclass_v2": 2426
+  }
+}

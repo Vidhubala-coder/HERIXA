@@ -1,0 +1,281 @@
+[
+  {
+    "class": "brihadeeswarar",
+    "file1": "brihadeeswarar_candidate_0042_Brihadeeswarar_Temple_3502.jpg",
+    "file2": "Brihadeeswarar_Temple_3499.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 2,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__081.jpg",
+    "file2": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__082.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__086.jpg",
+    "file2": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__087.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__090.jpg",
+    "file2": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__091.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 4,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__090.jpg",
+    "file2": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__092.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__091.jpg",
+    "file2": "Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__092.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 2,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Ganigai_konda_cholapuram_21.jpg",
+    "file2": "Ganigai_konda_cholapuram_6.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "brihadeeswarar",
+    "file1": "Big_temple_243.jpg",
+    "file2": "Big_temple_244.jpg",
+    "split1": "validation",
+    "split2": "validation",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "meenakshi-amman",
+    "file1": "Madhura_Meenakshi_Temple__1_.jpg",
+    "file2": "Madhura_Meenakshi_Temple__2_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "meenakshi-amman",
+    "file1": "MADURAI_MEENAKSHI_TEMPLE.jpg",
+    "file2": "Meenakshiamman_Temple_Tower.JPG",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "03ShoreTemple_Mahabalipuram_Sunset_Year2011.jpg",
+    "file2": "Shore_Temple_Mahabalipuram__Tamilnadu.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "Last_of_the_seven_Pagoda_s_at_Mamallapuram.jpg",
+    "file2": "Shore_temple_at_Mammallapuram.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "Mahabalipuram_Temple__1900s.jpg",
+    "file2": "Seven_Pagodas__Madras_-_Tucks_Oilette__1911_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "Mamallapuram_temple_02.JPG",
+    "file2": "_A_Beautiful_Architecture_of_Shore_Temple_of_Mamallapuram_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "Mamallapuram_view.jpg",
+    "file2": "Shore_Temple_Mahabalipuram_India_-_panoramio__3_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "Rock_temple_at_Mahabalipuram.jpg",
+    "file2": "Shore_Temple_Mammalapuram.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "Shore_Temple_-_Full_View.JPG",
+    "file2": "Shore_Temple_view_2_-_Mahabalipuram.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "mahabalipuram",
+    "file1": "_Aesthetic_stone_work_of_Shore_Temple_complex_at_Mamallapuram_.JPG",
+    "file2": "_Aesthetic_vertical_shot_of_Shore_Temple_complex_at_Mamallapuram_.JPG",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "gangaikonda-cholapuram",
+    "file1": "Gangaikonda_Cholapuram_ttkcvrvb122k23iph__163_.jpg",
+    "file2": "Gangaikonda_Cholapuram_ttkcvrvb122k23iph__164_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "airavatesvara_candidate_0032_Airavatesvara_Temple__Dharasuram_JEG_20.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram_JEG_19.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 2,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "airavatesvara_candidate_0033_Airavatesvara_Temple__Dharasuram_JEG_45.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram_JEG_44.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 2,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "airavatesvara_candidate_0077_Entranced_-_HighRes_-_SI_05800.jpg",
+    "file2": "Darasuram_-_Airavatesvara_Temple.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 2,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram_JEG_09.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram_JEG_10.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram_JEG_138.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram_JEG_139.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 4,
+    "decision": "POSSIBLE_DUPLICATE"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram_JEG_36.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram_JEG_37.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram_JEG_38.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram_JEG_39.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram__Kumbakonam_ttkcvrvb122k23iph__15_.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram__Kumbakonam_ttkcvrvb122k23iph__18_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram__Kumbakonam_ttkcvrvb122k23iph__17_.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram__Kumbakonam_ttkcvrvb122k23iph__18_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Airavatesvara_Temple__Dharasuram__Kumbakonam_ttkcvrvb122k23iph__837_.jpg",
+    "file2": "Airavatesvara_Temple__Dharasuram__Kumbakonam_ttkcvrvb122k23iph__838_.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 6,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "airavatesvara",
+    "file1": "Darasuram-_N-TN-C189_-214.jpg",
+    "file2": "Darasuram-_N-TN-C189_-215.jpg",
+    "split1": "validation",
+    "split2": "validation",
+    "distance": 8,
+    "decision": "REVIEW"
+  },
+  {
+    "class": "thirumalai-nayakkar",
+    "file1": "Tirumalai_Naickar_Mahal_Throne.null.jpg",
+    "file2": "Tirumalai_Naickar_Mahal_Throne.null_2.jpg",
+    "split1": "train",
+    "split2": "train",
+    "distance": 8,
+    "decision": "REVIEW"
+  }
+]

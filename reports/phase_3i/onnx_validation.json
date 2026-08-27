@@ -1,0 +1,7 @@
+{
+  "max_absolute_difference": 1.239776611328125e-05,
+  "mean_absolute_difference": 3.2464004107168876e-06,
+  "prediction_agreement_pct": 100.0,
+  "samples_evaluated": 14,
+  "passed": true
+}

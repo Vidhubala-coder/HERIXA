@@ -1,0 +1,18 @@
+{
+  "exists": true,
+  "sha256": "1dceac122b0cabeb1b031d11d26e5caf34f7869cc1ee17ffc14a77b8979393fe",
+  "input_name": "input",
+  "input_dimensions": [
+    "dynamic",
+    3,
+    224,
+    224
+  ],
+  "output_name": "output",
+  "output_dimensions": [
+    "dynamic",
+    7
+  ],
+  "opset_version": 18,
+  "session_load_test": "SUCCESS"
+}

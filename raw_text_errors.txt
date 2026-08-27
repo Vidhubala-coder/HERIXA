@@ -1,0 +1,171 @@
+FILE: LanguageSelector.tsx:28 | TAG: TouchableOpacity | TEXT: 'onLanguageChange(lang.code)}
+              activeOpacity={0.8}
+            >'
+FILE: SearchBar.tsx:34 | TAG: TouchableOpacity | TEXT: 'onChangeText('')} style={styles.clearIcon}>'
+FILE: VoiceAssistant.tsx:51 | TAG: ScrollView | TEXT: '(null);
+
+  // Determine speech capability on mount
+  useEffect(() => {
+    const checkVoiceCapabilities = async () => {
+      try {
+        const available = await speechRecognitionService.isAvailable();
+        setSpeechSupported(available);
+      } catch (err) {
+        setSpeechSupported(false);
+      }
+    };
+    checkVoiceCapabilities();
+  }, []);
+
+  // Stop any active speech when assistant is closed or language is changed
+  useEffect(() => {
+    if (!isVisible) {
+      handleStopSpeech();
+    }
+  }, [isVisible]);
+
+  useEffect(() => {
+    handleStopSpeech();
+    setResponse(null);
+    setError(null);
+  }, [language]);
+
+  const handleStopSpeech = async () => {
+    await textToSpeechService.stop();
+    setIsSpeaking(false);
+  };
+
+  const handleStartSpeech = async () => {
+    if (!response?.answer) return;
+    setPlaybackWarning(null);
+
+    await textToSpeechService.speak(
+      response.answer,
+      language,
+      () => {
+        setIsSpeaking(true);
+      },
+      () => {
+        setIsSpeaking(false);
+      },
+      (err) => {
+        setIsSpeaking(false);
+        setPlaybackWarning(
+          language === 'en'
+            ? 'Voice playback failed. Please ensure system TTS is installed.'
+            : language === 'ta'
+            ? 'ஒலி பின்னணி தோல்வியடைந்தது. கணினி TTS நிறுவப்பட்டுள்ளதா என்பதை உறுதிப்படுத்தவும்.'
+            : 'वॉयस प्लेबैक विफल रहा। कृपया सुनिश्चित करें कि सिस्टम टीटीएस स्थापित है।'
+        );
+      }
+    );
+  };
+
+  const handleAsk = async (customQuestion?: string) => {
+    const queryToAsk = customQuestion || question;
+    if (!queryToAsk || queryToAsk.trim().length === 0) return;
+
+    setIsLoading(true);
+    setError(null);
+    setResponse(null);
+    setPlaybackWarning(null);
+    await handleStopSpeech();
+
+    try {
+      const res = await askVoiceAssistant(monumentId, queryToAsk, language, explainSimply);
+      if (res.success) {
+        setResponse(res);
+      } else {
+        setError(res.answer); // Fallback error string
+      }
+    } catch (err: any) {
+      console.error('Error asking voice assistant:', err);
+      setError(
+        language === 'en'
+          ? 'Failed to fetch answer. Please try again.'
+          : language === 'ta'
+          ? 'பதில் பெற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
+          : 'उत्तर प्राप्त करने में विफल। कृपया पुन: प्रयास करें।'
+      );
+    } finally {
+      setIsLoading(false);
+      setQuestion('');
+      // Scroll to top of response area
+      setTimeout(() => responseScrollRef.current?.scrollTo({ y: 0, animated: true }), 100);
+    }
+  };
+
+  // Preset chips depending on active language
+  const getPresetChips = () => {
+    if (language === 'ta') {
+      return [
+        { label: 'இதை கட்டியது யார்?', query: 'இதை கட்டியது யார்?' },
+        { label: 'கட்டிடக்கலை விவரம்', query: 'இதன் கட்டிடக்கலை பற்றி விளக்குக' },
+        { label: 'இதன் வரலாறு என்ன?', query: 'இதன் வரலாறு என்ன?' },
+        { label: 'சுவாரஸ்யமான தகவல்கள்', query: 'இதன் சுவாரஸ்யமான உண்மைகள் என்னென்ன?' },
+      ];
+    }
+    if (language === 'hi') {
+      return [
+        { label: 'इसे किसने बनवाया?', query: 'इसे किसने बनवाया था?' },
+        { label: 'वास्तुकला समझाएं', query: 'इसकी वास्तुकला कैसी है?' },
+        { label: 'इसका इतिहास क्या है?', query: 'इसका इतिहास क्या है?' },
+        { label: 'दिलचस्प तथ्य', query: 'इसके बारे में कुछ दिलचस्प तथ्य बताएं' },
+      ];
+    }
+    return [
+      { label: 'Who built this?', query: 'Who built this monument?' },
+      { label: 'Explain architecture', query: 'Explain the architecture of this monument.' },
+      { label: 'Tell me its history', query: 'Tell me the history of this monument.' },
+      { label: 'Interesting facts', query: 'Tell me some interesting facts about this.' },
+    ];
+  };
+
+  // Toggle voice input (Speech to Text)
+  const handleMicrophonePress = async () => {
+    if (!speechSupported) {
+      Alert.alert(
+        language === 'en' ? 'Voice Input Unavailable' : language === 'ta' ? 'குரல் உள்ளீடு கிடைக்கவில்லை' : 'आवाज इनपुट अनुपलब्ध',
+        language === 'en'
+          ? 'Speech recognition requires a native Development Build. Please use the text input below.'
+          : language === 'ta'
+          ? 'குரல் அங்கீகாரத்திற்கு நேட்டிவ் டெவலப்மென்ட் பில்ட் தேவை. தயவுசெய்து கீழே உள்ள உரை உள்ளீட்டைப் பயன்படுத்தவும்.'
+          : 'भाषण पहचान के लिए एक देशी विकास निर्माण की आवश्यकता होती है। कृपया नीचे दिए गए पाठ इनपुट का उपयोग करें।'
+      );
+      return;
+    }
+
+    if (isListening) {
+      speechRecognitionService.stopListening();
+      setIsListening(false);
+    } else {
+      const hasPermission = await speechRecognitionService.requestPermissions();
+      if (!hasPermission) {
+        Alert.alert(
+          language === 'en' ? 'Permission Denied' : language === 'ta' ? 'அனுமதி மறுக்கப்பட்டது' : 'अनुमति अस्वीकृत',
+          language === 'en'
+            ? 'Microphone permission is required for voice input.'
+            : language === 'ta'
+            ? 'குரல் உள்ளீட்டிற்கு மைக்ரோஃபோன் அனுமதி தேவை.'
+            : 'वॉयस इनपुट के लिए माइक्रोफोन अनुमति की आवश्यकता होती है।'
+        );
+        return;
+      }
+
+      setIsListening(true);
+      speechRecognitionService.startListening(
+        language === 'ta' ? 'ta-IN' : language === 'hi' ? 'hi-IN' : 'en-US',
+        (text) => {
+          setQuestion(text);
+          setIsListening(false);
+          handleAsk(text);
+        },
+        (err) => {
+          console.warn('Speech recognition error:', err);
+          setIsListening(false);
+        }
+      );
+    }
+  };
+
+  return ('

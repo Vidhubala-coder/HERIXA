@@ -1,0 +1,3149 @@
+{
+  "environment": {
+    "timestamp": "2026-08-23T16:27:08.879385Z",
+    "python_version": "3.13.6 (tags/v3.13.6:4e66535, Aug  6 2025, 14:36:00) [MSC v.1944 64 bit (AMD64)]",
+    "pytorch_version": "2.13.0+cpu",
+    "torchvision_version": "0.28.0+cpu",
+    "onnx_version": "1.22.0",
+    "onnxruntime_version": "1.29.0",
+    "node_version": "v24.11.0",
+    "operating_system": "Windows-11-10.0.26200-SP0",
+    "cpu_info": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "ram_info": "unknown",
+    "cuda_available": false,
+    "class_mapping": {
+      "0": "Brihadeeswarar",
+      "1": "Meenakshi-Amman",
+      "2": "Mahabalipuram",
+      "3": "Gangaikonda-Cholapuram",
+      "4": "Airavatesvara",
+      "5": "Thirumalai-Nayakkar",
+      "6": "Hard_Negatives"
+    },
+    "preprocessing": {
+      "image_size": 224,
+      "color_mode": "RGB",
+      "normalization": {
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
+      },
+      "resize_method": "Resize((224, 224))",
+      "tensor_conversion": "ToTensor()"
+    }
+  },
+  "files": {
+    "models/best_model.pth": {
+      "sha256": "e3ce20a18fe90b69969d0e7c3c8181c2543a7c4b710966e334284496e3b64b41",
+      "size_bytes": 16320441,
+      "modification_time": "2026-08-21T11:33:40.335283Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/models/best_model.pth"
+    },
+    "models/best_model.onnx": {
+      "sha256": "a1c7d6b1782c347ec9f5dc4a3cf1a0eafa98f796a51d086dde263ed9ede0e4dd",
+      "size_bytes": 637407,
+      "modification_time": "2026-08-21T12:00:30.826525Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/models/best_model.onnx"
+    },
+    "models/best_model.onnx.data": {
+      "sha256": "438796116d0b8689a3f3696c775ac1fdb3a9bee12b1e33142fcb6e9c53dd308b",
+      "size_bytes": 15990784,
+      "modification_time": "2026-08-21T12:00:30.774843Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/models/best_model.onnx.data"
+    },
+    "models/best_model_multiclass.pth": {
+      "sha256": "ebcb3e26fb9ace036346e2656af70d0251450e4da4cd18fa8d41bc94ae10cc64",
+      "size_bytes": 16350835,
+      "modification_time": "2026-08-23T09:57:46.114892Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/models/best_model_multiclass.pth"
+    },
+    "models/phase3g/checkpoints/best_model_multiclass_v2.pth": {
+      "sha256": "83852e65067c2f96e65084c650e8cab8c22e572bc4d882563d95c33bb7644a0c",
+      "size_bytes": 16351911,
+      "modification_time": "2026-08-23T19:43:41.266868Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/models/phase3g/checkpoints/best_model_multiclass_v2.pth"
+    },
+    "models/phase3g/checkpoints/latest_checkpoint.pth": {
+      "sha256": "e0f263863da25b59ca33ab0e7e9127e205bec017a2c303bdc2b3ced8f7e2104e",
+      "size_bytes": 16354407,
+      "modification_time": "2026-08-23T21:08:11.890023Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/models/phase3g/checkpoints/latest_checkpoint.pth"
+    },
+    "backend/src/controllers/monumentController.ts": {
+      "sha256": "f3ab644f386cf49dfc2144d12d6aba1c9d2215a7a181f714e76b5a33a29af8c1",
+      "size_bytes": 66542,
+      "modification_time": "2026-08-22T20:35:41.872494Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/backend/src/controllers/monumentController.ts"
+    },
+    "backend/src/routes/monumentRoutes.ts": {
+      "sha256": "029063abd407877e1a4103a478861873d83fc520158333b09701580270247072",
+      "size_bytes": 9476,
+      "modification_time": "2026-08-22T20:32:43.647453Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/backend/src/routes/monumentRoutes.ts"
+    },
+    "ai/src/service.py": {
+      "sha256": "e57b9a09700a19e018273f73fdc2287db935f6d9002d5b7ce862ee748dbffee2",
+      "size_bytes": 7290,
+      "modification_time": "2026-08-21T05:27:37.909049Z",
+      "absolute_path": "C:/Users/LENOVO/Desktop/AR model/ai/src/service.py"
+    }
+  },
+  "directories": {
+    "dataset/multiclass_v2/validation": [
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/1-Airavatesvara_Temple_-_Darasuram_-_Tamilnadu_-_Detail_of_the_perimeter_wall.jpg",
+        "sha256": "74f0e2bb33ffd6bddbe6f81dfe47f315022cac9f4c0619cef9070c4832f47328",
+        "size_bytes": 1780074
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/1-Airavatesvara_Temple_-_Darasuram_-_Tamilnadu_-_Gopuram_and_plinth_detail.jpg",
+        "sha256": "efd8da768c9c0d214ab9f7ec73d9ab43c04b5420be23536bb9a53f837e3e7903",
+        "size_bytes": 1840439
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/1-Airavatesvara_Temple_-_Darasuram_-_Tamilnadu_-_temple_complex_-_general_view.jpg",
+        "sha256": "75f4c7bbe3a849666020d1af2917c7fa84226031db3ab081aaf5ade0f448e23f",
+        "size_bytes": 1778472
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/1-Airavatesvara_Temple_-_Darasuram_-_Tamilnadu_-_View_of_the_temple_complex_frame_through_a_jaali.jpg",
+        "sha256": "97ecd67cdb3a8f3ba7a76e97abf4bb9e3d319e8647307523d279510a786d9d2d",
+        "size_bytes": 1993667
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Airavateshwarar_Darasuram_Gopuram.jpg",
+        "sha256": "ab49568e7b5832e2376bf789b4d6999ddc49d93e0be9b1d325ec31809992ebb4",
+        "size_bytes": 381516
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0000__A_World_Heritage_Monument_Airavatesvara_Temple_beauty_.JPG",
+        "sha256": "1b3f60bd20a5b250f5d408e2bef0c80b68019e1cb0447bcd9fa0612a61c83b98",
+        "size_bytes": 1535333
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0005__Ruined_beauty_of_Airavatesvara_Temple_1_.JPG",
+        "sha256": "66b90555b285fa1c52202c3db19422ce7b19c3bbcc06ffcd99ca0e11be50e834",
+        "size_bytes": 2212525
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0014_Darasuram-_N-TN-C189_-_052.jpg",
+        "sha256": "5b51eae88f1f7c8306e55b64482143ae2c178daa7d6b94c124acd4e75e940812",
+        "size_bytes": 8964893
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0015_Darasuram-_N-TN-C189_-_143.jpg",
+        "sha256": "42d127dc41980f1a9308654efb75f8caa59855a7d3ce7f310480b942e8929ca1",
+        "size_bytes": 7070013
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0016_Darasuram-_N-TN-C189_-_159.jpg",
+        "sha256": "00e0bd2db2989ef641c20d476df48966ca823517607e09434871f5dd8c610473",
+        "size_bytes": 8156221
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0017_Darasuram-_N-TN-C189_-_180.jpg",
+        "sha256": "8b4f5107e8e0c5ea77d11273534b81c844fb36240132a6de872f39de5cc63d85",
+        "size_bytes": 6016913
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0018_Darasuram-_N-TN-C189_-_182.jpg",
+        "sha256": "e1c340129eab5475bc089b5559691d7bf28ddd91371e0d735067b21e0648a082",
+        "size_bytes": 8216927
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0023__A_depiction_of_Airavatesvara_Temple_long_shot_.JPG",
+        "sha256": "989993e24689e9cfbef511bc6f31039d088733615271a8f4142661a2bbcdad5b",
+        "size_bytes": 1510865
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0037_Darasuram-_N-TN-C189_-217.jpg",
+        "sha256": "32fd4529f4ece6ca0811330434e4421916577be4c6dd4f99ff645a6c512e24b3",
+        "size_bytes": 6203360
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0038_Darasuram-_N-TN-C189_-_056.jpg",
+        "sha256": "08019817809e0b4d3a757c6dd040f0707193bf304e0711befaae86c86e1f56a4",
+        "size_bytes": 6124769
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0039_Wiki_Temple_Tanjore2.jpg",
+        "sha256": "b0f8d2306291762770fecb2ccf049dd0d5df2371656c21e25a94ef4b0d3eeac1",
+        "size_bytes": 3059346
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0054_Darasuram-_N-TN-C189_-188.jpg",
+        "sha256": "bbe4ef1a99f1725e691eeb74ef23951de9291f442f1f9e733c5fd67af47cdd54",
+        "size_bytes": 7471834
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0056_Darasuram-_N-TN-C189_-198.jpg",
+        "sha256": "71d6e037cd9e588b722717c80ccc51767c48e1ee12b23f931974d891dc89f957",
+        "size_bytes": 7571463
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0057_Darasuram-_N-TN-C189_-_001.jpg",
+        "sha256": "6d095afca29e5eca50b62912f429135907690e44b0b6d56cdf6082a26b0ecd20",
+        "size_bytes": 9006643
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0058_Darasuram-_N-TN-C189_-_011.jpg",
+        "sha256": "b970002b4b7244c01372bde03ed3339876dc9a20537e32320ab848486116ee5c",
+        "size_bytes": 11847444
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0060__A_depiction_of_World_Heritage_Monument_Airavatesvara_Temple_.JPG",
+        "sha256": "00fdd65914438f2d68efdbe3addf323b32e80d5df4ea90100775f96e8dbecbfe",
+        "size_bytes": 2011877
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0062__Excellent_Stone_work_of_Airavatesvara_Temple_.JPG",
+        "sha256": "b04e190c93cae26bf6600c226d002871fab2f02b26a7de02440e3e08d9ac067e",
+        "size_bytes": 2649723
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0074_Darasuram-_N-TN-C189_-_070.jpg",
+        "sha256": "b01c2ebb306740a35f4c07dd3de4d72b4b149a6fad324fee8e8f4baa85045f56",
+        "size_bytes": 6850004
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0075_Darasuram-_N-TN-C189_-_160.jpg",
+        "sha256": "8dbea5f1184fe862d60ea5d086eb3e39cab1db56df6fe05eff1a5b8c794544fb",
+        "size_bytes": 9291858
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0076_Darasuram_temple_front_view.jpg",
+        "sha256": "dd5304e2557a0abeae46c7fd0218846f875ae60eba968501cb1b698cbf8e84f6",
+        "size_bytes": 719445
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/airavatesvara_candidate_0097_Darasuram-_N-TN-C189_-197.jpg",
+        "sha256": "89781d88c275a9a732f1a64d69259112a5a2026e35e3033552ecfb2470c0e4f3",
+        "size_bytes": 6033150
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Amman_Shrine_at_Darasuram.jpg",
+        "sha256": "835283533e756c9e4655a549cee21adbdcf6d81fc02962e6fa68c730dc00b549",
+        "size_bytes": 1296170
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Carved_Wheel_of_Airavatesvara_Temple.jpg",
+        "sha256": "746b170c005e4a7c9235250df51094654fb104f117317320b642db2539f1864c",
+        "size_bytes": 15204751
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-194.jpg",
+        "sha256": "162a5098a385c2b4f1c6ea60c7a90a6f59ef505f0c6f0a99fe76bbbec304178e",
+        "size_bytes": 7092476
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-199.jpg",
+        "sha256": "beaa216a918b681ad1c7862b5322a80b0c1a172c9aa1e7bedd78c987108fca50",
+        "size_bytes": 6551078
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-200.jpg",
+        "sha256": "884e9a1bd9fbf55c50f297ec97e6c1989f0e4dbb0ab2ffaa36d6021865475ef8",
+        "size_bytes": 6393833
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-213.jpg",
+        "sha256": "34e38f05b85054f888b73ecc09725c6ffc498774f12f7f2e600ce2f71815f444",
+        "size_bytes": 7546183
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-214.jpg",
+        "sha256": "5d805df1901dc191aec12a0cd95da5eda837767e9c1dfe0d55a065fca62b039c",
+        "size_bytes": 6281211
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-215.jpg",
+        "sha256": "864334ca49b7b279a4137cc784ab7e1e3f7ba330774bcb7c7636600fdec68412",
+        "size_bytes": 6859328
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-220.jpg",
+        "sha256": "5226f35dcb3fa78c24869663920458bf959ef145487293ca0ddd2a7a5609a747",
+        "size_bytes": 9939927
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-221.jpg",
+        "sha256": "01eb60a1fef939d9df86f7c97ed2b9368ff93e142ebf038fe4517e174ac345b5",
+        "size_bytes": 7728836
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_030.jpg",
+        "sha256": "ab758ceffad6f150b16f5779b6f2645fa2ea364ff612881288e1838f69ec9de2",
+        "size_bytes": 6104562
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_031.jpg",
+        "sha256": "d29bc28004eda1f6f55ffea36c620216d140628290cd6eccdd3f0d730833d2f0",
+        "size_bytes": 7666688
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_033.jpg",
+        "sha256": "750802b9eeaf2f340942cb7df9536de5e0a18fdd6bc94e126b6e82a7292b8477",
+        "size_bytes": 5740862
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_034.jpg",
+        "sha256": "86ca630fae8cc872c143ab9c6e2ccd15c54e0c18807533644c3870242ae51239",
+        "size_bytes": 8567318
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_060.jpg",
+        "sha256": "2f8b07ee2228d3af0fb25c4f335d7c21fd160d4556685107112403c52c07477e",
+        "size_bytes": 9423642
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_061.jpg",
+        "sha256": "7e4bfde1e9ad3752452c1000444e4a0d355dd8da0224302141f890b8731a8932",
+        "size_bytes": 6234972
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_138.jpg",
+        "sha256": "67075c10251d1986586365f13cc6b96af99344963c459d72e27bed18e714cdf0",
+        "size_bytes": 5659913
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_157.jpg",
+        "sha256": "ed28f303fb1ee2e245418d06588b78ff691d0114d27855c75df0132789f4812a",
+        "size_bytes": 8977858
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_177.jpg",
+        "sha256": "3f5f4e1716f2c044df4c9002f7330f7454b5d8cce383196d252d76cceead8ae2",
+        "size_bytes": 6405240
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram-_N-TN-C189_-_178.jpg",
+        "sha256": "b55a8bfd381d1f6b5df68906ed909af9bc8ce428391b471dec0b94dd33952d1e",
+        "size_bytes": 6505154
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram_Airavateswarar_Temple__Darasuram__Tamilnadu.jpg",
+        "sha256": "9b195fc8a0f9f8de8511f35d21a82a9251c69f68c1aa0b270270b69bed0435e4",
+        "size_bytes": 1298931
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram_Airavateswara_Temple_Wall.jpg",
+        "sha256": "59e8294453b74c54cad0a50e6359993fc8844b97f14c2e00cb1f5da17818b2ea",
+        "size_bytes": 5944366
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Darasuram_Siva_Temple.jpg",
+        "sha256": "dc77401da59c61d87061d8b9c5c5a02be73f0a2ee52cc3e33832803b81ead6fb",
+        "size_bytes": 1471319
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Dharasuram_pan_shot.jpg",
+        "sha256": "7d66729267ec711d5ee5a7a6afdc112d6639187f264d5f24ece499c69b04a3c4",
+        "size_bytes": 2880382
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Dharasuram_temple_praharam.jpg",
+        "sha256": "9644e7e8bc2265c8f24e589123a5b79ecb56c3f512ebbb69a32ed7c5f2f93b44",
+        "size_bytes": 4616220
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/N-TN-C189__3_.jpg",
+        "sha256": "6de94fafe68e7aa1a6e40009d6b7aea582978040d3696d64f8e2d73a1b2429a8",
+        "size_bytes": 2232538
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Painting_at_Darasuram.jpg",
+        "sha256": "a36b76463aeeeeed1a6420b07d49f092a3bdee9e734f99ffe6817bb851f7d2fa",
+        "size_bytes": 1251591
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/Temple_with_a_theme.jpg",
+        "sha256": "785cba4c2e99804775ba6382bfc8f6d2611944058e0d56f0a4bbe508e7ae84ef",
+        "size_bytes": 3418919
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_Architecture_of_World_Heritage_Monument_Airavatesvara_Temple_.JPG",
+        "sha256": "bc73c012314361abef4233a63e7960864efd313981fb4b60235d744003ab17d2",
+        "size_bytes": 1299153
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_A_arcitecture_of_World_Heritage_Monument_Airavatesvara_Temple_.JPG",
+        "sha256": "60beb8cf80a2f9676ad4bb8201179a288de76447e92d0e51212cc759034a84fb",
+        "size_bytes": 1650969
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_A_beautiful_tower_of_Airavatesvara_Temple_.JPG",
+        "sha256": "3eafed1e457f7b2ba21e8818f8ad1c813afaffd925cce2e612b1ad2c8abfaec0",
+        "size_bytes": 1696614
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_Excellent_Stone_work_of_Airavatesvara_Temple_1_.JPG",
+        "sha256": "911d089d59655398beac40d9f8263dd462fd594d0c936656a0e5b20e1ecb2116",
+        "size_bytes": 2237400
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_Excellent_Stone_work_of_Airavatesvara_Temple_2_.JPG",
+        "sha256": "3634b8f7818eb472deb2f594c7bcb3bd0e3dfd92a4f10c9fa3429ff864d35b95",
+        "size_bytes": 2228476
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_Ruined_beauty_of_Airavatesvara_Temple_.JPG",
+        "sha256": "4308a28a5eceb796d4d7e990a04046bd788a0d2608e0ca245ff20f95ce277e6d",
+        "size_bytes": 2300114
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/airavatesvara/_Ruined_beauty_of_Airavatesvara_Temple_2_.JPG",
+        "sha256": "2bc55e0cf14c47d24e77c7fc18ca2c15793499205ec2ded990264723de62e472",
+        "size_bytes": 1325795
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/1-Brihadeeswara_Temple-_court_-Thanjavur-Tamilnadu_08.jpg",
+        "sha256": "e0c149fa623ad57e112d7bcf747a4007bd2b9798145f97de678e65c18c6b3123",
+        "size_bytes": 1818021
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/1-Brihadeeswara_Temple-_Plinth_-Thanjavur-Tamilnadu_06.jpg",
+        "sha256": "e7de193e89a82bd2aaa2c794942330ca10719c5ab7be7f75dcc1f1f41661eaff",
+        "size_bytes": 1782415
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple-Thanjavur.JPG",
+        "sha256": "a02484e062778efa703dd52c6a4dd84e623ab227c1114f590ede8acc7944630b",
+        "size_bytes": 4358144
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple_230.jpg",
+        "sha256": "b01cd784425c06240c7feb17e99d0bf61b54b1b022401d7bb273028644323f60",
+        "size_bytes": 4960113
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple_236.jpg",
+        "sha256": "87eb39294029dc0d5b1c114cfc2e2146ab5c1f4fe6062932d554ecf7a12b4b46",
+        "size_bytes": 6309970
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple_239.jpg",
+        "sha256": "9d78a367188bbce5f2bede3b27e2bf78aa3794ba71e2e4914cba0d1a66599401",
+        "size_bytes": 4311658
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple_242.jpg",
+        "sha256": "c6b17d1ff81bd6cac561731c99ca51b25c272bd2919be0cf93cfa6500b6f5905",
+        "size_bytes": 5659725
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple_243.jpg",
+        "sha256": "0ef48296d4db09323bb55ccad96739265502742e6e9af75ce235efa9b816970f",
+        "size_bytes": 6062177
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Big_temple_244.jpg",
+        "sha256": "fb951d1d62cf73fb85bfb61a38f5fb7c21ae1ba7b04ef9643bcd584b9e2e44a2",
+        "size_bytes": 5977115
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0014_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2010_.jpg",
+        "sha256": "27ea0125ec00f0d015461e49cd4d74cf58fe8c2fc3ca84a10336e4ad8283d682",
+        "size_bytes": 447907
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0015_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__03.jpg",
+        "sha256": "8fb929440c977ecc85b491364a90ba9e718acba7838d6f1152cdb0e4a5f0b143",
+        "size_bytes": 4857238
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0016_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India_207.jpg",
+        "sha256": "442e2ea832058266ba7eef0f4134b25792e1e9bb1e29b8f014edf82d32b093ce",
+        "size_bytes": 4763581
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0017_Gopurams_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016_.jpg",
+        "sha256": "fd303945a7b92ef322a5db1495a8144a1f0b637deb9a2de91e2e9a21af39b1cd",
+        "size_bytes": 4590986
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0032_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India_204.jpg",
+        "sha256": "e2b693c197ac12c04c795319ad075e05568daa5ba4f02e8ac51d3bb9f25464bc",
+        "size_bytes": 5004565
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0036_Tanjore_kovil.jpg",
+        "sha256": "8bd93ded6150196b5119782dacf45361ef0aa2dd6434400dde7b2c7aa6f0a148",
+        "size_bytes": 1256923
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0069_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2012__3.jpg",
+        "sha256": "ccea635d53d6e386bc00ecb601e4aeb4b5ce4dbdc0ea5e0ac6c0c0bea8d3e120",
+        "size_bytes": 1462414
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0070_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India_206.jpg",
+        "sha256": "f19c4229265fb37857282c9faa208c47fdaf8940dde134fa86e1613eb38ac397",
+        "size_bytes": 6018818
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0071_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India_227.jpg",
+        "sha256": "f8afe1e5c071593ba5e9756a3a4aa830777f7d1807916bca746374fa3fd5b61e",
+        "size_bytes": 7257459
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0072_Gopurams_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__01.jpg",
+        "sha256": "864f77d6282940d03d8f0a8664157acd8d9cfefa1adc0234d4863ff83d043eb9",
+        "size_bytes": 8098322
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0094_Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India_210.jpg",
+        "sha256": "10d957e1520bfa60ec78fa0a0806c2950a12291225870e7abebe763868738eb0",
+        "size_bytes": 6330735
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/brihadeeswarar_candidate_0095_Gopurams_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2016__11.jpg",
+        "sha256": "2226af38983d3649bb036a5f2bd3d1c71473bafa4951eb3d95372a22768fb917",
+        "size_bytes": 5609007
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Brihadeewsar_temple.jpg",
+        "sha256": "7a15ffe861aba33cfac71b64af99e93331518a6a73853890dfcc574391971fdf",
+        "size_bytes": 3060587
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/BT_net.jpg",
+        "sha256": "2086ea8e8efceed05d75d149d59c6876d821c2fae4f8348ff93f515dc28ec7ac",
+        "size_bytes": 2527614
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Cassia_Fistula_in_brihadeeswarar_temple.jpg",
+        "sha256": "a070b370557fde7f7954ad80df0a173a8dd9d23e7c52951212a27b43dd14860c",
+        "size_bytes": 3234973
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Flowers_for_sale.jpg",
+        "sha256": "6604982279ac44e14ff85342df1559fd128f8d1b520d309444d6348aea56604f",
+        "size_bytes": 1022806
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Gangaikondacholeeswarar_Temple.JPG",
+        "sha256": "dd4c739ac10dce506d2e2813302f1c831e8ef02af60141cca006d9eec952f6ad",
+        "size_bytes": 2643400
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2011__10.jpg",
+        "sha256": "34e6e72c804c7049a1c793befa6f167017a65ca381097db0b5751f9f93c8e18d",
+        "size_bytes": 266612
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2011__12.jpg",
+        "sha256": "52ada156f80c8a3e22b6f5769d5931ccbaa59feffef5180a8f35728776d83cf7",
+        "size_bytes": 103720
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2011__15.jpg",
+        "sha256": "55f86b6b29480cb0da126129a58ba16d939e359f70e0fb46196d25d889fd3410",
+        "size_bytes": 67372
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2011__7.jpg",
+        "sha256": "1e1985e478ba309bbfc7be89e8e3cb8dba0ab1335dcd1eaa9fe2482641fae0d7",
+        "size_bytes": 631378
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Gopuram_of_the_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2011__8.jpg",
+        "sha256": "a12529196d85f873fb518ae9daeaac30b4593835b83edad8f25c8301c4cf7660",
+        "size_bytes": 101113
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/INDIA_s_ANGKHOR_VAT_BIG_TEMPLE_TANJORE_-_panoramio.jpg",
+        "sha256": "b42090f59f82a3ee70ccd6fa853334d480ff31eb0c6ad9f808681185b3cf572d",
+        "size_bytes": 5140146
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Kangalai_kavarum_gopuram.jpg",
+        "sha256": "0eeb1a98ce40ecc42fb13c1c90f02a2200e3841d164953545b3ec3be54e46f5a",
+        "size_bytes": 1336276
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Le_temple_de_Brihadishwara__Tanjore__Inde___13909668337_.jpg",
+        "sha256": "3e5ce2353f8d1c339beb749ca9c8f629d61cacf4383c2c4961ffbde7d83982e1",
+        "size_bytes": 583202
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Le_temple_de_Brihadishwara__Tanjore__Inde___14092188891_.jpg",
+        "sha256": "3d1fecc52d9040332f65a9451d24156559784e10e0fb1a20785e26da569995ae",
+        "size_bytes": 701378
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Le_temple_de_Brihadishwara__Tanjore__Inde___14095381115_.jpg",
+        "sha256": "8d29c92e1e79d89c53bf70075da65dab361c10e54d2f57794835bbd306321be9",
+        "size_bytes": 662064
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Le_temple_de_Brihadishwara__Tanjore__Inde___14095382445_.jpg",
+        "sha256": "c6cfcbb84902c0a0256f1003af77edea98b7828c527cc9264f9476beee62471b",
+        "size_bytes": 1187668
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Le_temple_de_Brihadishwara__Tanjore__Inde___14354574611_.jpg",
+        "sha256": "6c148294872eb50e5857db65fe7c87fd499da445ed4f63c4706c55b6719cd401",
+        "size_bytes": 1395668
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Outer_Gate_of_the_Brihadeshwarar_temple.jpg",
+        "sha256": "428ed84420a59b8bf1a206855022357344b9155d21c5b6624dc8d8dd9b97321c",
+        "size_bytes": 8720717
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Outside_Brihadeeswarar_Temple__6271202235_.jpg",
+        "sha256": "45bb4cc3967b506ba652ec21d880e9fb5efb28f602278913e5a60d52b3da7387",
+        "size_bytes": 1967869
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Panaromic_view_of_Gangaikonda_Cholapuram_Temple.jpg",
+        "sha256": "13c1178e81ff2e0340e8fa786381e67cb6c120b917f9327c7c31865df67b9b72",
+        "size_bytes": 3226506
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Periyakovil_with_stone_culture.jpg",
+        "sha256": "6bed7bbda21ee57bae7f8946d7fb0f46d52bc35ddbaaaf5a34375228a07d08fc",
+        "size_bytes": 4974115
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Pilars_of_big_temple.jpg",
+        "sha256": "85a91371d47d0066c40f716022df39f5bd997c27f53c269dcd0719a60edf2145",
+        "size_bytes": 1512554
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Sri_Brihadisvara_Temple__Thanjavur__Tamil_Nadu__India__2012_.jpg",
+        "sha256": "8fea021bce0a7ac05513db0d10ab7601f6d263da1ddf060a5fb1d38bce5653ef",
+        "size_bytes": 54914
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Tanjore_Brihadeeshwar_temple.jpg",
+        "sha256": "2a6cf45704f3cae3bca0276f9b3a2ae771b9e2ff56ff534e11e894873e5e7a4a",
+        "size_bytes": 10012088
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjai_periya_kovil_side_view.jpg",
+        "sha256": "e748bf56a7592eef17db66ad3692c1b8cc0fb4006dcd606ab2cb003f80b3128f",
+        "size_bytes": 145102
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjavur_big_temple_10.jpg",
+        "sha256": "0564fe8e1493cbc1c76019c082401ad74d2f35d3a9087a6f651d7e66792525ac",
+        "size_bytes": 1044530
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjavur_Brihadeshwara_Temple.jpg",
+        "sha256": "65107c6ddf3ec629387f9e494be3a0f6510d919fa8d215dd1a7667bc4d064eb5",
+        "size_bytes": 9516281
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjavur_periyakovil_front_view.jpg",
+        "sha256": "ed1c92fba9d22dbc51330fd4129d350d93f5d2ff14e6d07555c754a194e8ce5f",
+        "size_bytes": 10430059
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjavur_Temple_Lateral_view.jpg",
+        "sha256": "ad234b3a511abb0f0f63a97a3e21fd8c91add1c9238e7e6a59f51b6877a4ef81",
+        "size_bytes": 6291543
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjavur_Temple__62922_.jpg",
+        "sha256": "9a1d012501293bf2a2b7f42c4651be0dfd1dc7ee4db3f9e739017e4679a3d98d",
+        "size_bytes": 1293085
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Thanjavur__27201_.jpg",
+        "sha256": "1d727d328c9b91df36be845d60fc3b7f4f47f261874bdde35a9274becdfacb0e",
+        "size_bytes": 4947724
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/Vimanam_Under_the_tree_from_gangaikondacholapuram.jpg",
+        "sha256": "33e26abf4d1fb6be9bdd0cbc29aae0a7f3c3b9ef1e6c5cccf9cce6c397608a33",
+        "size_bytes": 2143667
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/VM_photography_-_Peyruvudaiyar_Temple.jpg",
+        "sha256": "3e2d7525986fe66afc33cf7c788ddcac378fd9416029d879af8dcd71d90ba082",
+        "size_bytes": 144060
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/____-____________________________.jpg",
+        "sha256": "7c028e725be5b52ffd578889037b01a8c79f53e3d74c0c96eccea72f6ea4077a",
+        "size_bytes": 167945
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/________________.jpg",
+        "sha256": "d1b9c8fdb63a007647bd0955b8007015787607dfb7c20250b59aaedab495f4a9",
+        "size_bytes": 2389356
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/___________________.jpg",
+        "sha256": "155c026191e648cdd03db7e4b714c20689c05ebe8257276f6c7357bb63c19672",
+        "size_bytes": 498046
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/_____________________.jpg",
+        "sha256": "ce9d558df00782c9d7cdcf3dc0bbcb06c9bd2e8386e3740439c2926b3c7c49de",
+        "size_bytes": 85531
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/_______________________________.jpg",
+        "sha256": "5309c6e56a5e323caa13060e06218297e32513dd6d467f86d523f9039097c603",
+        "size_bytes": 725222
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/______________________________________..jpg",
+        "sha256": "8ba98f508e6e7c9b6fbb3d46cc0d134d56285f38b615432b3c5552586795afd0",
+        "size_bytes": 525194
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/brihadeeswarar/____________________________________________Side_door.jpg",
+        "sha256": "014f28348212048c765fa61a6817d7631d356e4ddfd5c1188d8c1951bd22bcb5",
+        "size_bytes": 3908855
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/10.Gangai_konda_cholapuram.jpg",
+        "sha256": "64b3492a370f40ca62f2bb82cff029771c4a76f8e55e07b5d57e7af049e290ad",
+        "size_bytes": 943158
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/23.Gangaikonda_Cholapuram.jpg",
+        "sha256": "38daafc258aec88c55b88e25f519a7e6326ffdcda1e43e133ab4156246965499",
+        "size_bytes": 844958
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/25.Gangaikonda_Cholapuram_kalvettu.jpg",
+        "sha256": "5c138eb9aed86036a3da3bdb22bffffc91992fa4faabdcb1eee5b1771ad841b3",
+        "size_bytes": 897790
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/8.Gangai_konda_cholapuram.jpg",
+        "sha256": "e8b3bfd3d2ddce602182adb9dbc7667cca388d2210f0f95cd3eb8e9bc23f3dd4",
+        "size_bytes": 736662
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/A_view_from_ground.jpg",
+        "sha256": "ef12582ad72646f14e31a974cde296fdcb29d6a32e4bbb7f15f652323559eb91",
+        "size_bytes": 1990351
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadeeswarar_temple__Gangaikondacholapuram__2_.jpg",
+        "sha256": "62641e145d12ad672f7652104eca3ff44f37150cb81ecef4920b38eff65c7fe0",
+        "size_bytes": 2647347
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_-_Gangaikonda_Cholapuram_-_complex_view_from_outside.jpg",
+        "sha256": "c1eba53d89aaa9ea6bb9bb74cba934c6598184587656017f078f2ed22e34d935",
+        "size_bytes": 456676
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_of_Gangaikonda_Cholapuram_05.JPG",
+        "sha256": "4e6bc01d5fff4135b55e4a62e5b78f8834438e4f23fe5737326ad9f4f73cea6d",
+        "size_bytes": 4390198
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_of_Gangaikonda_Cholapuram_07.JPG",
+        "sha256": "e35aca281ebb5f2bd46004d542a8574bfad84c122e0f8b0ad74d1ec05d24da78",
+        "size_bytes": 6564956
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_of_Gangaikonda_Cholapuram_08.JPG",
+        "sha256": "e14d14fce3151d9c8f92a95ae8099923c0283dac52d698d659f1e643be9937ea",
+        "size_bytes": 6036798
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_of_Gangaikonda_Cholapuram_09.JPG",
+        "sha256": "94bfbddb2336a57b7854586ba783aee6fa74275ade8cda61291113fbc0358d9e",
+        "size_bytes": 4540895
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_of_Gangaikonda_Cholapuram_10.JPG",
+        "sha256": "6cadd72916b5c0b4bbb606c87e650da77d8fad387fa3aad1dbf6b70ada62e8c8",
+        "size_bytes": 4593014
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Brihadisvara_Temple_of_Gangaikonda_Cholapuram_17.JPG",
+        "sha256": "af10a71cb173ff6fa454cfdc805638c4a163ace643b447b917fd3adcce2a0a76",
+        "size_bytes": 3924189
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Close_up_view_of_the_head_of_Simhakeni__the_Lion-shaped_entrance_of_the_Step-Well.jpg",
+        "sha256": "a8186187ea982510427df1d22127eb098701e834939c383ce0a7416763dd8293",
+        "size_bytes": 2778315
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Destroyed_Gangai_Konda_Cholapuram.JPG",
+        "sha256": "f9e8b10611035ca0ac5ae9c46d44153ba85a1fe4a8126be2cdacf3e0c5a4e249",
+        "size_bytes": 8379750
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/DSC_0179_Temple_at_Gangaikonda_Cholapuram._Was_awestruck_to_see_its_beauty_from_its_entrance._Sky_was_blue_on_one_side__yellow_on_other_side_and_dark_clouds_above_the_temple_added_beauty_to_the_site.jpg",
+        "sha256": "2c11738bfb7827fbc450b293be6dc29b6643ea9f5077f31bc47d55107ce7aee1",
+        "size_bytes": 8233330
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Fossils_paleozoic_time.jpg",
+        "sha256": "772e801c3e0c51b23d0f2aa00f2fded18691d9ea4486b8004eb503af6205796f",
+        "size_bytes": 2735171
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0019_Prime_Minister_of_Bharat__Shri_Narendra_Damodardas_Modi_at_the_Gangaikonda_Cholapuram_Temple.jpg",
+        "sha256": "76cf665e9ba60042aabfa81c84e04a5255cb2e3c073c9cd75ed1ffc0388ac4e3",
+        "size_bytes": 786468
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0020__A_Beautiful_Low_Angle_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "5db83dd0b8e9f5fa09844eb330666a4e9d4b444a43cb87c6d2bd236dfbee5d47",
+        "size_bytes": 2093448
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0026_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_11.JPG",
+        "sha256": "2a1de87df02ce7608625966cd4616f078d5f867af4e1f89b19f700a5875d19fc",
+        "size_bytes": 4493386
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0036_N-TN-C94_Gangaikonda_Cholapuram_Brihadiswara_Temple_Gopuram_Backside_View.jpg",
+        "sha256": "87bbff0d7b7b6e5d6f6193148e3b04ec150d257e2cccb2dc8c0e7dfb3c2e3bfa",
+        "size_bytes": 11153622
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0038_Prime_Minister_of_Bharat__Shri_Narendra_Damodardas_Modi_visits_Gangaikonda_Cholapuram_Temple.jpg",
+        "sha256": "cc12b8262592f09171314eead9a7db1109a52f65edab4a8fb6285349c8f118c2",
+        "size_bytes": 929042
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0041__A_Night_Visual_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "5ea8061626dc48221d63c210bf179d5bf9d8d784334af4b69ecc46fc932afe72",
+        "size_bytes": 1790388
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0044_A_majestic_view_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_5.jpg",
+        "sha256": "b9aa4229fe4a8770c40fd9335d67d3bd31fc196c44c8174b474acc713837843f",
+        "size_bytes": 1797818
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0046_Brihadisvara_Temple_-_Gangaikonda_Cholapuram_-_entry.jpg",
+        "sha256": "1385685607434067b8254e3b8348f77c31b8fae427cc19efe7e003cc2e6cbcbc",
+        "size_bytes": 372847
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0062_GANGAIKONDA_CHOLAPURAM_SCULPTURES_12.jpg",
+        "sha256": "25e76d02cadf75f7af4adbf6903062586c4f2975995d140c0d438942c2fa2fd8",
+        "size_bytes": 3430834
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0078_Prime_Minister_of_Bharat__Shri_Narendra_Damodardas_Modi_at_Gangaikonda_Cholapuram_Temple.jpg",
+        "sha256": "6e6b2e8955ec6d24e8f403954668052612bb4bd39685edd865e00012307e78c7",
+        "size_bytes": 954216
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0096_Statues_in_Gangaikonda_Cholapuram_Temple..JPG",
+        "sha256": "1d4927f6ad984e13611f873db7fc2f4d6cc5cdc088f8cc29854c02dfb15a7528",
+        "size_bytes": 2663613
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0101__Amazing_Inscriptions_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_Inscriptions_.JPG",
+        "sha256": "a5a32a8e2809a6cb84c55960549cb7c5304302bc008cca49a1b56797bdcbed88",
+        "size_bytes": 1835325
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0103_GANGAIKONDA_CHOLAPURAM_SCULPTURES_03.jpg",
+        "sha256": "bd770ce8dc178e42b4bc2a345340e3e3392e5ac9ab06a2c6af42439fa4068a3f",
+        "size_bytes": 886184
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/GANGAIKONDA_CHOLAPURAM_SCULPTURES_01.jpg",
+        "sha256": "7efb9075fbb102f90436929ea22d5fe58e86433a8b59447680525b6fe97b03e0",
+        "size_bytes": 1104508
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Gangaikondcholapuram_Temple__dedicated_to_Shiva__built_by_the_Chola_king_Rajendra_I__11th_century__111___37234667480_.jpg",
+        "sha256": "e9acd5c1c4adea97d3df20d1887a673432f860f3d3a6ebda1d1964a240fc424d",
+        "size_bytes": 10782473
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Ganigai_konda_cholapuram_front.jpg",
+        "sha256": "fe6e7bb276eb951f9cb125d69c23a83cb763f3ae043308daa20120c8523b44b9",
+        "size_bytes": 3000788
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/G_C__1_.jpg",
+        "sha256": "499a083e8e9c41f737f559a96eb6c1a3aeef75ac186f85f214253b9625a7aec0",
+        "size_bytes": 1558045
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Inscription_at_Jayankondam_temple_10.jpg",
+        "sha256": "fa7a36c0a2b3e72c8c9b5a7ed449833124c1b6aff21e8ccd8929ac8df071855d",
+        "size_bytes": 2857043
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Jayamkondam_temple_01.jpg",
+        "sha256": "821411f005c2dd2c8b8e7ed88aed1ddcbee54d3dd81587a41b1c9cd1b49102d4",
+        "size_bytes": 3121720
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Jayamkondam_temple_02.jpg",
+        "sha256": "6533042ae71d23602acd5a9a44b6992011897014f991818b33a34ef71512662b",
+        "size_bytes": 3378131
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Jayamkondam_temple_03.jpg",
+        "sha256": "7da07139ec4dca4f21c511bdddf2736789dbb1b1e6dc0952e05a05075dd0f9f5",
+        "size_bytes": 6353071
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Jayamkondam_temple_06.jpg",
+        "sha256": "66ff28c50153ed0c94361655c2bceba7d7f157b32f6caaecf58c8db5555ce6f2",
+        "size_bytes": 3614932
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Lion_shaped_well_in_Gangai_konda_Sozhapuram.jpg",
+        "sha256": "93482b97ffe3b205b236e6be69a91509e6deb7a0fdb17687f6e299bd8ec4f6e7",
+        "size_bytes": 497786
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Mano_IMG_20180324_171917964-01.jpg",
+        "sha256": "b0a118c72a238e27a61ae46f9bedaa9deb767b4d2c1d18c23bb1e6cc07c7b60b",
+        "size_bytes": 2215244
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/N-TN-C94_Gangaikondacholapuram_Tower_View.jpg",
+        "sha256": "6d336ec512474a4d83d5c09fd579047a4f10719fa8d4c94e463190645eba8cc2",
+        "size_bytes": 8009537
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Nandi_at_Jayankondam_temple_03.jpg",
+        "sha256": "6a9f005be3df390f66c5f955bd48d9cf00a14ad5323e153755d07b57bfc473c0",
+        "size_bytes": 6915917
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Revered_first_-_HighRes_-_SI_05127.jpg",
+        "sha256": "ce80dd9ce5c90ca4e19dcdc40a10bcc4331a1558e151eade7987f0ad510fda5e",
+        "size_bytes": 11083234
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Right_side_gate_of_Brihadisvara_Temple__Kangai_Konda_Cholapuram.jpg",
+        "sha256": "d5f4cffe6120d3c71a4fbc24b6b2933a471d48756f4ff91fdd936d3b9bae78a7",
+        "size_bytes": 413824
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Sculpture_at_GKC_-_Flickr_-_Ravages.jpg",
+        "sha256": "62028fe7d8f2930e8ce81a05e026210c9c435ddbedb7143afb83e762672c43c5",
+        "size_bytes": 80250
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Side_Entrance_with_some_extravagant_chola_art_in_Gangai_Konda_Chozhapuram_Temple_-_R2P_0683.jpg",
+        "sha256": "ec9e9af920555543b212a266612f76ed0b46cc409582b665cca29f0056f19a1f",
+        "size_bytes": 2457080
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Side_view_of_Simhakeni__the_Lion-shaped_entrance_of_the_Step-Well.jpg",
+        "sha256": "7d5f75c11514b5aad2ea6142f1a5a0fb62528f912cd519f9176ea375f8fdff28",
+        "size_bytes": 2992664
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Simhakinaru_or_Simhakeni_-_Side_view_of_the_Lion-shaped_entrance_of_a_Step-Well_located_at_Gangaikonda_Cholapuram_Temple__Tamil_Nadu__South_India.jpg",
+        "sha256": "90f1195446757f4db43756e866b8d095c0b80b46c046471ddbf5ce244fee0a6d",
+        "size_bytes": 8024188
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Tamil_Sculpture_at_Gangaigonda_Cholapuram.jpg",
+        "sha256": "a8971793951b2efca09f0087d408e32d3430178c145063622df5124a2f631765",
+        "size_bytes": 1328161
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Tanjavur_Big_Temple_India.jpg",
+        "sha256": "3a4d5403a214c8906a332a13edbc31cf99f775b14b3afdfd16dd0dc3c6cceef2",
+        "size_bytes": 4978903
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Veeranandapuram__Tamil_Nadu__India_-_panoramio.jpg",
+        "sha256": "34d37b4527fcd60b291d95e6043d3b67cc08df5f5398e3da89daa2e0835c5b62",
+        "size_bytes": 2770755
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/Vimaanam_of_Brihadeeshwarar_temple_Gangaikondacholapuram_9.jpg",
+        "sha256": "522ecd80888ed89fddbfb09e45427fb6591a0a5ecc01954bc6bbf84d240c80ca",
+        "size_bytes": 3796148
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/_A_Big_Nandi__Bull__inBrihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "2daeedf97de373657fc832f1b3a9c72cae4afbe730b36d1d55fc249cec0a825a",
+        "size_bytes": 1798446
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/_A_Lion_Statue_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "36caac7d4802b4a6cae7ad933090bdc1c4e0651c647a5bdc39c0c6bbb311cf12",
+        "size_bytes": 1755261
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/_A_long_shot_view_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "8b11abeb926d6b0eec162bced0cdfbaf697eedca30f5e3747bdac1a181f4353a",
+        "size_bytes": 1830711
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/_A_Nandi_inside_the_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "a01311cdff585415f9198b40fa12d0398e2cbafcdc46af607bf19d544a70150b",
+        "size_bytes": 1805070
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/_A_Sunset_view_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "4983f4a97f4fe11710a82b167383739dc65b0ff3fedfc6c9abacd1f7b906dad9",
+        "size_bytes": 1782415
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/gangaikonda-cholapuram/_A_Visual_of_Lion_Statue_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "74fd1ce78620221147c60daaf3fd1e4e3d1302f0334e1671bfd649d425c408ae",
+        "size_bytes": 1763756
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Alaghar_Koil_in_Madurai.jpg",
+        "sha256": "d1fc0277610b87612038719d4a9d7ab6301337caade0b81cb1fdfa378ab613a9",
+        "size_bytes": 277014
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Arunachalam_big_temple_of_tamilnadu.jpg",
+        "sha256": "6d8712b4ec9339a0b5da9eab611727754fcfe174c31c6b72ccff1aea1a7c2d73",
+        "size_bytes": 133916
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Avinashi_Temple.jpg",
+        "sha256": "56f08b2528d6c54e649e30e148b4b45c390a098d3b4e1b3ba760c8ec09fca171",
+        "size_bytes": 425401
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/AyyaTemplee.jpg",
+        "sha256": "7b4c28803c4b24a052ccecdd7b137eb518ff6b5116b56c0b258d98100b225631",
+        "size_bytes": 2158418
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Brahma_temple.jpg",
+        "sha256": "22fbdbe2b9994182781f5e874fbd60d75b6892675b6635e0892d773ec6bc02f0",
+        "size_bytes": 163434
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Colourful_painting_temple.jpg",
+        "sha256": "2c74699ad75af10929e924de002072750d9ebcf5a9503ee6e99798eb5b85d463",
+        "size_bytes": 484774
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Dravidian_style_temple.jpg",
+        "sha256": "fac12441c72b40392c819dced559becea1ce4d74083b00be4264a95ed8e18834",
+        "size_bytes": 4350887
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Entrance-_Halu_Rameshwara.jpg",
+        "sha256": "3763f854ea70481371f57a54ae7ce3c677cbef156822064901209e44d2faecc5",
+        "size_bytes": 1170437
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Erukkatthampuliyurswetharanesvarar.jpg",
+        "sha256": "1cd0bd9dd6a3f2aad3950b52f6218cd3534696e440dd8b155b8e309db909b809",
+        "size_bytes": 20162
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/FISH_SCULPTURE2.jpg",
+        "sha256": "dcdf478600f7e33953aa5684a1785b7b77c2e44b8a28bbfbdb6da784e2da062d",
+        "size_bytes": 23199
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Front_view_of_this_Aiyanaar_temple.jpg",
+        "sha256": "c035e7ccabbad9a346e533b75b48ef43ad1533bad7933c4a762bfa4a8d4b6995",
+        "size_bytes": 4184916
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Gopuram_of_Chennimalai_Murugan_temple.jpg",
+        "sha256": "be791774f5781e34a1180aefb5f7e527c3c61fad3534453b032e4b843c06b6bc",
+        "size_bytes": 182213
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Hindu_Temple_Gopuram.jpeg",
+        "sha256": "eeb8f6408a0676e444065827d93fb074d4fae4edfc36ef931fbd4c9935f4ead5",
+        "size_bytes": 5625177
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Indian_temple_architecture.jpg",
+        "sha256": "7e7bc32b94d8bb838248bc51e377e786795e9b45ab12765b0c3d80d38e14c617",
+        "size_bytes": 5346066
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Kailasanathar_Gopuram-1.JPG",
+        "sha256": "4d27cbb3bab3799703a5e5bd69dea5ac71c5791b883659d0f90e911b716142c0",
+        "size_bytes": 277174
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Kazheesirama_Vinnagaram2.jpg",
+        "sha256": "4166048dc8d3f32c5c6c17bc2d85ed101288918cc75dcd9a78ddb6ab12439b66",
+        "size_bytes": 572518
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Kundrathur_Murugan_Temple1.jpg",
+        "sha256": "9477c616d8020ba2d1ea1e0aba302fd89ceb2eff4916367f5920784b64f3cd47",
+        "size_bytes": 67406
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Kutram_poruthuvar_aalayam.jpg",
+        "sha256": "4a05da9e8765384d9bd503adaee601aa21f4ff40f9799bb08365b95533121a50",
+        "size_bytes": 231815
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Maduramangalam_Shri_Vaikunta_Perumal_Shri_Embar_Swami_Devasthanam.jpg",
+        "sha256": "e6907fbe112e7841fdf57628af292e6b772fe22133ebed5068033a6d4b0b8853",
+        "size_bytes": 1778888
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Nagaraja_Temple__Nagercoil.JPG",
+        "sha256": "338cde9f6d1e367b14ddaa08ddcb7a4b2e0314b959d8e6224e6bba12114dd91f",
+        "size_bytes": 1736147
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Omampuliyur_temple.JPG",
+        "sha256": "a75a9873748f40c9e331a84a56b82e9ff3f788ab0d5426b7c5b5a451492ff07e",
+        "size_bytes": 259830
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Opalnayak_anjaneyar_temple.jpg",
+        "sha256": "4fecc4f7c8cfcf164ce4ee1dbe5d532c61b0c578e631ae0048b299516afd0509",
+        "size_bytes": 50123
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Palani_Base_Temple1.JPG",
+        "sha256": "55eafe7ff80b01a80dc8a5d7827722622dbab525030cebffdea562e02313d829",
+        "size_bytes": 2836718
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Patteeswaram_Durgai_Temple_Gopuram.jpg",
+        "sha256": "10d2bdff3d381be658ff1e8b601a6b98b01cefcd845b024983afe003079f4a11",
+        "size_bytes": 606361
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Pillaiyaarpatti_Temple_Gopuram.jpg",
+        "sha256": "b2183a65ef3e81737b78cf307994579cde543ea44616fd610832bb476334a04b",
+        "size_bytes": 8930420
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Rajagopuram_-_2022.jpg",
+        "sha256": "8255c6908a9d9b436588c1fc6e2475f3cfdcb005158b0110c0cf391025370a66",
+        "size_bytes": 4514967
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Raja_gopuram_-_2022.jpg",
+        "sha256": "86f795d0b08115a98bb1ed93c07db077ae6cd3528defc54f55990e6eae2d5ed4",
+        "size_bytes": 2824304
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Shiva_and_consort_in_gopuram.jpg",
+        "sha256": "db3bf9e35204ee6cdada8bfca077e44e78c1abcff6eeccb1120cfb9902c770b7",
+        "size_bytes": 752586
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Tamilnadu_village_women_sitting_at_temple.jpg",
+        "sha256": "36efbdf4bbba5f62d2993ca3b88b49b0e8133ec2c50557eaeca02eb084b9988c",
+        "size_bytes": 1118411
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Temple_during_markazhi_urjavam.jpg",
+        "sha256": "e2ec798d85c2cbb6f05d0172de186033ef10a26dd63e3e6ebbca67abf76c05b6",
+        "size_bytes": 779489
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Vaitheeswaren_kovil.jpg",
+        "sha256": "9899575c28acd16e2d4c77560e821f97fe4c56a5fb38bef79c0a32ff7e840a4e",
+        "size_bytes": 204957
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/hard_negatives/Vidhana_Soudha_main_dome_viewed_from_2_o_clock.jpg",
+        "sha256": "7c0d17e82c8511c15703f4c7511b3fcd7233d8d401512c210a2ec93de80f47e2",
+        "size_bytes": 1356845
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/10Shore_Temple_Mahavalipuram.jpg",
+        "sha256": "e6517698ad9f8acf858227f8199ec76dfebf135e9125fa34bc5fa8e89d113e03",
+        "size_bytes": 841823
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Compound_Wall_of_Shore_Temple.jpg",
+        "sha256": "2664262f036ce8807645eec223db02705b6d1fd93934a4f288c551a3cef29f94",
+        "size_bytes": 3413629
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Faith_and_Light_-_HighRes_-_SI_01664.jpg",
+        "sha256": "5096c849c9089cbad1ec0b47a443521cacf1cdc11ef045cfa922a747657879f6",
+        "size_bytes": 12300050
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Garbhagriha.JPG",
+        "sha256": "56290b2cc8673e72edb83c7ed6decf9d672ed71c4f66617f23498cc3666258cd",
+        "size_bytes": 150597
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Huge_Stone_Figures_Of_The_Lion__Elephant___And_A_Bull__1_.jpg",
+        "sha256": "d6d010a15911c0d82005c665f022f00b5528839e1b495f9986585f88dd4bf0b7",
+        "size_bytes": 2492277
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Image_of_Mahabalipuram_Shore_Temple.jpg",
+        "sha256": "e3ac02dc4a44d49ae808c706deef93f747b92abfb0128351b1de7e604964d695",
+        "size_bytes": 503621
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Kurt_boeck_indien_nepal_092.jpg",
+        "sha256": "506c5be61cd316b5d77148fbf45cd71853d2771354e89bdd9dae5c52806746e0",
+        "size_bytes": 232568
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Maamallapuram.jpg",
+        "sha256": "76da91b5c6dd29eb0f6b5e18ae879b6ee55e5c5f56d2b64bf206880c032fa526",
+        "size_bytes": 149435
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Madras__India_-_One_of__Seven_Pagodas__LCCN2014712013.jpg",
+        "sha256": "03cae3a212ac0a155035aa50a6cb16555f3789fd8f72c8360facc89c99aff80c",
+        "size_bytes": 2511825
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahabali006.jpg",
+        "sha256": "2dff9252a12d22d51b2568842057e946b3a3b614e9994a129ba184af63a68339",
+        "size_bytes": 72860
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahabalipuram-04-Tempel_am_Meer_Jalasayana-1976-gje.jpg",
+        "sha256": "1ff9f7021942968c5b399fe271054c255c10dcad533c96468c82307fc6fcac72",
+        "size_bytes": 1678904
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahabalipuram-2779562_1920.jpg",
+        "sha256": "b07072946fff700ce3c403a8101427e8b72ffccc10d89532b552e1247aada11d",
+        "size_bytes": 586325
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahabalipuram_gopuram_long_view.jpg",
+        "sha256": "65d0fc573ffb92f7cd167eb4ebfcd6b96d2baa3af7600ad6033dd1703503066b",
+        "size_bytes": 2733591
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahabalipuram_Pallavas_Shore_Temple.jpg",
+        "sha256": "01a54401df55556d2a27394054054e5f29d360be4da3bb307352fbc0d7b3657c",
+        "size_bytes": 4279426
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahabalipuram__92979_.jpg",
+        "sha256": "82ca7acf939d842aff981677576ba67d1b6c201ef930ae306656db33a4d4c6aa",
+        "size_bytes": 3083114
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mahaballipuram_Shore_Temple.jpg",
+        "sha256": "213bcb3c02b8fb23e19bcfebcb2923c8228f73137c94389560aff6ec4170a9c1",
+        "size_bytes": 119091
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Majestic_Mahabalipuram_Shore_Temple.jpg",
+        "sha256": "7b4920a37e1514524c52f8664bec674772552aba438d4a8419a788e44f98681f",
+        "size_bytes": 9569645
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mamallapuram_beach_temple.JPG",
+        "sha256": "28364a7ddfeafa87dc2c60dfc7b2aba86e072a9b8cb6cdc6f49985d2bac9d947",
+        "size_bytes": 1914134
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mamallapuram__167_.jpg",
+        "sha256": "5a1d674ef66b3a0196afa6a3ce81bb2c4c41d64dee7f3b942cf9c315ced840da",
+        "size_bytes": 191543
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Mammalapuram_04_HDR__2281604786_.jpg",
+        "sha256": "8e8dab821ea22826b29f09c13bf6653c0b20bee817ab5c5e05cdd382db019f63",
+        "size_bytes": 786075
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Meyer_s_Universum_Bd._8._1841__138502640_.jpg",
+        "sha256": "3fa6aabfe33f771fecd15181c8d708664c49667c9d1fb7ba516783b7b3efc255",
+        "size_bytes": 16707958
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Seven_pagodas.jpg",
+        "sha256": "519cbd07820b46dba2b3e5574f069ba441f1bac606c983aa2df696029ff3efdb",
+        "size_bytes": 2494830
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shikaras_of_Shore_Temple.jpg",
+        "sha256": "26cc34b400eee08991a480d02a67321e167cda1d09ef3fca52c31f203d055084",
+        "size_bytes": 1418911
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shiven.jpg",
+        "sha256": "8bb0ab827c0e05ce547e1e4dcfe5c26deb0a16dd2b04cc88764c76ebcc1785ea",
+        "size_bytes": 1100026
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shoretemple1.jpg",
+        "sha256": "eea4e175e5f368945b1020c24b06c7dc7b72849fb692197adc33e0800e797ec8",
+        "size_bytes": 4848457
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shoretemple__Mahabalipuram.jpg",
+        "sha256": "5c2fc9c928b70b8c7e088c5584f44a0a2c9c07bc388b0bde774f8670dc37b05a",
+        "size_bytes": 208696
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_temple-1.jpg",
+        "sha256": "9417cfd971b997efb9bc3f7d5b7411971fb45122590b902b86ee7c3d2b339bb7",
+        "size_bytes": 3319648
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple-_Mahabalipuram.jpg",
+        "sha256": "6ada632c3ec9b160b24a67ef6729e9e7048ea7455777731fae3e6a16e2530b99",
+        "size_bytes": 780638
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temples_Mahabalipuram.jpg",
+        "sha256": "d92bca5731392e173b9d1d7acc41aa41c1d070bdf1dbe5be83d665d07ee5d876",
+        "size_bytes": 1767968
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_temple_04.jpg",
+        "sha256": "4708d220b6186595bb50d623e81449917df271a1a8a89464a17dbc3e2dae9c9a",
+        "size_bytes": 5263442
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_26-3.jpg",
+        "sha256": "f018e2fdb050fdfe61d81a6d12dad1cd084fb8362751f651925e6096fa684f76",
+        "size_bytes": 319921
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_gopuram_glowing_at_sunrise___Mahabalipuram__Tamil_Nadu___Sep_2025.jpg",
+        "sha256": "4275cc9b9fbad6db2155271b10439da384599f10072eeb68fd0e495057139009",
+        "size_bytes": 9923095
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_In_the_morning.jpg",
+        "sha256": "1b218a687f81e7695d03751f4a761dad49890b4de9c0d9a2563454584be0cb19",
+        "size_bytes": 4998949
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_North_View.jpg",
+        "sha256": "2cb732c0a4b09117fc39a3becd033836bd724842044b762d52e834e979a0a822",
+        "size_bytes": 115255
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_of_Mahabalipuram.jpg",
+        "sha256": "e68286c63d78c9fd94a22b07050f2930eb70e87c75583b0cce74dd26e08e02b5",
+        "size_bytes": 6084843
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_on_Bay_of_Bengal.jpg",
+        "sha256": "71bb568927bd6660c0913a6b92a15c82ebd82604c51ce1f2569b1d25ad7ff17b",
+        "size_bytes": 3233554
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_TN.jpg",
+        "sha256": "f0889e92a6768756631dd164fb5f3ae51ea2aa7fe380bd8db5e096caaecca390",
+        "size_bytes": 3249747
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Shore_Temple_with_great_Sculpure_of_Nandhi.JPG",
+        "sha256": "03a71a5b39853968f13290ff1cbf17f4a0c16dd57311340ef7cc2efad7479ad1",
+        "size_bytes": 4875207
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/SHORE_TEMPLE__MAHABALIPURAM.jpg",
+        "sha256": "5ce27cdcef6b8689d30e43911e293f1fe08d7dd77553691d77314689ea54378b",
+        "size_bytes": 7233942
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Sunrise_at_Shore_Temple.jpg",
+        "sha256": "233ca52b9353bd71cf6fad0a66b504f5ff403691724363caff5a4843e5326187",
+        "size_bytes": 4591376
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/TempleRivage__1_.jpg",
+        "sha256": "6ab94a347f9b0becbf520f461165b83b151f3113bb6728c0c079416945ee6712",
+        "size_bytes": 2763991
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/TempleRivage__4_.jpg",
+        "sha256": "dfd26929896a6dfeb7ed4ab43ed7de25064ed101c0fd51de366db04d0699ed93",
+        "size_bytes": 4896021
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/TempleRivage__7_.jpg",
+        "sha256": "7ed8a2bf937a61b0139daf967b346c05fbf956f0dcf70d5d1adcab46f7ea79b7",
+        "size_bytes": 4441019
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Temple_city.jpg",
+        "sha256": "a5e2c1602b2d70ffc7cdc608e6e6834a5e070107520586023b22d9b115c3c4cc",
+        "size_bytes": 2233046
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Temple_in_south.JPG",
+        "sha256": "ccdc409d42d966a1f5efb40458385a01b187c0a08f8a2f6a9867509a447715c0",
+        "size_bytes": 2173538
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/The_Era_Foregone_-_HighRes_-_SI_01654.jpg",
+        "sha256": "c500cb0819171bd3f1f7107274f0245216fce1f2db81a6515874dc2cabf5c32d",
+        "size_bytes": 15882868
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Tour_354.jpg",
+        "sha256": "641fc5c97362969eb3b7232dc7756f5d76732d2f09253e4623ff3b103204214a",
+        "size_bytes": 2011567
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/Tour_361.jpg",
+        "sha256": "bc57e4920fc147c34923dac80c251eb9d48fc9610a9ebdcb3d111a12a09dfd0b",
+        "size_bytes": 2027929
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/_Aesthetic_colourfull_Shore_Temple_complex_at_Mamallapuram_.JPG",
+        "sha256": "2bc549ca3afaf32827f67cec96be33d9af6892242952aeb65779ef259a4be773",
+        "size_bytes": 5889111
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/mahabalipuram/_Pagodas_near_the_sea___from_Le_Tour_du_Monde__1888.jpg",
+        "sha256": "c413247db0b1c56a9f1186279a6fdf3bafbcbcf0a11c2e19c4e2224b0d01a679",
+        "size_bytes": 445449
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/01MaduraiMeenakshiTempleGopuramCloserView.jpg",
+        "sha256": "da3fd895144695d32be122d22fe70f973c7987e5b5eb0f806686ee7c50354bec",
+        "size_bytes": 558675
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/03_sunrise_view_of_Meenakshi_temple_gopuram.jpg",
+        "sha256": "4f05b254d41e9915084cd40007fda9f620d586f05411527554991d0d80e93a03",
+        "size_bytes": 434674
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/2014_gopuram_of_Meenakshi_Temple__Madurai_Tamil_Nadu.jpg",
+        "sha256": "5266dfdaf0f8649c3370930c12ba9ecb2d56ee8e17d8ef499f2d4e0eac174350",
+        "size_bytes": 2790954
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/AmmanMeenakshiTempleGopuram.jpg",
+        "sha256": "9fbed96fcb3faa0f327ba25d56b9b41a31b90af2d419be4316e7638440bd212a",
+        "size_bytes": 1347846
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Another_Craftmanship_of_madurai_Temple.jpg",
+        "sha256": "7a97ba4cb23a0519e48e50aaa6e96ddd0a314869f2b12e85145a9582ec7f18bb",
+        "size_bytes": 176732
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/A_panoramic_view_of_Vandiyur_Mariamman_Teppakulam.jpg",
+        "sha256": "932d22eafe54f755d02ec9e461a3c4ee8713c68d343ebab9b61230a8e8a1a9ac",
+        "size_bytes": 5515058
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Bheema_Pushti_Halwa.JPG",
+        "sha256": "c6fef3ca135cfd29642920eaa2dd21fc1b3c042f981c07fdc5aeb5427f81d38c",
+        "size_bytes": 1938322
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Camouflaged_-_Flickr_-_VinothChandar.jpg",
+        "sha256": "0b88055ab90667415eae49f3ddd917cf9ab78ebf3d5d7a06cfcfd065bd6dd44b",
+        "size_bytes": 1556490
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Chitirai_Festival_Madurai.JPG",
+        "sha256": "2951fcaf4006a5c18c38f01ce70077b19f48ec6403be34b35c6438828e801f6f",
+        "size_bytes": 2348297
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Dawn_Madurai_banner.jpg",
+        "sha256": "a9c7871fd42c10ca35a367b5e8e9b095809289a21c4f4d689742eaa322421716",
+        "size_bytes": 1064745
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Different__Thinpandam_s.JPG",
+        "sha256": "99db51bec042f3d3001aacdb59ec351f819c0d0f4f5f8c11ebf4ab78a1f22bbf",
+        "size_bytes": 2207068
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Dravidian_Architecture_of_Madurai.jpg",
+        "sha256": "9099d575014d13d6c652fd4aa9fd4697611d6db02438d762b2c0eaa01fc8e46d",
+        "size_bytes": 8290215
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Faithfulness_in_Ministry.jpg",
+        "sha256": "b8365ceec0bfc71c730339a18990b9b0ace9d531c68f1b920d71602dbb83f631",
+        "size_bytes": 4234967
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Gates_of_Madurai_Meenakshi_Amman_temple.jpg",
+        "sha256": "3a490db69a1797e94ed2049c4b878084273280c5b476e35791fbcfe76284dc46",
+        "size_bytes": 4262708
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Good_and_Evil.jpg",
+        "sha256": "58662d443635870539aba7dfd73713eaa534fe3a20bedd98a84beb5d9c10b9f2",
+        "size_bytes": 860483
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Gopuram_Gateway_Tower__of_Madurai_Meenakshi_Temple.JPG",
+        "sha256": "d92a0aaf5660826c78e5aaf7044aa82511a102589323bb319b9c427c88cab92a",
+        "size_bytes": 1321960
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Gopuram_Gateway_Tower__of_Meenakshi_Temple___Madhurai.jpg",
+        "sha256": "5f74452a897c60d30bff753ace913b71cda426b0e388d8586eadaaf40da99554",
+        "size_bytes": 1874241
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Gopuram_Madras.jpg",
+        "sha256": "39b31fce1f36e8bca15ff053ac7a0e956a53a3fb5ed52d4c9bf3f275f6fc655e",
+        "size_bytes": 1101352
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Gopuram__Sri_Meenakshi_Temple_-_panoramio.jpg",
+        "sha256": "25386264cf9968a508ccccf781fc8e26b63f9d07ab7519273cf6290324f35f61",
+        "size_bytes": 2366103
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Incomlete_Raya_Gopuram__madurai.jpg",
+        "sha256": "bcf094f26d88ea4666219f1ca3848ea9d2022711c2102dc1684cb01a4b461d0f",
+        "size_bytes": 3831578
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Incomplete_Raj_Tower__Madurai.jpg",
+        "sha256": "7f44a2718f8bc57fd9e558ea954955d52bd480250b66d8a387b3b95092c75cbe",
+        "size_bytes": 91876
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Kodai_Festival__Gopurams_of_the_Madurai_Meenakshi_Temple__Madurai__Madurai_district__Tamil_Nadu__India__2022_.jpg",
+        "sha256": "c8e5347f3ff8a65bf75566e2466128b609baeb8bacc885bc25adbb0585c21738",
+        "size_bytes": 2879046
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Kurt_boeck_indien_nepal_069A.jpg",
+        "sha256": "5606a6b5aa10f38501b44035dfdf16132a27f9ff808232be48a0e7761070acf3",
+        "size_bytes": 942382
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Maduari_temple.jpg",
+        "sha256": "78dacd0667eebc4354dee5bfebbd699ef4db010313feb849a8710adbeaa62163",
+        "size_bytes": 206259
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai-meenakshi-temple.jpg",
+        "sha256": "808e82da097a19d2976a8313725fc7fa9fa7b1b57859b1e29f07160042b13507",
+        "size_bytes": 1518504
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/MaduraiMenakshiview1.JPG",
+        "sha256": "3f1516214d67782caed98c580278c726ce1556f786b884bf8036d1d9188b5084",
+        "size_bytes": 539869
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai_Car_Festival_1.jpg",
+        "sha256": "3049256b2420fe6acb7b67da3f895357ba48b1f1dc652609e6f1c4203a263487",
+        "size_bytes": 1021180
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai_Car_Festival_2.jpg",
+        "sha256": "857a65ed3cee31b62beb72fe1475cc2680c5a482a9bb73357e01dc8e9c69dc9f",
+        "size_bytes": 4114986
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai_Menakshi_temple.JPG",
+        "sha256": "2b89be9c205b5b9d2a72c557ce9d10fa83c2e9345a675beb4a98127d02ae8d27",
+        "size_bytes": 1871570
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai_si0676.jpg",
+        "sha256": "c6f6ce8bb4f93a4a6bbcd6d75f10036170741360ff6ec2520008cd6904d0f3f2",
+        "size_bytes": 259684
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai_street_scenery.jpg",
+        "sha256": "5b49601b7f8f4317b6665cef265094a68781c087d97226f7eb8d8f5f81ad1902",
+        "size_bytes": 1141023
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Madurai__India.jpg",
+        "sha256": "2929f3a12dab85eac0288283a913940cfd35de703c37a82e40b0e3a6179eac07",
+        "size_bytes": 411818
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Meenachi_amman.jpg",
+        "sha256": "b9a3efbb41e1175b22401da8d3a83aaab996694518039fefe67ede97bb6f70ed",
+        "size_bytes": 3338784
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Meenakshi-devi-temple.jpg",
+        "sha256": "50edcce2af7a830607940ce6a055628716d12476dbfe3970e8dbcd2ccba1bbe4",
+        "size_bytes": 244624
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Meenakshi_Temle__Madurai.jpg",
+        "sha256": "2be279db065345782e73a4627fa0f83e3e66f69908861fa0425fa04a29438ac6",
+        "size_bytes": 907921
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Meenawest6.jpg",
+        "sha256": "1ba95618cf0c987e6884f9b7ae1b5013fe6ba17c8c5003a6977c485f1c7b5fb8",
+        "size_bytes": 473985
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Miniature_of_Meenakshi_Amman_Temple_1.jpg",
+        "sha256": "4c631270660598c0449376a9c207ea26aea0973e6cd1b35cec4f2a2359ef03e4",
+        "size_bytes": 2661806
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Miniature_of_Meenakshi_Amman_Temple_2.jpg",
+        "sha256": "45d264a0f935c54fdcf688c672e817aaadf5c2a49d2b5e81a500dbf1e3448b58",
+        "size_bytes": 959442
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/MS_41487_copy.jpg",
+        "sha256": "ab23cbb37820027618509196508865c4b3e842b383cd9cabf578a3ea4a1b9cc0",
+        "size_bytes": 5434172
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Muttaasu_and_Sevu.JPG",
+        "sha256": "51e30a545926cf7287c86ea31a3003986a910a33d068aceb239f426a69c0dbc3",
+        "size_bytes": 1775068
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Nagaramurasu_Mandapam_3.jpg",
+        "sha256": "095f2c191663591aa7f6d94614524ecf87cd08fc03186d873bcb2e6a74caf34c",
+        "size_bytes": 1103927
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/ONDIPPILI_SHARBATH.jpg",
+        "sha256": "0e91899626dbafdba9aa19edc2019445bbb8e9a6c22f57baf8003c8775baedb3",
+        "size_bytes": 983388
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Procession_of_images_of_deities__Meenakshi_Temple__Madurai__12___37479319146_.jpg",
+        "sha256": "20c319758ee6adc165ff06e9caf2f0ec7b1885e1ee7671c6efe1a46b1df4ae88",
+        "size_bytes": 4377024
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Procession_of_images_of_deities__Meenakshi_Temple__Madurai__6___37479334256_.jpg",
+        "sha256": "50ba59a465ac2f1a582087453c662e7d63148978f51f1acc7dc0b9f05e51d398",
+        "size_bytes": 6384052
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Snacks_Stall_in_Appan_Thirupathi.JPG",
+        "sha256": "ae3f7fd409e338175f84648fc0e770c6d7f29b67cea53a0619c31eb37c526fbe",
+        "size_bytes": 2104244
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Snack_Stall_Madurai_Alagarkoil.JPG",
+        "sha256": "8210cee6aeef754d5ba40620804a0d3f199ee0b2932cc41b5f3c12c48af6c166",
+        "size_bytes": 2080692
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/The_interior_view_of_madurai_meenakshi_amman_temple_in_madurai.jpg",
+        "sha256": "806689b7f79c96aee491e4ec55f92878db418f0d4e2f638224c6efc6f0ff5cd4",
+        "size_bytes": 3621053
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/Valayankulam_Drama_Festival.jpg",
+        "sha256": "7ef97f37de02728158c3b944773f3f7cb8eb34a99617e6729808d89625d69e6c",
+        "size_bytes": 6878985
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/_____________.JPG",
+        "sha256": "ae336e57f88d7cf04b3128741df9e41421b44c1e5ca9b7a3a7c8aa484fd5ce8c",
+        "size_bytes": 1050776
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/meenakshi-amman/_____________1232.jpg",
+        "sha256": "095dfab0f690fd57c1edee90a0f6a6dd0269234975558b9e942529723ade1e39",
+        "size_bytes": 1402877
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/A_monochrome_palace.jpg",
+        "sha256": "34102a37a2aabeeca8433638fd0c112af150bc911be8873868dbedf845c31e13",
+        "size_bytes": 883941
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Center_Hall_ceiling.jpg",
+        "sha256": "c22a183ac03963fb7dd355a34e837de490af62901a2a21a92cee0d6b52314407",
+        "size_bytes": 147978
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Fort_St._George_Museum-Interior_View_of_the_Palace__Madura-WUS-01533.jpg",
+        "sha256": "a16ee48d3f98fc68087adede98c65504950f418f48aaf4e89d225823f6e9bc4e",
+        "size_bytes": 16440477
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Full_view_of_evolution_of_Tamil_language.jpg",
+        "sha256": "1c8a8e52660adbaf702a93414b7172d19a105094b8f9f61b6ee7d3f8a6abf387",
+        "size_bytes": 2319270
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/GOPR2515.jpg",
+        "sha256": "796722c85836327732a1b11c512e7008901dbc7828f6673107a13f42a462fb9a",
+        "size_bytes": 11064721
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Hallo_Nayakkar.JPG",
+        "sha256": "0fac4afb51b49c867263e29d8d62563aa821e9a86a27131a5e77bf7daddb774e",
+        "size_bytes": 517361
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Hallway_ceiling.jpg",
+        "sha256": "deda0274e9fb35e48eba872f3d6420a45eda4fd3f51cfbe0bf4b621d4519124c",
+        "size_bytes": 69725
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Heritage_of_madurai.jpg",
+        "sha256": "c037621979132689b11cab69c81484d9ed1ea7afb699f21a479bdc77a5d0317a",
+        "size_bytes": 1653846
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Interior_View_of_the_Palace__Madura_-_British_Library_P950.jpg",
+        "sha256": "d484ce36c28f7d60a3b9c6870407d1c63de8177bcf6d7e1bca1639f573486e81",
+        "size_bytes": 197268
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Light_Show_of_Mahaal.jpg",
+        "sha256": "66350b336af99d4f71bdf6399a3baa14c03726a509dd8668c0ea832c9cf7f3a3",
+        "size_bytes": 1252391
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Madurai_inside.jpg",
+        "sha256": "f2cfc81defba4f6de762f367cc85bd7a5cd53b7d6bfa31837fae6a673f9ffa5a",
+        "size_bytes": 3718853
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Madurai_Nayak_Palace_Collage.jpg",
+        "sha256": "6713ac4282f74ed57638b19994d16c3514997c6da3f9157edea9676a24cb84a5",
+        "size_bytes": 234331
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Madurai_si0671.jpg",
+        "sha256": "59465f4ffb67489eb5913adab99e8bb6f8e047438f58d14943411037c2df19c3",
+        "size_bytes": 196586
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Madurai_si0673.jpg",
+        "sha256": "feb342a066a8369bea50f673c801974e9c94837111e732432a7641b86eb1e869",
+        "size_bytes": 75122
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Main_Hall_structure.jpg",
+        "sha256": "6014f215e3efd10407c07f3c40a31cda662d331f3ab10936b4b2f50b25909d5e",
+        "size_bytes": 211333
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Mathura_thirumala_naikar_palace.JPG",
+        "sha256": "c59ca210dbe8180369bee3e7a9c78ccdae517e673172aef78afe7124f623c1a9",
+        "size_bytes": 2840463
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Monument_3.jpg",
+        "sha256": "18049fcfd92bd1631b6de554db0ff2abd7b6e31fe9665a7891318f91f89249d4",
+        "size_bytes": 838944
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Nayakar_mahal.jpg",
+        "sha256": "7e44c71e004f9bf7042e132ee04b885386d22f6a05a3f9992bde04f431092c04",
+        "size_bytes": 1220801
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Nayakar_mahal_inner_pillar.jpg",
+        "sha256": "96e9af63dd4f53e847964b1a72840826491c40e7d97a2f0d79bddf8c3b67337a",
+        "size_bytes": 1004134
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Nayakkar_Mahal_Madurai.jpg",
+        "sha256": "c21c8d2e4eaa93e2d246979bb906c3ed39c9cab668554d9fcd7404523fb8ac91",
+        "size_bytes": 3334860
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Part_of_the_Palace__Madura_-_British_Library_P948.jpg",
+        "sha256": "228351f076d78c93c5a53506cb0dca82ac45315c1c0b980290533b25573bac98",
+        "size_bytes": 160920
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Porch_with_Pillars_in_Place.jpg",
+        "sha256": "998a17ed6fd5efe9fe6155faa3cbe36233071812aca04eb3cf41869f891291a1",
+        "size_bytes": 5474011
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Rameswaram_coral_beach.jpg",
+        "sha256": "d1885c0fc4a4a052bf368230e55f7120f61e40e0fee988864760bacee8d6dc3c",
+        "size_bytes": 4581609
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/S-TN-23_Durbar_Hall-Thirumalai_Naicker_Palace.jpg",
+        "sha256": "52dbb948b97089268cee423d91c81011115cef1af97eaf69d2cbab93ca782168",
+        "size_bytes": 12538754
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/S-TN-35_Thirumalai_Naicker_Mandabam_Madurai.jpg",
+        "sha256": "8302410e467a1affc04b6f504aa2e210be637bde39b21c521361d8420211972d",
+        "size_bytes": 5591606
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/The_Court_Hall__Thirumalai_Nayakkar_Mahal__Madurai.jpg",
+        "sha256": "f1652e262dbf3dbbb1891d27ede29b3c3e08c71e2749531647038e4b35352139",
+        "size_bytes": 19867617
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/The_statue_pf_Buddha_in_Thirumalai_naicker_palace.jpg",
+        "sha256": "f988a3956dd1262960ab12b41e2d4980b8ab0c5a511fffb5879d85689b11d56a",
+        "size_bytes": 3054905
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Thiru9789.JPG",
+        "sha256": "004f345df324e9fa8dac0dd4e6aaefe6728a57269a0b8bbb871cf983fe757da5",
+        "size_bytes": 2176907
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/ThirumalaiNayakkar_Mahal.jpg",
+        "sha256": "8d73cf12bf620344124b420c63fbff8dbd61eef1d486928d923aff82d81bd798",
+        "size_bytes": 3860022
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Thirumalai_naikar_mahal_madurai.jpg",
+        "sha256": "d52b774ebb6a09e89416634be51f80fdc635907198d02f89f7181c66224bdb28",
+        "size_bytes": 6657868
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/THIRUMAL_NAICKER_PALACE.jpg",
+        "sha256": "290d58ea6c2f736404eea531f19055930020c741fbc0a67c42d2c1f473f96923",
+        "size_bytes": 5546187
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Thiru_malai_nayakkar_palace_s_outer_view.jpg",
+        "sha256": "22acc30c8b780e6874ae493c65a1b690b85c18d3892babf1694f3e76160ffb3f",
+        "size_bytes": 13254
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Tirumalai.jpg",
+        "sha256": "9ec6c84056afbcb6acad1bdefbb68a071e1416244ef45408cf89d12be11cf27e",
+        "size_bytes": 42094
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/Turumalai_Nayak_Palace__Madurai__Tamil_Nadu.jpg",
+        "sha256": "855942669f82fc7439fd4758369d681a5ddd686221d0538a79cf94e32a847fc8",
+        "size_bytes": 1120189
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Aesthetic_Pillar_Constructions_of_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "ca6d20db4d7deaae0a91ee981f1dd95096b94cf05627c962f023894802c0e31e",
+        "size_bytes": 1166038
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Amazing_Art_Construction_of_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "c6d381c575c1961090727ca73b82f0661e3def0c34bcdcb97d2e6641ef8ec91c",
+        "size_bytes": 1236496
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Amazing_Backside_of_Thirumalai_Nayak_Palace_Nadaga_Salai_.JPG",
+        "sha256": "67ff5d560bec324b62f3b5dc1468665a2b45c0553b0d50998b42cc3989167e5b",
+        "size_bytes": 1325299
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Amazing_beautiful_Visual_Treat_of_Pillars_in_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "6b13280a3c63c9e4ca462048a5ee8983585693f90a57a88d02f7b2ebcdba703d",
+        "size_bytes": 1183006
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Amazing_Construction_Work_in_Nadaga_Salai_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "430f4b2dcf7ee1450a7aeaa19e0b621bd9297276fe820a6ca30ad6bddb24040c",
+        "size_bytes": 1646391
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Amazing_Roofs_Constructions_of_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "23d7c702fbad790773eb08ed60dcbb9e8587b7eb887f3dd0b098f7786d863aee",
+        "size_bytes": 1774971
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_An_Entrance_ofThirumalai_Nayak_Palace_.JPG",
+        "sha256": "322afd30cff76f8f750bc5c5ad921d07d382a1f47a2dbe82c8944cd8c2246e5d",
+        "size_bytes": 2024198
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_Artistic_Construction_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "2ca13663e504ec01fcab32eda9254289c1cfdeb3a140c181bef3cb588a6000c4",
+        "size_bytes": 1963975
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_Beautiful_Angle_of_Artistic_Pillars_of_Dharbar_Hall_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "a0d356d5ce03e25814261839cdaf96449652dfe89116d9ca3e44b5c898a2717e",
+        "size_bytes": 1561463
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_beautiful_Construction_in_Darbar_Hall_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "64ee38e18d5a1e387a2a4ee8fe27c6ccf4adad5a54fb54a42a11a390a5a89be0",
+        "size_bytes": 1638991
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_beautiful_rows_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "88f4435ef4be7cb5f915466a61c80af69b759f42716a5f9fd6d3431c95d42a5f",
+        "size_bytes": 1399593
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_Beauty_of_ViewThirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "74df4f11f56e4e0926557e9f2955f467c9da0f3025ea9e506316efca124421f4",
+        "size_bytes": 1516779
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_Pillar_Visual_in_Thirumalai_Nayak_Palace_Nadaga_Salai_.JPG",
+        "sha256": "439342398ba1e9f318490f18838b742ce95c5c928d1c761b10be14fb1956aabf",
+        "size_bytes": 1552254
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_Royal_Chair_of_Darbar_Hall_of_Thirumalai_Nayak_Palace__.JPG",
+        "sha256": "f1324f00c46633d6f04a66a64fd868c0ee43653af72abe7411cdd531bb6fa6d9",
+        "size_bytes": 1900079
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/validation/thirumalai-nayakkar/_A_Wonder_of_Pillars_Constructions_of_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "1c0c83dfd252144ccaef97a285f76dc2aecc586d73b96d4b64c4efb0553817ed",
+        "size_bytes": 1515801
+      }
+    ],
+    "dataset/multiclass_v2/test": [
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/25_Dharasuram_Airavatesvara_Temple.jpg",
+        "sha256": "9467d4615852649978ad0ae4c3d45ab6385fd17db3203df4c46be641aca84c30",
+        "size_bytes": 422310
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airatesvara_temple__Dharasuram__Tamil_Nadu.jpg",
+        "sha256": "74532eeb2c27a9063d4493713e921e6d7904b6f9e8d57c0c649e20d137d7f3fe",
+        "size_bytes": 1283613
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0002__A_stone_work_of_World_Heritage_Monument_Airavatesvara_Temple_.JPG",
+        "sha256": "d6f851304f4a6ae73ee1206b430861c934a37cab4ff56e35ede09a0137c1f930",
+        "size_bytes": 2104350
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0020__A_beautiful_pillars_at_Airavatesvara_Temple_.JPG",
+        "sha256": "11363275d346201633004c2b7dcbdc8a76caff47ea9415a11da15cbaf8279412",
+        "size_bytes": 2078957
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0021__A_beautiful_stone_work_on_Airavatesvara_Temple_roof_.JPG",
+        "sha256": "c4368d511ab52e133f8d429ab953e504eb088200d3404c55e1e662d18cb377f6",
+        "size_bytes": 2581975
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0022__A_beauty_of_long_shot_of_World_Heritage_Monument_Airavatesvara_Temple_.JPG",
+        "sha256": "f8740f4e254a44f7a451d4325b0f6ec5f269d84181cb72330096a9e2a3b4cfd9",
+        "size_bytes": 1445387
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0026__Beautiful_stone_details_on_pillars_of_Airavatesvara_Temple_.JPG",
+        "sha256": "07e35e5fa9294929938cd54acb1faeefea62b5534c65922bd5ac9cd8d23d53ff",
+        "size_bytes": 2188314
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0052_Combined_Bull_and_Elephant_Statue_in_Airavatesvara_Temple.jpg",
+        "sha256": "57f088c21b796093f09b9499c049ed8a383b388ea946494f21a37db7f56a648d",
+        "size_bytes": 10167794
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0063__Stone_miracle_of_Airavatesvara_Temple_3_.JPG",
+        "sha256": "d5ebc2272cb2be027cf3a84bdb9711aabf0423b6298610a5728189c3538d79d4",
+        "size_bytes": 1276428
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0080__A_beautiful_view_of_Airavatesvara_Temple_.JPG",
+        "sha256": "7670e6a1bfb298bf06cac487512decbc66216af274ed4836bac537ac325d0f7d",
+        "size_bytes": 1490892
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0081__A_lady_dansing_bose_on_Airavatesvara_Temple_wall_.JPG",
+        "sha256": "3d4f0b958ae139c7a0a9d1d442abd2f4ee17da30424da4a6a1e0b3b5e37434ce",
+        "size_bytes": 2411141
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0082__Airavatesvara_Temple_dance_bosses_of_dancing_girls_.JPG",
+        "sha256": "e09d36325eded411cb5ab707ad67378d8e84b6145a63d7ee8d232be425683520",
+        "size_bytes": 2474690
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0090_Airavateswara_Temple_Darasuram_04.jpg",
+        "sha256": "44932bb8da8409ce29abc0d3a25c8b7e7029a26c6b787d0860102de44c461c6f",
+        "size_bytes": 4537057
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0092_Darasuram__Airavatesvara_Temple__Brahmin_priest__Sanctum_sanctorum__India.jpg",
+        "sha256": "b852fc5fca82b5373f54d7ceb10759f8144d35432550810425b766c73e227884",
+        "size_bytes": 5695355
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0093_Darasuram__Airavatesvara_Temple__Inner_halls_2__India.jpg",
+        "sha256": "4407900d027b5a743ed6f82f5f4f2fbb7b7f776aa31427e5ebc529838c4f14fe",
+        "size_bytes": 8514679
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0094_Darasuram__Airavatesvara_Temple__Mandapa_at_night_3__India.jpg",
+        "sha256": "8a7e36a860486f1fd09c58f3bc543ff7b2e08978691c41ee02752fb695cd3513",
+        "size_bytes": 9397942
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/airavatesvara_candidate_0109_Darasuram__Airavatesvara_Temple__Dravidian_architecture__India.jpg",
+        "sha256": "dd56be4a9cd9a50fb5bf9771056d07c5eb904eba7c3a5422baaa326fb81f707e",
+        "size_bytes": 6700874
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavatesvara_Kovil.jpg",
+        "sha256": "33d346c2c5dde81d3d5f6ff51e3c1d938affad09e055b16aca60bcb0055a3211",
+        "size_bytes": 3349652
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswarar_Temple.jpg",
+        "sha256": "f1825c0a070c3f7637dff6d0c6ccdc88f20b7d620bbd20a35342ba3ac0f4d0f2",
+        "size_bytes": 2808557
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswarar_temple.png",
+        "sha256": "b4dfab08a23f54ea8728d8776c4f1e9c7e919cb67c25fda4211cd22d6defff9d",
+        "size_bytes": 138716
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_Temple_-_Gopurams.jpg",
+        "sha256": "8eb8b2b5594554de389ad62bd0289163f39cf7d8cfd63fd2085dec63d331fc86",
+        "size_bytes": 10748078
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_Temple_Darasuram_02.jpg",
+        "sha256": "089e08f975ee5d5a97879c09f29d665273ef5a7199adb180aea00901268720c5",
+        "size_bytes": 3275342
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_Temple_Darasuram_09.jpg",
+        "sha256": "d7bcdc7a712ab572128bd434ad9dc371a1abae6eeb8c00fdc3310d6cc631e9a9",
+        "size_bytes": 3025277
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_Temple_Darasuram_10.jpg",
+        "sha256": "065031ee6dfd00225feeeefa3103bb6a8bdd4153ec9dbbe83881a6f41eef0109",
+        "size_bytes": 3630179
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_Temple_Darasuram_12.jpg",
+        "sha256": "e0232741e5c83d0985bc00350a0b1d61d2b47a192e8d4f4a781fe6e24a9902b0",
+        "size_bytes": 2689875
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_Temple_Darasuram_17.jpg",
+        "sha256": "399bd222ef5c6219c2fde5cba023b3f6d6fff7567686b7f530e027b88844f88a",
+        "size_bytes": 8282040
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Airavateswara_temple__Darasuram.jpg",
+        "sha256": "62a0ddfd2fb52d6cd79f1d4c10b8241e72ea7e7122486e8baa31515b389cbbfb",
+        "size_bytes": 997337
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Darasuram2.jpg",
+        "sha256": "a5e351f69fc7adf949bacd3bf34f460ad96e5a7681b44e30dfefb203b6e99f8f",
+        "size_bytes": 2226400
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Darasuramiravatesvaraammanshrine.jpg",
+        "sha256": "97e6fbec072375554e4eca3bbc1c8d70acc8455a49d21b166fe90605015f5c6c",
+        "size_bytes": 2951938
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Darasuram__Airavatesvara_Temple__Dusk_2__India.jpg",
+        "sha256": "90e32fe6d9afcfee1f60bae3a950603c232173480a5132a3ecb3ab0cf35a4c90",
+        "size_bytes": 6330544
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Darasuram__Airavatesvara_Temple__Dusk__India.jpg",
+        "sha256": "b7bb9cd074fd678582b31f0949200187da6d323600df3ec182348f3de4bc780d",
+        "size_bytes": 6569016
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Darasuram__Airavatesvara_Temple__India.jpg",
+        "sha256": "4e3ecb6bfe37284e16fb376a0399e67943e715b4376cae364d65a8462f57fc9e",
+        "size_bytes": 6526353
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Darasuram__Airavatesvara_Temple__Sanctum_sanctorum_3__India.jpg",
+        "sha256": "917d93eb22e9dc21655f6cde9882f80974045ea7d141fed68d386c551f004f62",
+        "size_bytes": 8031545
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/God_s_confines_-_HighRes_-_SI_05793.jpg",
+        "sha256": "e8d79302f3d6cff4bfa0e81a577a709881daf216ea147e382383dae6e1bf8a0c",
+        "size_bytes": 14995754
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Iravatesvarar-Temple-Darasuram-TamilNadu-India.jpg",
+        "sha256": "e002ef5e5ee4f80ba6a2a346aa4827c7213acee1575137d8d47ffad433401832",
+        "size_bytes": 1383436
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/N-TN-C189__4_.jpg",
+        "sha256": "55518bd8a2eb76fa7f21ea7c202455f4ce4453c228bcdd4f6b151233d8b8ed35",
+        "size_bytes": 2936013
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Panoramic_view_of_darasuram_temple.jpg",
+        "sha256": "fe53d6e7602cf7d384992d22943e2af82546f5be2cfdcefc8ec08124fb677a1a",
+        "size_bytes": 2288166
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/Thaaraasuram_OreKalJannalgal.JPG",
+        "sha256": "a40f40dd3890ca8fe4b662b43bda432656393b85b7cd0ff61d6546541c57baae",
+        "size_bytes": 4111862
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/_Airavatesvara_Temple__A_world_Heritage_Monument_at_Darasuram.JPG",
+        "sha256": "2674b4a2ba70e5a525ce39c569a8e93f3ec25e0af33a297a8ecf0a6a3f34f98e",
+        "size_bytes": 1854510
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/_A_beautiful_long_shot_of_Airavatesvara_Temple_.JPG",
+        "sha256": "072f3edfe00ccacb784499303714dab73063821c5bcfd9c3cd0febb54b1a99e8",
+        "size_bytes": 1529832
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/airavatesvara/_Stone_miracle_of_Airavatesvara_Temple_2_.JPG",
+        "sha256": "63490f76f94ed70d2142afb0e651fd75ffbe7b9299b84b411761595d54a15779",
+        "size_bytes": 1560081
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/1000_year_old_Brihadisvara_Temple__Thanjavur.jpg",
+        "sha256": "080655fa048371e04059c691b989a54eae089b29247fb5f276d1a29f20b10fb7",
+        "size_bytes": 412869
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/A_welcome_statue_scluptured_in_a_pillar_inside_the_big_temple.jpg",
+        "sha256": "664f2b10c5a47d6a03a2c31902d3860edd5d3699f35a667f2d5c0ecc448b428a",
+        "size_bytes": 2015756
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Beautiful_view_of_the_Brihadishvara_Temple.jpg",
+        "sha256": "45da66da9743201e5fa02b3b72c13e9fc2b4d82babd593fba532a25456a582b1",
+        "size_bytes": 9192058
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Big_temple_234.jpg",
+        "sha256": "fabff56b3a9c8ddb6e4d469c34140a9b10db32d28596190a22ed9d846ea417f8",
+        "size_bytes": 5385637
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Big_temple_237.jpg",
+        "sha256": "785e7c9ea28498b5de78ff0af7e71c98ce5b3c3cd204390100317462118c0734",
+        "size_bytes": 6563266
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Big_temple_240.jpg",
+        "sha256": "44c88c1971dfcface0de6e2c9adc2a887d5e5d4ce2cda5a6511ac2ae72ef82af",
+        "size_bytes": 5985111
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Brihadeeshvara_Temple_Tamil_Nadu.jpg",
+        "sha256": "0dcf7c7e979a21fdc403b8be990cec0099a67d094838e9b159bce42ea1cf1c56",
+        "size_bytes": 1858864
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/brihadeeswarar_candidate_0054_Majestic_main_tower_big_temple_tanjore_tamilnadu_-_panoramio.jpg",
+        "sha256": "09f872eab856464720953bf1a90685b9246a4a123ab6174c5f6ee4274e389406",
+        "size_bytes": 3015881
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/brihadeeswarar_candidate_0058_Thanjavur_peruvudaiyar_kovil_tanjore_big_temple_1_Tamilnadu_India.jpg",
+        "sha256": "420ed1cb91041a3699fc6e85a011e2e4d02c67237861d624a271923fd2a1bc25",
+        "size_bytes": 1957905
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/brihadeeswarar_candidate_0077_The_Grand_Enterance_of_the_Majestic_Tanjore_Big_Temple.jpg",
+        "sha256": "31599dbe9024cdcada48707f4fc6cf3be4a83038c1235b35f177ab4b93adba41",
+        "size_bytes": 2698993
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Brihadeshwara_Temple_06.jpg",
+        "sha256": "34c288e8548de7eca4180ee14e3f46634a912b649cbe2a234d786d5a729f58f3",
+        "size_bytes": 10833882
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Brihadeswara_Temple_in_ivory.jpg",
+        "sha256": "13bf65a74a1e8e2e4cdfd9c56076e511d18459bb43234ca11638da9ccf06e047",
+        "size_bytes": 2738791
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Brihad_Sikharam.jpg",
+        "sha256": "dfcca53afa039a1edbd13ae94df6a1c468f3f6ed3aa38ae28d766f60a08fbc11",
+        "size_bytes": 953082
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Chola_Temples-Tanjore.jpg",
+        "sha256": "109717d0f8aded2a92e8831a90218a1e3b6e922d5946c2eb1c9b1b8a4032c59b",
+        "size_bytes": 1292986
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Dancer_at_Brihadeeswara_temple_Tanjore_11.jpg",
+        "sha256": "0e75504662c56b41a3ce7048bf88fdb6a095ccda5e7fe15cc2e1a345db2e677a",
+        "size_bytes": 5369908
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/FP_IMG_20160829_105502_04.jpg",
+        "sha256": "140d697553178937b625a155465820cc882afe8c5c3c06eb7b68685f323bdb8e",
+        "size_bytes": 5060758
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Getting_into_-_Gangaikonda_Cholapuram_Temple.jpg",
+        "sha256": "bcb85ce1eb3c050a4d284dc41b95e48024f45de373484cb6d2f2b593196b549f",
+        "size_bytes": 4598209
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Kulothunga_chola.png",
+        "sha256": "4820a65c8df3d47445cc4a22dae3ee7e00255ba05e46ef642052e17b731dd80c",
+        "size_bytes": 238942
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Marvellous_Brihadisvara_Temple.jpg",
+        "sha256": "e1d0fcd2a2bd0434c8bb51c441118b0202fedaec8f9a127eb7e2180190a4b841",
+        "size_bytes": 9574416
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Periyakovil_AD985.jpg",
+        "sha256": "f042255ed4f62b880572878e1d5283c68c8b5f0e00c8799d9deae75096ec37e5",
+        "size_bytes": 5181386
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Perudaiyar_Temple.jpg",
+        "sha256": "a4d0b92c9bc1efa1e36ec7d10155c498c8ae4b70af18c0d4926f053734ab3dab",
+        "size_bytes": 937049
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Peruvudaiyaar_Aalayam.jpg",
+        "sha256": "5e361d3ab5a0f6a2a91aed268d07a34ae12fcb2f14f1beb46f7b08653aad2d57",
+        "size_bytes": 10582381
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Rajendra_Chola_-_Brihadisvara_Temple.jpg",
+        "sha256": "29f041c00a4d5476b1bd80b40da49fa6022f9bf3933a9a3dfdcf28672651b28a",
+        "size_bytes": 1770623
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Shadew.jpg",
+        "sha256": "1027518a6c278ec8fabd41b02460fff1ef2b6e15a7093d150fa621f6599555c5",
+        "size_bytes": 90322
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Stone_art_tanjore_big_temple_tamilnadu_-_panoramio.jpg",
+        "sha256": "7819b567f2b2c0aec3cf166e902bda5e62cf569b4b3d49d6cecc0000f095d902",
+        "size_bytes": 3208143
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Tanjore_plate_art_tanjore_india_-_panoramio.jpg",
+        "sha256": "3fd549f717bb225b2fa2d0409a7534f194ad1ead298b6807b447639e8aa256ca",
+        "size_bytes": 4009045
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Tanjore_temple_entrance_inner_view.JPG",
+        "sha256": "f517e1bd9603b688e3206bc4843c18192210f76f6e28aba5a1e19a49093d4026",
+        "size_bytes": 1245556
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Tanjore_temple_entrance_view.JPG",
+        "sha256": "57d7cfe30c330fb5d34bc67e0da13af980b9513939c4c7b2e026f581aeb5625d",
+        "size_bytes": 1252191
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Tanjore_temple_entrance_view__inner_.JPG",
+        "sha256": "6130f8942ff97268b0aa3152a02a63d02298ddf7af10acbddca2c368eabc9bf7",
+        "size_bytes": 1245856
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Tanjore_temple_outer_view.JPG",
+        "sha256": "29f2fc864279bbade18f53f1c2324c9d650feff584b7e27ab24025c808401594",
+        "size_bytes": 1895026
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur_Architecture_01.jpg",
+        "sha256": "d2655ecba6701a23e8eef03d29711e9ab00963326c3ca354105702a94f693c5d",
+        "size_bytes": 544884
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur_peruvudaiyar_kovil_tanjore_big_temple_5_Tamilnadu_India.jpg",
+        "sha256": "76592010d8ba341453c4c6e06977391c192b25579ca1445840b926a3d4b1d76b",
+        "size_bytes": 3800033
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur_ShivaTemple.jpg",
+        "sha256": "6aa431a51eb36e6d853180767443a933c5c49f9b7f5c4930d5f2796e929deb45",
+        "size_bytes": 345330
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur_shiva_temple.jpg",
+        "sha256": "b32ff51bb5ac85102142f3ca71fb861a2917384941e7aa4d1ba726756e480ec9",
+        "size_bytes": 2223326
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur__83569_.jpg",
+        "sha256": "7e1a4b28cb1b54f85da6a5c81b8236117b76e4e5870b6b5de7c0e63c6032bc03",
+        "size_bytes": 5436705
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur__Brihadishwara_Temple__6994374911_.jpg",
+        "sha256": "f2d65fa0151a7ca4d4f1fc01d3d5fb4b6c205f080ebb0c7bf3e17bf6ee6d395e",
+        "size_bytes": 4950961
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Thanjavur__Brihadishwara_Temple__7013915633_.jpg",
+        "sha256": "a0950ae703b94661b856173d80df207c4e5bf40de407bfbf11d8f27729554e73",
+        "size_bytes": 5079601
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/Where_Stone_Speaks_History___The_timeless_carvings_of_Brihadisvara_Temple_in_Thanjavur_showcase_the_unmatched_brilliance_of_Chola_architecture.jpg",
+        "sha256": "60bd75e2def5eee13b552ad29770169a5bf6e4acbed804be38be160302e44288",
+        "size_bytes": 8440116
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/World_heritage_week_2017_celebration_at_Brihadisvara_Temple__Thanjavur_IMG_20171125_174746.jpg",
+        "sha256": "30368d92ab983d9238db798488be6b36d7daacd59e0aa7889ef69e66ff3d27cf",
+        "size_bytes": 2241994
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/World_heritage_week_2017_celebration_at_Brihadisvara_Temple__Thanjavur_IMG_20171125_174842.jpg",
+        "sha256": "d6959a6337df3ea845f5d259910fa3528dc9a410a6008c7ba87c5aec1ea02901",
+        "size_bytes": 2635048
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/World_heritage_week_2017_celebration_at_Brihadisvara_Temple__Thanjavur_IMG_20171125_182108.jpg",
+        "sha256": "a78299b95945f872c938cffecfe9260a2709052b625f4bde78339b9cf54654d4",
+        "size_bytes": 3304416
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/brihadeeswarar/World_heritage_week_2017_celebration_at_Brihadisvara_Temple__Thanjavur_IMG_20171125_182130.jpg",
+        "sha256": "73d0776289e10e852f91ac8cc4eb3a909de9071e597a378b18243adaddec8482",
+        "size_bytes": 3500163
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/11th_century_Brihadesvara_temple__Gangaikonda_Cholapuram__Tamil_Nadu.jpg",
+        "sha256": "4eea6ddd75cbe7b6c3043f83b9834ba2e97f0e4d4323b2050ead22ce78807609",
+        "size_bytes": 606416
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/26.Gangaikonda_Cholapuram_-kalvettu.jpg",
+        "sha256": "7acabef5b492cfe3bd7e6e89b95dee7af4721c2971bedcc355297ca944605889",
+        "size_bytes": 1146938
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/An_11th_century_Hindu_temple_architecture_in_south_India.jpg",
+        "sha256": "ae10de7ffc611fad613bb6a93dfb1762d4504645e0b7f27d3e8fcab82a291547",
+        "size_bytes": 7195936
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/A_Hindu_Temple_architecture_religion_in_India.jpg",
+        "sha256": "691c6ba1db683e187b5ac39b8071c8c417d0fb3f397ce1fa9903ba8a2fc2f89a",
+        "size_bytes": 5045003
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Brihadeeshwarar_temple_Gangaikondacholapuram_5.jpg",
+        "sha256": "0bdd4f54530220ef5126883af4265808e72b58a100d9abb2ea9b02b58e65cb01",
+        "size_bytes": 5204851
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/BT_Front_Silhouette.jpg",
+        "sha256": "f09a05b06e7009560242c296a9dd0109eaa5f9bf3aa43e8596bf089e147d0196",
+        "size_bytes": 336425
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Entrance-Brihadisvara_Temple.JPG",
+        "sha256": "e9d0303fb7f9c9b5220f1cbecb26a64d0718a5edd1f210953f91d88d3989f57c",
+        "size_bytes": 2802275
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Fossills.jpg",
+        "sha256": "cc0e35fdb7fdbfccd8dcf6f74093e9acf50e260a34f1b3c5e6a75568973e35b4",
+        "size_bytes": 2995246
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Front_Entrance_of_Gangai_Konda_Chozhapuram_Temple_RRS07128_f.jpg",
+        "sha256": "cd9ad15e70c6dcc779ee555d4b440c35ef857bced659a8fef1100331a2f73c01",
+        "size_bytes": 1742906
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0023__A_Royal_View_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "1a827c124fbc3053458ce8fa0074cc4f00884bda75fd3255ba16ea20a0e469f7",
+        "size_bytes": 1809734
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0040__A_Closeup_view_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_Tower_.JPG",
+        "sha256": "c61e23962ff8ea267bc63fa9600a0974f33bc7f3e8d3ef7841858f3128ff6a35",
+        "size_bytes": 1939187
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0042__A_Sannatih_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "dd57aa8401606be99cd2f6d2f808c428673dfaae79926f39e0e268ce77eaef95",
+        "size_bytes": 1815137
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0080__A_Evening_Visual_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "623925a0b3dc994200613a36a1e00361f48ba5fb9151c9d3efdf6d3592d6b99f",
+        "size_bytes": 1754151
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0099__A_wonderful_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "9319d96df070761dc826f9a9b9528d9e41235a8c39ad5c4d2c62e245484978c3",
+        "size_bytes": 1935586
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/gangaikonda-cholapuram_candidate_0102_An_amazing_architecture_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram.jpg",
+        "sha256": "96b338a623d8193990af3520ceb10c0ee6768f87bfd1a7ffc7de197cb9027000",
+        "size_bytes": 1784789
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Gangaikondasolapuram_temple_sculptures.jpg",
+        "sha256": "fc0d3f04cff619462dfbe1dd817b936cafbbe7fdb017a6c39333a22bd7787238",
+        "size_bytes": 6496032
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Garden_view_of_Gangaikondachozhapuram.jpg",
+        "sha256": "3dd901f639a3c2b46dc67d4efbba41221168a095a61e1d334200933cbf8a3de5",
+        "size_bytes": 3267293
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Grand_Temple_Entrance.jpg",
+        "sha256": "d1a0283b5660d4f618688368e02fb91607bd1038442883a2ed1f2c26b15cdb10",
+        "size_bytes": 2302152
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Inside_campus_-_Brihadeeswarar_Temple__Gangaikonda_Cholapuram.jpg",
+        "sha256": "75f915e212bc375c76b4d80efe87a8d79b40d4e40daa68e7bc5f4857af6e6e30",
+        "size_bytes": 7324903
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Lion_Statue_Gangaikondasolapuram.jpg",
+        "sha256": "1ec09978a8551706931869ba7aca4e7a5cbf82cf8f8ce449a591ea39db175193",
+        "size_bytes": 987844
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Main_entrance_-_Gangaikonda_Cholapuram_Temple.jpg",
+        "sha256": "5bd9d1b9f26bd0c8ccf357868d16a9c682c4559e9efcaa69429110fa707aa851",
+        "size_bytes": 5012638
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Nandis_Gangaikondacholapuram_temple_tamilnadu_-_panoramio.jpg",
+        "sha256": "869dc4e2de825770ed6788c7ee4b7da2a29f069ba1099424a258879f9ed171f4",
+        "size_bytes": 2944516
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Paintings_on_the_wall__Brihadeeswarar_Temple__Gangaikonda_Cholapuram.jpg",
+        "sha256": "2bb25cd0847d5786053926ad232e2fc0fd307cdd4a7c31e0d5679039f363b819",
+        "size_bytes": 7628637
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Ruined_Marvel.jpg",
+        "sha256": "0e611ae85e70585926f4167f1611ede62a08a3a988904a2d1d9388bf2b8e870b",
+        "size_bytes": 2985048
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Ruins_of_Gangaikondacholapuram_temple.jpg",
+        "sha256": "2178474283285a363d2f04fa4b53f0b468c86f57a57e365bdb7b6be84c655109",
+        "size_bytes": 4976123
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Shiva_statue_at_Jayankondam_temple_08.jpg",
+        "sha256": "44d0dffaae83b31cc76b3133c93da47d7ec61e678724cba25c256d61ffc0bb67",
+        "size_bytes": 2787833
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/South-Indian_Images_of_Gods_and_Goddesses__page_25_crop_.jpg",
+        "sha256": "30177e82319be73c8105b5c3e8a6210262e0c699d4fda2c081e99b995a0bb617",
+        "size_bytes": 821064
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Statues_at_Jayamkondam_temple_05.jpg",
+        "sha256": "d3b01e2680ce2b1e8573e13b6a9dec72314e01527e4d06fc3232e8330495efe5",
+        "size_bytes": 6897631
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Temple_art.jpg",
+        "sha256": "066a56cb741f651c051597bf56a6ec8d038b8465924d466dba6ead4a4e949d72",
+        "size_bytes": 3686438
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Temple_tower_at_Gangaikondan__Tamil_Nadu.jpg",
+        "sha256": "192b7ac77215f7cf54f8f5a116ad8d224da824a32312fae08a8f1c67b080b8ac",
+        "size_bytes": 4418564
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Top_of_Dwajasthambam_of_Brihadeeswarar_Temple__Gangaikonda_Cholapuram.jpg",
+        "sha256": "04559d2c37f34f765ef184f2855b952788002b89e832cd459e822b29b5451f97",
+        "size_bytes": 7049011
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Zoom_View_Entrance-Brihadisvara_Temple.JPG",
+        "sha256": "b3b229a531b0ae0af0fa857035257435095f0dd81635dbe2b48fa02775a13d64",
+        "size_bytes": 2828335
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/Zoom_View_Entrance-Brihadisvara_Temple_cropped.jpg",
+        "sha256": "3b26815b2cebc193be1b31ba014b3caa8456bd5bb59b68ca4fc519e4af39efca",
+        "size_bytes": 1617833
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_Aesthetic_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "3d5a1f3d85a3f157339d4f8e88c59226de268f3f4ffa2f80a3be275f8e9e199d",
+        "size_bytes": 2083466
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_Amazing_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "5f880a7794e175c1430a92c2401e97e45512cbfb74112e2b581f8229eecc9008",
+        "size_bytes": 2092675
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_A_Entrance_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "471f887db25643e4e149daba597a0eaaca319c7c8484bc5e701c4b6a42ba146a",
+        "size_bytes": 1766494
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_A_Nandi_Statue_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "414918a8d5034dfd0a71dcf3d54244c8b0fa56f15615e1f52eb34792e229b6aa",
+        "size_bytes": 1777080
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_A_Terrace_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "eba075fd9c20dae5120b6e75ddc81a9a523cb1daf53ae83edb815ce46c839761",
+        "size_bytes": 1797600
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_A_Visual_of_Sannathi_in_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "f8c1a45f272a07e82dc3f65632fdfa0d52003c27c89ba1cc6335c85ebee3d9ae",
+        "size_bytes": 1778808
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/gangaikonda-cholapuram/_A_wonderful_Sunset_view_of_Brihadisvara_Temple_of_Gangaikonda_Cholapuram_.JPG",
+        "sha256": "d9aa3e564ce9ee5318b9b23b543b8ed2fdb6b6a42970d4ffcf35121d748afd97",
+        "size_bytes": 1822023
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Ancient_temple_in_Ambasamudram.jpg",
+        "sha256": "71d38ba1a4b845df5479044ac0d02ab836f2d630e65805da293e182a7a0387a7",
+        "size_bytes": 1576964
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/CTD_East_Gopuram.jpg",
+        "sha256": "31a254b07dd9ea0fc28a2fd09becf5a7c84714d01bf51e1e5db740d84beb4cc3",
+        "size_bytes": 422581
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/ENTRANCE_TO_TEMPLE__TIRI_KULI_KUNDRAM.jpg",
+        "sha256": "c1b8bec1834d09952ad97321938cb5493f8f2d4569e8d814f5b8c03dc357c81c",
+        "size_bytes": 792052
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Gopuram__most_South_Indian_temples.jpg",
+        "sha256": "2d3cff73908d8b3b067ba244eb53a7b272d361380ad8bc8c47999a662ff96ebf",
+        "size_bytes": 370789
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Kailasanathar_temple_at_Kanchipuram.JPG",
+        "sha256": "b51b6de89dffa728daead0203e6aa452c39a850740d06a6bc8cbc908e3a178df",
+        "size_bytes": 123409
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Kalayar_kovil_gopuram_view.jpg",
+        "sha256": "c25dcce93307ca247e69df822093ec3d28c672230f05dca222b6bdfcdf9234be",
+        "size_bytes": 93569
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Kodungallur-RD-11Nov11.jpg",
+        "sha256": "c30a0d6fe278ac64e4bd2bb46e750acd06e97f38544718dc669cb24995782547",
+        "size_bytes": 281976
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Kuppalnatham_jain_cave_temple_in.jpg",
+        "sha256": "6458e7a6e72f39a11dd9c59824d0a83380f64c282f7f55f4c8430a9121d5a6ae",
+        "size_bytes": 52919
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Lemon_chain_for_Masani_Amman.jpg",
+        "sha256": "fd5d3a3505c9a597530f119f0920fdfbdac3811375391a3504021182345a4464",
+        "size_bytes": 2236794
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Nellaiappar_temple_tower.jpg",
+        "sha256": "61532c5a880452ee012f9c66a74672e3ea319be74a322dc6385bcde49e63fe0f",
+        "size_bytes": 2175782
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/New_Age_Temple__95232925_.jpeg",
+        "sha256": "cb9d4401bb6e38e09377b7cd61c874b47f81b237ca5204e7c8df53fe26b7877d",
+        "size_bytes": 473805
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Outside_of_temple.jpg",
+        "sha256": "67739d6f1cdb78a428ea92e3d3bd6aa4a8f2a7da71606c553312612d346de996",
+        "size_bytes": 66647
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Palani_Edumbar_Temple.JPG",
+        "sha256": "236c99d4955e39df4be3bb2f267630bcf1e0b13add8a193fd4306787408adc5b",
+        "size_bytes": 1833421
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Panaiyur01.jpg",
+        "sha256": "76627f4d973879c805a656b568e471fb671e9fe3f2244c7fa2f4056b26ed2491",
+        "size_bytes": 930703
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Pennadampiralayakalesvarartemple2.jpg",
+        "sha256": "d8965f12357f8dcd75de906330a21a75973dbb57b0e3a668a60a33b9dd94fca1",
+        "size_bytes": 34729
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Real_Gopuram.jpg",
+        "sha256": "526ff4874c3a499bc1fcfd8baea2b35915bc3435f008c5ed21403650ddf21dcb",
+        "size_bytes": 448844
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Salemsukavaneswarartemple.jpg",
+        "sha256": "1efc757bdc3f0d99d5b9f4bdbc274e8b32ab1c3159f3c3595b2edf49cb6a06eb",
+        "size_bytes": 216090
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/T.Agaram_Vinayagar_Temple.jpg",
+        "sha256": "6a71c949c0c52750c0cd6147711c6ef35ee4358df047d6d6cbdb23c9679ff809",
+        "size_bytes": 90379
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Temple_gate-_Halu_Rameshwara.jpg",
+        "sha256": "c87797b6c560ae2f4561ec85bd88b7f756eaeef9c59863a6d92f41e10ef35091",
+        "size_bytes": 1315098
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Thillivilagamkothandaraswamytemple.jpg",
+        "sha256": "ad87930d96ce23a539edca5d830dc24a978880f8b26bbd448fa9ee009078f569",
+        "size_bytes": 352747
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/Tirutelicheryparvatheesvarartemple4.jpg",
+        "sha256": "b9f649b25fbcee9847db247bd3056564c7faa9f6a5af5a904020ca30ba31e918",
+        "size_bytes": 40803
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/hard_negatives/________-______1.jpg",
+        "sha256": "cc5a367cea41ad4d158fee4edd081dad1a7ba855aeb85753d5978167294b04e5",
+        "size_bytes": 238797
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Abode_of_the_God_-_HighRes_-_SI_01616.jpg",
+        "sha256": "f2c7279a3fb370aec7edbf89d358c11e481944761e742e21b2f7d7fbdf808cbe",
+        "size_bytes": 14480159
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Chennai_Beach_temple__942115928_.jpg",
+        "sha256": "b540935ed595e7bd7ba947fb534571ce607e2185838a46e6a0f5a3c728c32b41",
+        "size_bytes": 343703
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Description_about_shore_temple.jpg",
+        "sha256": "edcf1c7b470134fcc547175d308f5fc6bdca7a03f97900263b805036a2fa8eee",
+        "size_bytes": 4660406
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Front_View_of_the_Shore_Temple.jpg",
+        "sha256": "248bc882ac06973d109b39aa04471fd32f551a85bc1fa9ce562dec533e91b3f5",
+        "size_bytes": 1741372
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Garuda_on_the_temple_roof.jpg",
+        "sha256": "7a66176ea1e9c0202ef566d579ae2474449a4b1e06531764d01471bbe2989ce5",
+        "size_bytes": 1151881
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Mahabalipuramanu.jpg",
+        "sha256": "2efc84129ec49fdf3610f5c140395f0d9a6088308d0de9b08da173efc3859aa9",
+        "size_bytes": 4792596
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Mahabalipuram_Cow_carvings.jpg",
+        "sha256": "e5ee3ea27bf20531f782484ffd5a8e47a759f84b2b0448c4faecb1b65157806f",
+        "size_bytes": 540173
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Mamallapuram1a.jpg",
+        "sha256": "ef43d150760f321b9a22458b3e1000f5f56da8bda36124045cc8d338a4cce348",
+        "size_bytes": 731216
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Meyers_Universum_Band_08_26.jpg",
+        "sha256": "7e1db299086e2553d20f32ada3d07fe635a2ac76659d87d733ef9bdfc2c3360d",
+        "size_bytes": 7353696
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/ShoreTemplePano.JPG",
+        "sha256": "bcd5d66d159143de0be38285bfd71da229d4cbcdfe671c74641353a145b2cdfc",
+        "size_bytes": 225432
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple-_Pious.jpg",
+        "sha256": "8e41683b0754eeb9e226d65c49d5bf1ec371e0499cfe47c8e1f9af4173582b77",
+        "size_bytes": 1043532
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temples_of_Mahabalipuram.jpg",
+        "sha256": "b4540cd11914cf4d7124fa4bb7458fa335fdaa1616576fd0f7ca3bafb995ba8f",
+        "size_bytes": 1931871
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_1.JPG",
+        "sha256": "44237f38ed442175b932038bf847e70a32705288094e1acab76e3ca4a088543f",
+        "size_bytes": 1280310
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_10.JPG",
+        "sha256": "fdae8185d21d8df811c8be2294d35c7cc015a6e8c3d6af1f2cbbd03f4d33b1b2",
+        "size_bytes": 158559
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_4.JPG",
+        "sha256": "75b2636e3127075fbf609c03e5464184835c1a118a068b2903882e9494bdfe98",
+        "size_bytes": 134233
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_in_Mamallapuram_Tamil_Nadu.jpg",
+        "sha256": "2fb58e0f636d194758b71f66ccbd5642e20f78a37856cb07e3ffc581296a00f6",
+        "size_bytes": 2782772
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_temple_mb.jpg",
+        "sha256": "3a11d8879bd263f68851e2f2d36adf082762a8f9259055b15039e0e852c1bfcd",
+        "size_bytes": 3034990
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_N-TN-C55.JPG",
+        "sha256": "9d307f974e179ab4135a3a3d8ebd1ccb21a99e6e196fbf6e8cb7649be21ceea9",
+        "size_bytes": 4205606
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_Nr_Chennai.JPG",
+        "sha256": "74c1dc735cd5ece8b95b7b6a42c337e6f3bbf530f20a46b7ea4f26a8aae367d3",
+        "size_bytes": 3025430
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_temple_of_mamallapuram.JPG",
+        "sha256": "62ef4c504c7f6d5d03b50d0f6692ec8f6cbb701e9f559c498ecaeddc0ddce3cb",
+        "size_bytes": 1247187
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_Path.jpg",
+        "sha256": "7f9ce12616aa437b4d4a0953e60e3baf8e3d5d7ae85a61a8426d9e596d272d5c",
+        "size_bytes": 18122890
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple_View.jpg",
+        "sha256": "66d965372e7bfe4d093c41779d74ed72118f75a653bdb0fec6202380bb8f49ae",
+        "size_bytes": 1689810
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_temple_x96.JPG",
+        "sha256": "6dd9ebad3b2474544f7c99251fc34dcd4dc1679365c99d733af2eafa7f9bdf1d",
+        "size_bytes": 2042045
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Shore_Temple__UNESCO_World_Heritage_Site.jpg",
+        "sha256": "1f55e50309c76b4edbbb4f2549064b2d1fb9e41e14c3137ce8bfadc4feeac992",
+        "size_bytes": 4790488
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/TempleRivage__2_.jpg",
+        "sha256": "b274383ab4c24b7ea686e7f4d9ed90240ec1f621c84634c7d95d0edee69936a7",
+        "size_bytes": 4624329
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/TempleRivage__5_.jpg",
+        "sha256": "0dfd34232c6e0a0a9b62a94972824d175b87b91a7beebca98c89de6add364bc2",
+        "size_bytes": 4929776
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/TempleRivage__8_.jpg",
+        "sha256": "6d4052931b1455a782ad647aed495533bbc79eb4367967aad2d2f1c9bd83782a",
+        "size_bytes": 2780439
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Temple_at_Mahabalipoor___by_William_Daniell__c.1799.jpg",
+        "sha256": "9f8c0aa985eb97c67ead38461d76df9560cbf8fc7162ab49fb55470491f1c9e4",
+        "size_bytes": 178386
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Temple_in_Mamllapuram_11.JPG",
+        "sha256": "3a020f6cc54e3e1cc58127bd7d1520f7d215751643ae9365159861bf81ec4f84",
+        "size_bytes": 247784
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/The_Gate_of_Mahabalipuram.jpg",
+        "sha256": "b8717f9f84f17ae992a30b8be9ddbca2c9f81ec4c944b9f02d416755c2119bc4",
+        "size_bytes": 56874865
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/The_impeccable_marvel_at_mahabalipuram.jpg",
+        "sha256": "ad109dc261f12f424a426fb43f5d3a60c9eaec0b42ac79f0b9bc71e0f319e530",
+        "size_bytes": 440056
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/Well_at_the_Shore_temple.jpg",
+        "sha256": "bc49e69048325c0d9d4e3d24bec45bdf2a8b526a95172baf5a742c9eb88340d6",
+        "size_bytes": 2420545
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/_Aesthetic_low_angle_shot_of_Shore_Temple_complex_at_Mamallapuram_.JPG",
+        "sha256": "f418bf6c3f37b43541f6cd62fe1e3a4e81bf297781b877b4036d73f152861c2d",
+        "size_bytes": 5855117
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/mahabalipuram/_Temple_at_Mahabalipoor___from_Meyer_s_Universum__1841.jpg",
+        "sha256": "62b17061d19e9c2cb3fcb0abcfd535cd835f02311f4aec1696a7adcbdb230060",
+        "size_bytes": 101549
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/02MeenakshiTempleGopuram.jpg",
+        "sha256": "d42fe125600eae64a131f85edb3a94cc167078ef3b8957965f39cc623e433c14",
+        "size_bytes": 2130137
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/A_kingfisher_bird_near_the_gopurams_of_the_Madurai_Meenakshi_Temple__Madurai__Madurai_district__Tamil_Nadu__India__2018_.jpg",
+        "sha256": "c1b796df08f0f0ddcf16d700076a07bdca4c0c6563d410c9371668bcc8f18908",
+        "size_bytes": 1204325
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Distant_view_of_Meenakshi_temple.jpg",
+        "sha256": "28ae39b180eb2c379f7a2d937ca5d3e3c957345dd82941cfd8d90683a45cc4a8",
+        "size_bytes": 101203
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Elephant_at_Madurai_Meenakshi_temple.jpg",
+        "sha256": "f63577b91bb7ff71c0b67941a0492f9b4373710d6abc0127d7449c4e56bf12d4",
+        "size_bytes": 2471341
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/El_phant_dans_le_temple_de_Meenakshi__Madurai__Inde___13823403624_.jpg",
+        "sha256": "bab3ad55997c3e7f9c598d7df663a9cb6202224ee6132899a149b33ca8964111",
+        "size_bytes": 556909
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Goddess_Meenakshi_s_Own_Kingdom_.jpg",
+        "sha256": "79fba2f1986b3ac79f5e2425ef8bf88b1354f993a5d84a42a90d6d85085909dd",
+        "size_bytes": 6519578
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Goden_lotus_madurai_meenakshi_temple_TN_-_panoramio.jpg",
+        "sha256": "5f4823a519291ac561522fdf1c5075e59314d991adb87adb536730df1eb4886d",
+        "size_bytes": 2084056
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Gopuram-madurai.jpg",
+        "sha256": "25530b0f853339738d18ba9c809972f1c9a2a00be808793c0871860f2addae14",
+        "size_bytes": 110563
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Gopuram_Madurai.jpg",
+        "sha256": "189d96f376ee77a60c65847b22b529ed7a2e30987fb32ca5db2efcc7a8a6b120",
+        "size_bytes": 3202437
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Halwa_Pieces_and_Other_Snacks.JPG",
+        "sha256": "d13afcf02e8589f9965afa4fee2d3a7153724e667a66797da47253dda71ac201",
+        "size_bytes": 2006959
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/India_Meenakshi_Temple.jpg",
+        "sha256": "e6cec5dc871df97aa63cad646cf241939676f6e75ece21ee1a9ddbdc0cd727c5",
+        "size_bytes": 620948
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Kartikeya_on_Gopuram_in_the_Meenakshi_Temple_at_Madurai.jpg",
+        "sha256": "27946a95d672fccd23c59b63435e738742c30e0ab1d901595e0e1dec20be5903",
+        "size_bytes": 13981247
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Lotus_Tank__Sri_Meenakshi_Temple_-_panoramio.jpg",
+        "sha256": "b7a8cd1d93ca1020a57ea140172f443150da21c63579d2a027b594ba89ae23c6",
+        "size_bytes": 3761197
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Madhurai_meenakshi_temple.jpg",
+        "sha256": "6fd9b487fb682422764ce87e0f03205ee73d9d272fd3133ee39681601f944496",
+        "size_bytes": 4702331
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Madurai-04-Minakshi-Tempel-Bad-1976-gje.jpg",
+        "sha256": "8e8b2d504bb4a3e116a6e84386f19c5179fbeb23cc736625625f2098a51d0b86",
+        "size_bytes": 2284475
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Madurai_gopuram_sculptures.jpg",
+        "sha256": "b5582231691fade3585311f9812fc4ee4e1012f78a00e6d5a2f06051340cdee1",
+        "size_bytes": 1195383
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Madurai_meenachi_amman_temple.jpg",
+        "sha256": "4b378cbb394c41b58946688e395074cfaa420b1f1da20fa663a19172c56013a6",
+        "size_bytes": 3530409
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Madurai_si0677.jpg",
+        "sha256": "bfa12c32f699381e875ce8f2532c2fbf5ed8eac963a0d1a5f5bb0de6635e54e0",
+        "size_bytes": 239614
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Madurai_temple.jpg",
+        "sha256": "4a90ead139a5f781ea7db0766cbb137e541efd83f971cb8fd9a48ac011d0948c",
+        "size_bytes": 152361
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/MDU_Meenakshi_Amman_Temple.jpg",
+        "sha256": "0ca4d8df3df657feb205eb0ab9b7ab729bbc999f3618073a9e16cf6d56129e40",
+        "size_bytes": 4893949
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Meenakshi-Temple-bw.jpg",
+        "sha256": "ab7ed0e95056c7225af1345b95a368d7fbf014b34e074abf0219299491469afe",
+        "size_bytes": 281688
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Meenakshi_amman_potramarai.jpg",
+        "sha256": "fa43737fcf91b2a1ae2417ce50ab529deaac025c753100bb183320e7dcfec916",
+        "size_bytes": 1760678
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/MEENAKSHI_TEMPLE-VIEW_FROM_WEST_SIDE_TOWER.jpg",
+        "sha256": "c158bf3350c9f5c1c4e994b3543e53bcee26839530ec7c9d6aa0b03381c27d82",
+        "size_bytes": 12038097
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Mela_maasi_veedhi.jpg",
+        "sha256": "3894c2e8869ea7cd1cb15cfa20a023c5511677ea8fe972827f34455d20a2c081",
+        "size_bytes": 1804908
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Menakshi_Temple_11S.jpg",
+        "sha256": "eaf9f5409bb7c413a749894ff187ee8004a57d09bdf19f99e332ea51f95bf2e0",
+        "size_bytes": 7181799
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Nagara_Murasu_Mandapam_2.jpg",
+        "sha256": "053a75bdcc6dd1a4adc9dcd4cf2ee8cd62114a7241dd99c0a56589f1979edc1f",
+        "size_bytes": 3054845
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Poondhi.JPG",
+        "sha256": "5498ba4887ae6a22b1e8d9bd265e8e84b27db20480c0bfe8f0aade8252ce4576",
+        "size_bytes": 1795954
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Porthamarai2.jpg",
+        "sha256": "d875db4a932281b394a530a0b84d4ed1a0d6ac0d9996c6d3f36b58d5c6f6d1a8",
+        "size_bytes": 446014
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Pottukadalai_and_Other_Snacks.JPG",
+        "sha256": "09e65afe464710690806c64a7fd79ca14cc99152b7e75a0bbfe329f32b69be03",
+        "size_bytes": 2099895
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/Temple_de_M_n_ksh_01.jpg",
+        "sha256": "cbf97825ba921ac56bbb381868de3858146584577d44149509691c7b30bbc2e8",
+        "size_bytes": 2992040
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/The_Reverse_Blessing.jpg",
+        "sha256": "b9d1a131e2c786f0582ceca1e8a658f2e3d075e87c4a326156f51d5b7e2513ab",
+        "size_bytes": 704051
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/View_of_Golden_lotus_well__pottramarai_kulam__on_Festival_of_Lights_-_Navarathri_01.JPG",
+        "sha256": "adc7140330c1d2cbb2020ec3eaada150781e1ca25d0478fbe560d3e41f16f1ed",
+        "size_bytes": 4039293
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/_____________2.JPG",
+        "sha256": "b1d0b1e08863f5fa6c6809051b951d4360bd554ad23fe6bafa2a7e14e4e30b76",
+        "size_bytes": 1443940
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/meenakshi-amman/______________.png",
+        "sha256": "93118ae3735e4530322610ef2387393d29e7411b8aa803175d3bb04f9cd45a42",
+        "size_bytes": 439863
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Ceiling_and_Pillar_Work.jpg",
+        "sha256": "3ddd96bda7f4d0f641ff67f434bf11d3cf88935c9fb47c93e0a08b1aa6b2cc39",
+        "size_bytes": 3356943
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/GOPR2513.jpg",
+        "sha256": "8c9de5465815f3ec79f5faa16bc17f1efd1fcf2b2759097772c6519a84b2a69c",
+        "size_bytes": 8849312
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Inner_view_of_nayakar_mahal.jpg",
+        "sha256": "4051909ab3a17c96befb1cc9867e47541699b8ec580ce7dae5c2fbbd6e9af513",
+        "size_bytes": 1166485
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Nandhi_Silai.jpg",
+        "sha256": "a382207693555af948a88321a9214331a4f25fc2c567edf9b6fd027ae6fd02b5",
+        "size_bytes": 1052773
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Pillars_of_the_Palace__Madurai__India.jpg",
+        "sha256": "2ff215da07072fe943b18195e3398968b524facfd789bdb5f690e66c5943859b",
+        "size_bytes": 5200269
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Pillars_of_Thirumalai_Nayakkar_Mahal.JPG",
+        "sha256": "8de34909294a55f8ff47c30b4cbd7217bc96e81e170e13e5c464aef5a520577d",
+        "size_bytes": 1654151
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Raja_naicker_palace.jpg",
+        "sha256": "6280eb5abd608069914b5daf2c7fc2db7a736479a9fc89e52a9892c5563f3195",
+        "size_bytes": 1049228
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Rameswaram_harbour.jpg",
+        "sha256": "07a346043cc194418f7f7d4ea484c2bf22da00a2268559246ef99442b26bef14",
+        "size_bytes": 3336016
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/S-TN-23_Relaxedly_enjoying_the_Pillars_of_Thirumalai_Naicker_Palace.jpg",
+        "sha256": "7b929224618d724c81e95746ba90f01073a59d690d786cfc85596cc7b2d2b6cc",
+        "size_bytes": 10627517
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Sound_and_light_show_at_Tirumal_Naicker_Palace.JPG",
+        "sha256": "be519797b4a72d9fde717dd25a7b0b2aed818f542a129ebc8550ddee8993bd33",
+        "size_bytes": 681092
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/The_people_in_thirumalai_naiker_palace_at_the_19th_century.jpg",
+        "sha256": "d5b9e6a537b1bfba6c0e6ec07b8465a8eaedce0797fe8e893dfad71ab53fbfd0",
+        "size_bytes": 2885390
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Thirumalai-Nayak-Palace-Madurai-with-Ornamental-Ceilings.jpg",
+        "sha256": "ff0daa5abd22c2532a57ae88bf2fb1827f10c77a00824d1c740f68491eadd82d",
+        "size_bytes": 9558188
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Thirumalai_Naicker_Mahal_front_view_-_famous_monument_in_Madurai__Tamil_Nadu__India.jpg",
+        "sha256": "746ffcb2c4e727c878ee0f74d8554c8551b5ceda0aef1ec8cb500f7e5ce0f1de",
+        "size_bytes": 2348013
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/THIRUMALAI_NAICKER_MANDAPAM.jpg",
+        "sha256": "9f9ca053f408b515553902b50ea470038673eae4f335076116a016ac57dd2a98",
+        "size_bytes": 6279201
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/THIRUMALAI_NAYAKAR_MAHAL_ENTRANCE.JPG",
+        "sha256": "95abe4a936e4a8c1ceb8d7ca8237388b1d59c14101e98bf8a362fd1c80601e81",
+        "size_bytes": 4184811
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Thirumulai_Nayakkar_Palace__India.jpg",
+        "sha256": "f537f316587eff23c50bb60d16207cbdfcdfa3b8a503bbab78895b94caa7f2af",
+        "size_bytes": 2977112
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/TIRUMALAI_NAICKER_MANDAPAM.jpg",
+        "sha256": "8bb455e6a0aa0fbd9d1fe23c6766ecba05ef3e51075807052572f216eabb902f",
+        "size_bytes": 3355343
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/Tpalace11.jpg",
+        "sha256": "9d28809d9e82e58365ca1c974c07038867f140358fceba075814ab2dd4ecc326",
+        "size_bytes": 75944
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/View_of_Thirumalai_palace.jpg",
+        "sha256": "034b4980860a64826c38dbbd131d2b02c5ba8a5e411ff710f291aec1444fc23e",
+        "size_bytes": 79502
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Amazing_Architecture_of_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "4a62daf713f64d37d6de4dcada70df9458b5312b0a78e182b10a353cc78f9e41",
+        "size_bytes": 1479730
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Amazing_Art_in_the_roof_top_of_Thirumalai_Nayak_Palace_Dharbar_Hall_.JPG",
+        "sha256": "4fb402b9cee42df953bd676c93320743883d1e3bf03970ab68a41ccc59f4bca9",
+        "size_bytes": 1679024
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Amazing_beatiful_Constructions_of_Thirumalai_Nayak_Palace_Darbar_Hall_.JPG",
+        "sha256": "2de5bdc1f34b656a98131bbcdfb651021af7681137b96b529ea427ac1a26f8f1",
+        "size_bytes": 1851024
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Amazing_beauty_of_Roof_Works_in_Thirumalai_Nayak_Palace_Nadaga_Salai_.JPG",
+        "sha256": "a71351f07d077ef5946a25cac6684497180b63a6c34e707c494d8099d2bdedbf",
+        "size_bytes": 2012158
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Amazing_Light_and_Shade_Effect_in_Dharbar_Hall_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "2fca603ae650fba31d0616aa9741edeef2d05447ae80ba62247537aa771f319d",
+        "size_bytes": 1012801
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Amazing_Roof_of_of_Thirumalai_Nayak_Palace_Dharbar_Hall_.JPG",
+        "sha256": "a2d2c854e0150a98bb33b43ade107b6b35df82abaef73316e1975731a9747f8a",
+        "size_bytes": 1484905
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_An_Information_Board_in_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "1e19b0b5a2e47a6b43f1f31b6139557efe5ac491ee0e99eee653139223ab38bf",
+        "size_bytes": 1810253
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Artistic_Rows_of_Pillars_of_Dharbar_Hall_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "b12d84b644b86b34a87531e6608d40966dac59f689993702d715ac090d8119cc",
+        "size_bytes": 1429312
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_A_Beautiful_angle_of_Construction_of_Pillars_in_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "6b831e4dacfae1e9ac155d0832ebde2f3879f952639d6376dc5538945a1c3aea",
+        "size_bytes": 1271474
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_A_Beautiful_Low_Angle_of_Artistic_Pillars_of_Dharbar_Hall_of_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "86d6ac4cdc42b733226f6239a4bc557d44b0bd5e9e1813bc0feb5ea00a6e9ca3",
+        "size_bytes": 1291400
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_A_beautiful_scene_in_Dharbar_Hall_Thirumalai_Nayak_Palace_.JPG",
+        "sha256": "db7f39fc8f6f7bd70d2a49b46c0b63d0f5d2f6e9150eccc7a0988987512aaa19",
+        "size_bytes": 1154044
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_A_Low_Angle_of_Thirumalai_Nayak_Palace_Nadaga_Salai_.JPG",
+        "sha256": "1255a224d31aeea60b4280b4c91ec4d60f9e8c6c3f61e6739ea159a3d155410a",
+        "size_bytes": 1807113
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_A_Statue_Thirumalai_Nayak_.JPG",
+        "sha256": "ea8c46eccbb8a7f90a068bcdebf0fc8a3e39841f6dd525d993c0c82ce8f4502c",
+        "size_bytes": 2079540
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Name_board_Thirumalai_Nayak_Palace_Entrance_.JPG",
+        "sha256": "fb96171875983dc68a1c62114a24ce6bfd15d0fadced322edf03ae818dbddc9f",
+        "size_bytes": 1864785
+      },
+      {
+        "rel_path": "dataset/multiclass_v2/test/thirumalai-nayakkar/_Thirumalai_Nayak_Palace__-a_view_of_Darbar_Hall.JPG",
+        "sha256": "3a1be584c46ab0718ee9bfe0690ebf79fc582d58a2a0c339866239b2be140b85",
+        "size_bytes": 1255280
+      }
+    ]
+  }
+}

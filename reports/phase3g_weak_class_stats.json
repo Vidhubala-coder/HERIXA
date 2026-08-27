@@ -1,0 +1,73 @@
+{
+  "brihadeeswarar": {
+    "total_images": 409,
+    "splits": {
+      "train": 306,
+      "validation": 61,
+      "test": 42
+    },
+    "tag_counts": {
+      "front": 3,
+      "entrance": 6,
+      "side": 5,
+      "nandi": 2,
+      "mandapa": 4,
+      "vimana": 1
+    },
+    "avg_resolution": "3460x2795"
+  },
+  "airavatesvara": {
+    "total_images": 407,
+    "splits": {
+      "train": 305,
+      "validation": 61,
+      "test": 41
+    },
+    "tag_counts": {
+      "entrance": 7,
+      "detail": 5,
+      "front": 3,
+      "side": 1,
+      "mandapa": 1
+    },
+    "avg_resolution": "3996x2936"
+  },
+  "gangaikonda-cholapuram": {
+    "total_images": 395,
+    "splits": {
+      "train": 296,
+      "validation": 59,
+      "test": 40
+    },
+    "tag_counts": {
+      "side": 13,
+      "sculpture": 45,
+      "detail": 1,
+      "entrance": 17,
+      "front": 6,
+      "mandapa": 2,
+      "vimana": 1,
+      "nandi": 11
+    },
+    "avg_resolution": "3984x3202"
+  },
+  "hard_negatives": {
+    "total_images": 216,
+    "splits": {
+      "train": 162,
+      "validation": 32,
+      "test": 22
+    },
+    "tag_counts": {
+      "vimana": 4,
+      "gopuram": 35,
+      "wall": 1,
+      "entrance": 9,
+      "crop": 1,
+      "chola": 1,
+      "dravidian": 1,
+      "sculpture": 1
+    },
+    "avg_resolution": "2446x2145"
+  }
+}
