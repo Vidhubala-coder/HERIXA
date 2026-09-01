@@ -1,0 +1,9 @@
+{
+  "total_images": 362,
+  "records": [
+    {
+      "filename": "1-Airavatesvara_Temple_-_Darasuram_-_Tamilnadu_-_Detail_of_the_perimeter_wall.jpg",
+      "ground_truth": "Airavatesvara",
+      "pred_g": "Brihadeeswarar",
+      "conf_g": 0.8198735117912292,
+      "margin_g": 

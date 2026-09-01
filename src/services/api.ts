@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Constants = require('expo-constants')?.default || require('expo-constants');
 
@@ -24,6 +25,7 @@ let connectivityVersion = 0;
 let lastLanIp: string | undefined = undefined;
 let lastApiUrl: string | undefined = undefined;
 let lastAndroidDevMode: string | undefined = undefined;
+let lastLoggedConfigKey = '';
 
 // General GET request deduplication map
 const activeRequests = new Map<string, Promise<any>>();
@@ -116,7 +118,8 @@ export const isStaleOrLoopback = (ipOrUrl: string | undefined | null): boolean =
   return (
     lower.includes('localhost') ||
     lower.includes('127.0.0.1') ||
-    lower.includes('10.254.129.241')
+    lower.includes('10.254.129.241') ||
+    lower.includes('10.197.4.241')
   );
 };
 
@@ -142,6 +145,13 @@ export const getApiUrl = (): string => {
   }
 
   const configuredUrl = currentApiUrl || 'http://localhost:5000';
+  
+  // If EXPO_PUBLIC_API_URL is configured with an HTTPS production domain, bypass dev LAN probing
+  if (configuredUrl.startsWith('https://')) {
+    resolvedApiUrl = configuredUrl;
+    return configuredUrl;
+  }
+
   const portMatch = configuredUrl.match(/:(\d+)\/?$/) || configuredUrl.match(/:(\d+)/);
   const port = portMatch ? portMatch[1] : '5000';
 
@@ -185,9 +195,13 @@ export const getApiUrl = (): string => {
   
   const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
   if (isDev) {
-    console.log(`[HERIXA-API] Platform: ${Platform.OS}`);
-    console.log(`[HERIXA-API] Android mode: ${resolvedMode} (configured: ${devMode})`);
-    console.log(`[HERIXA-API] Resolved Base URL: ${finalUrl}`);
+    const configKey = `${Platform.OS}:${resolvedMode}:${finalUrl}`;
+    if (configKey !== lastLoggedConfigKey) {
+      lastLoggedConfigKey = configKey;
+      console.log(`[HERIXA-API] Platform: ${Platform.OS}`);
+      console.log(`[HERIXA-API] Android mode: ${resolvedMode} (configured: ${devMode})`);
+      console.log(`[HERIXA-API] Resolved Base URL: ${finalUrl}`);
+    }
   }
 
   return finalUrl;
@@ -210,6 +224,7 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
   const startVersion = connectivityVersion;
 
   activeHealthCheck = (async () => {
+    console.log('[HERIXA-NETWORK] Health check started');
     const configuredUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
     const portMatch = configuredUrl.match(/:(\d+)\/?$/) || configuredUrl.match(/:(\d+)/);
     const port = portMatch ? portMatch[1] : '5000';
@@ -219,7 +234,9 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
 
     const candidates: string[] = [];
 
-    if (Platform.OS === 'android' && resolvedMode === 'physical') {
+    if (configuredUrl.startsWith('https://')) {
+      candidates.push(configuredUrl);
+    } else if (Platform.OS === 'android' && resolvedMode === 'physical') {
       // 1. EXPO_PUBLIC_LAN_IP
       if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
         candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
@@ -303,16 +320,13 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
       console.log(`[HERIXA-API] Connectivity status: available`);
       console.log(`[HERIXA-API] Last connectivity failure: ${lastConnectivityFailure}`);
       console.log(`[HERIXA-API] HTTP status: 200`);
+      console.log(`[HERIXA-NETWORK] Backend URL: ${foundUrl}`);
+      console.log('[HERIXA-NETWORK] Health check success');
       
       return true;
     } else {
-      if (hadGenuineNetworkFailure) {
-        resolvedApiUrl = null;
-        setConnectivityState('unavailable');
-      } else {
-        // Keep existing resolved URL (never set to null on transient timeout/cancellation) and reset state to unknown so next call can retry
-        setConnectivityState('unknown');
-      }
+      resolvedApiUrl = null;
+      setConnectivityState('unavailable');
       lastHealthCheckTime = Date.now();
       lastConnectivityFailure = new Date().toLocaleString();
       lastHttpErrorDetails = lastStatus;
@@ -322,6 +336,8 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
       console.log(`[HERIXA-API] Connectivity status: ${connectivityState}`);
       console.log(`[HERIXA-API] Last connectivity failure: ${lastConnectivityFailure}`);
       console.log(`[HERIXA-API] HTTP status: ${lastHttpErrorDetails}`);
+      console.log('[HERIXA-NETWORK] Health check failed');
+      console.log('[HERIXA-NETWORK] Backend unreachable');
       
       return false;
     }
@@ -365,6 +381,27 @@ export const apiFetch = async (
       await checkConnectivity();
     }
 
+    const now = Date.now();
+    if (connectivityState === 'unavailable' && !shouldBypass) {
+      if (now - lastHealthCheckTime < HEALTH_CHECK_COOLDOWN) {
+        console.log('[HERIXA-NETWORK] Backend unreachable');
+        const detailedMessage = 'Unable to connect to the backend API service (Offline mode cooldown).';
+        const netError: ApiError = new Error(detailedMessage);
+        netError.isNetworkError = true;
+        throw netError;
+      } else {
+        console.log('[HERIXA-NETWORK] Offline cooldown expired. Retrying connection check...');
+        const available = await checkConnectivity(true);
+        if (!available) {
+          console.log('[HERIXA-NETWORK] Backend unreachable');
+          const detailedMessage = 'Unable to connect to the backend API service (Backend still unreachable).';
+          const netError: ApiError = new Error(detailedMessage);
+          netError.isNetworkError = true;
+          throw netError;
+        }
+      }
+    }
+
     const controller = new AbortController();
     
     if (options.signal) {
@@ -391,6 +428,35 @@ export const apiFetch = async (
       const isFormData = options.body && typeof (options.body as any).append === 'function';
       if (!isFormData) {
         headers['Content-Type'] = 'application/json';
+      }
+
+      // Auto-attach stored authentication token and user ID if not explicitly set
+      try {
+        const passedHeaders = options.headers || {};
+        let storedToken: string | null = null;
+        if (!(passedHeaders as any)['Authorization']) {
+          storedToken = await AsyncStorage.getItem('auth_token');
+          if (storedToken) {
+            headers['Authorization'] = `Bearer ${storedToken}`;
+          }
+        }
+        if (!(passedHeaders as any)['x-user-id']) {
+          let targetUserId: string | null = null;
+          if (storedToken && storedToken.includes('.')) {
+            const parts = storedToken.split('.');
+            if (parts.length === 2 && parts[0] && parts[0].length === 24) {
+              targetUserId = parts[0];
+            }
+          }
+          if (!targetUserId) {
+            targetUserId = await AsyncStorage.getItem('active_user_id');
+          }
+          if (targetUserId) {
+            headers['x-user-id'] = targetUserId;
+          }
+        }
+      } catch (_) {
+        // Ignore storage read failures
       }
 
       const response = await fetch(url, {
@@ -452,10 +518,12 @@ export const apiFetch = async (
         finalError.isTimeout = true;
         finalError.status = 408;
         logResult = 'TIMEOUT';
+        console.log('[HERIXA-NETWORK] Request timeout');
       } else if (isAbort && options.signal?.aborted) {
         finalError = new Error('Operation was cancelled.');
         finalError.isCancelled = true;
         logResult = 'CANCELLED';
+        console.log('[HERIXA-NETWORK] Request cancelled');
       } else {
         finalError = error;
         logResult = error.message || 'unknown';
@@ -482,6 +550,7 @@ export const apiFetch = async (
           );
 
         if (isNetwork) {
+          console.log('[HERIXA-NETWORK] Backend unreachable');
           if (startVersion === connectivityVersion) {
             setConnectivityState('unavailable');
             lastHealthCheckTime = Date.now();

@@ -31,6 +31,7 @@ export const BORDER_RADIUS = {
   lg: 12,
   xl: 20,
   xxl: 30,
+  full: 999,
 };
 
 export const TYPOGRAPHY = {

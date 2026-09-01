@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, View, Text, ActivityIndicator, TouchableOpacity, Platform, UIManager, Image, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,7 +10,7 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 import { MONUMENTS } from '../data/monuments';
 import { MainTabParamList, RootStackParamList } from '../navigation/types';
-import { getMonumentById, ApiMonument, recognizeMonumentFromImage, recognizeMonumentFromMultiView, ImageRecognitionResponse } from '../services/monumentService';
+import { getMonumentById, ApiMonument, recognizeMonumentFromImage, recognizeMonumentFromMultiView, ImageRecognitionResponse, getAiRecognitionHealth } from '../services/monumentService';
 import { ApiError } from '../services/api';
 import { useFavorites } from '../context/FavoritesContext';
 
@@ -32,17 +33,13 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { askVoiceAssistant } from '../services/voiceAssistantService';
 import { textToSpeechService } from '../services/textToSpeechService';
+import { detectARCapability, ARCapability } from '../services/arCapabilityService';
 
-type ARScannerScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, 'AR'>,
-  NativeStackNavigationProp<RootStackParamList>
->;
-
-type ARScannerScreenRouteProp = RouteProp<MainTabParamList, 'AR'>;
+type ARScannerScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface ARScannerScreenProps {
   navigation: ARScannerScreenNavigationProp;
-  route: ARScannerScreenRouteProp;
+  route: any;
 }
 
 interface ScanEvidence {
@@ -81,6 +78,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
   const [monument, setMonument] = useState<ApiMonument | null>(null);
   const [isMonumentLoading, setIsMonumentLoading] = useState(false);
   const [arCapability, setArCapability] = useState<ARCapabilityStatus>('initializing');
+  const [arCapabilityStatus, setArCapabilityStatus] = useState<ARCapability | 'initializing'>('initializing');
   const [arCapabilityResult, setArCapabilityResult] = useState<ARCapabilityResult | null>(null);
   const [scannerMode, setScannerMode] = useState<'ai' | 'ar'>('ai');
   const [arConfigs, setArConfigs] = useState<MonumentARConfig[]>([]);
@@ -101,6 +99,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [scanMode, setScanMode] = useState<'single' | 'multiview'>('single');
   const [scanEvidence, setScanEvidence] = useState<ScanEvidence[]>([]);
+  const [aiReadiness, setAiReadiness] = useState<'unchecking' | 'preparing' | 'ready' | 'unavailable'>('unchecking');
   
   // Voice Tour Guide States
   const [isNarrating, setIsNarrating] = useState(false);
@@ -108,6 +107,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
   const hasSpokenForMonumentIdRef = useRef<string | null>(null);
   const cameraRef = useRef<CameraView>(null);
   const isScanningRef = useRef(false);
+  const isRecognizingRef = useRef(false);
   const cooldownActiveRef = useRef(false);
   const recognitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -138,6 +138,9 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
   useEffect(() => {
     const initializeAR = async () => {
       try {
+        const mappedStatus = await detectARCapability();
+        setArCapabilityStatus(mappedStatus);
+
         const result = await checkARCapability();
         setArCapabilityResult(result);
         
@@ -160,9 +163,75 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
         setArConfigs(loaded.filter((c): c is MonumentARConfig => c !== null));
       } catch (err) {
         setArCapability('error');
+        setArCapabilityStatus('UNKNOWN');
       }
     };
     initializeAR();
+  }, []);
+
+  // 1b. Check and poll AI Service readiness
+  useEffect(() => {
+    let pollIntervalId: NodeJS.Timeout | null = null;
+    const localAbortController = new AbortController();
+
+    const checkHealthOnce = async () => {
+      try {
+        const response = await getAiRecognitionHealth({ signal: localAbortController.signal });
+        if (response && response.success && response.ai_recognition) {
+          const status = response.ai_recognition.status;
+          if (status === 'READY') {
+            if (isMountedRef.current) {
+              setAiReadiness('ready');
+              console.log('[HERIXA-AI] Frontend readiness check: READY');
+            }
+            if (pollIntervalId) {
+              clearInterval(pollIntervalId);
+              pollIntervalId = null;
+            }
+          } else if (status === 'INITIALIZING') {
+            if (isMountedRef.current) {
+              setAiReadiness('preparing');
+              console.log('[HERIXA-AI] Frontend readiness check: PREPARING');
+            }
+            if (!pollIntervalId) {
+              pollIntervalId = setInterval(checkHealthOnce, 2000);
+            }
+          } else {
+            if (isMountedRef.current) {
+              setAiReadiness('unavailable');
+              console.log('[HERIXA-AI] Frontend readiness check: UNAVAILABLE');
+            }
+            if (!pollIntervalId) {
+              pollIntervalId = setInterval(checkHealthOnce, 3000);
+            }
+          }
+        } else {
+          if (isMountedRef.current) {
+            setAiReadiness('unavailable');
+          }
+          if (!pollIntervalId) {
+            pollIntervalId = setInterval(checkHealthOnce, 3000);
+          }
+        }
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+        if (isMountedRef.current) {
+          setAiReadiness('unavailable');
+        }
+        if (!pollIntervalId) {
+          pollIntervalId = setInterval(checkHealthOnce, 3000);
+        }
+      }
+    };
+
+    checkHealthOnce();
+
+    return () => {
+      localAbortController.abort();
+      if (pollIntervalId) {
+        clearInterval(pollIntervalId);
+      }
+    };
   }, []);
 
 
@@ -337,6 +406,12 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
   };
 
   const runLocalFallbackRecognition = async () => {
+    if (isScanningRef.current || isRecognizingRef.current) {
+      console.log('[AR DEBUG] Local fallback recognition skipped — scan already in progress');
+      return;
+    }
+    isScanningRef.current = true;
+    isRecognizingRef.current = true;
     console.log('[AR DEBUG] Running local fallback recognition...');
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -354,6 +429,9 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
     } catch (err) {
       console.error('[AR DEBUG] Local fallback recognition failed:', err);
       setAnalysisError('Local recognition failed.');
+    } finally {
+      isScanningRef.current = false;
+      isRecognizingRef.current = false;
     }
   };
 
@@ -399,7 +477,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
       return;
     }
 
-    if (isScanningRef.current) {
+    if (isScanningRef.current || isRecognizingRef.current) {
       console.log('[HERITAGEAR] AI scan request skipped — scan already in progress');
       return;
     }
@@ -411,6 +489,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
     }
 
     isScanningRef.current = true;
+    isRecognizingRef.current = true;
     console.log('[HERIXA-RECOGNITION] REQUEST_STARTED RetryAttempt: 0');
     console.log('[HERITAGEAR] Scan started');
     
@@ -467,7 +546,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
         console.log('[AR DEBUG] Starting recognition request');
         let result: ImageRecognitionResponse | null = null;
         let attempt = 0;
-        const maxRetries = 2; // maximum 2 retries (total maximum attempts: 3)
+        const maxRetries = 0; // No client-side retries, backend handles it
 
         if (abortControllerRef.current) {
           abortControllerRef.current.abort();
@@ -620,17 +699,32 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
       }
 
       if (isMountedRef.current) {
+        const errMsg = err.message || String(err);
+        const isTechnical = errMsg.includes('ECONNREFUSED') || 
+                            errMsg.includes('localhost') || 
+                            errMsg.includes('127.0.0.1') || 
+                            errMsg.includes('FastAPI') || 
+                            errMsg.includes('Failed to fetch') ||
+                            err.status === 503 || 
+                            err.status === 502 || 
+                            err.status === 504;
+        
         if (isCancelled) {
           setAnalysisError('Recognition request was interrupted. Please try again.');
         } else if (isTimeout) {
           setAnalysisError('Recognition is taking longer than expected. Please try again.');
-        } else if (err.status === 401 || err.status === 429 || err.status === 502 || err.status === 503 || err.status === 504) {
+        } else if (err.status === 401 || err.status === 429) {
           setAnalysisError('HERIXA recognition service is temporarily unavailable. Please try again.');
+        } else if (isTechnical || err.errorDetails === 'MODEL_UNAVAILABLE') {
+          setAnalysisError('HERIXA recognition service is temporarily unavailable. Please try again.');
+        } else if (err.errorDetails === 'MODEL_INITIALIZING') {
+          setAnalysisError('HERIXA AI is preparing. Please wait a moment.');
         } else {
-          setAnalysisError(err.message || 'Please check your internet connection and try again.');
+          setAnalysisError('HERIXA couldn\'t recognize this monument. Please try another view.');
         }
       }
     } finally {
+      isRecognizingRef.current = false;
       if (isMountedRef.current) {
         setIsAnalyzing(false);
         isScanningRef.current = false;
@@ -719,7 +813,13 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
       return;
     }
 
+    if (isScanningRef.current || isRecognizingRef.current) {
+      console.log('[HERITAGEAR] Multi-view scan request skipped — scan already in progress');
+      return;
+    }
+
     isScanningRef.current = true;
+    isRecognizingRef.current = true;
     console.log('[HERIXA-RECOGNITION] REQUEST_STARTED RetryAttempt: 0');
     setAnalysisError(null);
     setIsAnalyzing(true);
@@ -757,7 +857,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
       console.log('[AR DEBUG] Starting multi-view recognition call');
       let result: ImageRecognitionResponse | null = null;
       let attempt = 0;
-      const maxRetries = 2; // maximum 2 retries (total maximum attempts: 3)
+      const maxRetries = 0; // No client-side retries, backend handles it
 
       while (attempt <= maxRetries) {
         try {
@@ -890,17 +990,32 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
       }
 
       if (isMountedRef.current) {
+        const errMsg = err.message || String(err);
+        const isTechnical = errMsg.includes('ECONNREFUSED') || 
+                            errMsg.includes('localhost') || 
+                            errMsg.includes('127.0.0.1') || 
+                            errMsg.includes('FastAPI') || 
+                            errMsg.includes('Failed to fetch') ||
+                            err.status === 503 || 
+                            err.status === 502 || 
+                            err.status === 504;
+        
         if (isCancelled) {
           setAnalysisError('Recognition request was interrupted. Please try again.');
         } else if (isTimeout) {
           setAnalysisError('Recognition is taking longer than expected. Please try again.');
-        } else if (err.status === 401 || err.status === 429 || err.status === 502 || err.status === 503 || err.status === 504) {
+        } else if (err.status === 401 || err.status === 429) {
           setAnalysisError('HERIXA recognition service is temporarily unavailable. Please try again.');
+        } else if (isTechnical || err.errorDetails === 'MODEL_UNAVAILABLE') {
+          setAnalysisError('HERIXA recognition service is temporarily unavailable. Please try again.');
+        } else if (err.errorDetails === 'MODEL_INITIALIZING') {
+          setAnalysisError('HERIXA AI is preparing. Please wait a moment.');
         } else {
-          setAnalysisError(err.message || 'Please check your internet connection and try again.');
+          setAnalysisError('HERIXA couldn\'t recognize this monument. Please try another view.');
         }
       }
     } finally {
+      isRecognizingRef.current = false;
       setIsAnalyzing(false);
       isScanningRef.current = false;
     }
@@ -925,7 +1040,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      navigation.navigate('Home');
+      navigation.navigate('Main', { screen: 'Home' });
     }
   };
 
@@ -933,7 +1048,7 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
-      navigation.navigate('Home');
+      navigation.navigate('Main', { screen: 'Home' });
     }
   };
 
@@ -1047,6 +1162,38 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
 
   const isRealARActive = arCapabilityResult?.supported && scannerMode === 'ar' && !isPreviewMode && permission?.granted;
   const activeConfig = arConfigs.find((c) => c.monumentId === monument?.id);
+  const isAiReady = aiReadiness === 'ready';
+  const isAiPreparing = aiReadiness === 'preparing' || aiReadiness === 'unchecking';
+
+  if (arCapabilityStatus === 'initializing') {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.gold} />
+        <Text style={styles.loadingText}>Initializing AR Scanner...</Text>
+      </View>
+    );
+  }
+
+  if (arCapabilityStatus === 'UNSUPPORTED' || arCapabilityStatus === 'UNKNOWN') {
+    return (
+      <SafeAreaView style={styles.onboardingContainer}>
+        <View style={styles.onboardingContent}>
+          <Feather name="layers" size={80} color={COLORS.gold} style={styles.onboardingIcon} />
+          <Text style={styles.onboardingTitle}>Smart Scan Mode</Text>
+          <Text style={styles.onboardingDescription}>
+            Your device doesn't support native AR, but you can still scan monuments using AI and explore them in 3D.
+          </Text>
+          <TouchableOpacity
+            style={styles.onboardingButton}
+            onPress={() => navigation.navigate('Main', { screen: 'SmartScan' })}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.onboardingButtonText}>START SMART SCAN</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -1088,6 +1235,19 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
             scannerMode === 'ar' && styles.activeModeTabText,
             !arCapabilityResult?.supported && styles.disabledModeTabText
           ]}>AR MODE</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.modeTab}
+          onPress={() => {
+            navigation.navigate('HeritageAssistant');
+          }}
+          activeOpacity={0.8}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="message-circle" size={14} color="rgba(255, 255, 255, 0.6)" style={{ marginRight: 6 }} />
+            <Text style={styles.modeTabText}>HERIXA AI</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -1281,28 +1441,47 @@ export const ARScannerScreen: React.FC<ARScannerScreenProps> = ({ navigation, ro
                 <TouchableOpacity
                   style={[
                     styles.scanBtn,
-                    scanMode === 'multiview' && scanEvidence.length >= 5 && { backgroundColor: COLORS.surfaceLight, opacity: 0.5 }
+                    (scanMode === 'multiview' && scanEvidence.length >= 5) && { backgroundColor: COLORS.surfaceLight, opacity: 0.5 },
+                    !isAiReady && { backgroundColor: '#555', opacity: 0.7 }
                   ]}
                   onPress={runFallbackRecognition}
-                  disabled={scanMode === 'multiview' && scanEvidence.length >= 5}
+                  disabled={(scanMode === 'multiview' && scanEvidence.length >= 5) || !isAiReady}
                   activeOpacity={0.8}
                 >
-                  <Feather name="camera" size={18} color={COLORS.background} style={{ marginRight: 8 }} />
+                  {isAiPreparing ? (
+                    <ActivityIndicator size="small" color={COLORS.background} style={{ marginRight: 8 }} />
+                  ) : (
+                    <Feather name={isAiReady ? "camera" : "alert-triangle"} size={18} color={COLORS.background} style={{ marginRight: 8 }} />
+                  )}
                   <Text style={styles.scanBtnText}>
-                    {scanMode === 'single'
-                      ? 'SCAN MONUMENT'
-                      : `CAPTURE VIEW (${scanEvidence.length}/5)`}
+                    {isAiPreparing 
+                      ? 'Preparing HERIXA AI...' 
+                      : !isAiReady 
+                        ? 'HERIXA AI Unavailable' 
+                        : scanMode === 'single'
+                          ? 'SCAN MONUMENT'
+                          : `CAPTURE VIEW (${scanEvidence.length}/5)`}
                   </Text>
                 </TouchableOpacity>
 
                 {scanMode === 'multiview' && scanEvidence.length >= 2 && (
                   <TouchableOpacity
-                    style={styles.analyzeBtn}
+                    style={[
+                      styles.analyzeBtn,
+                      !isAiReady && { backgroundColor: '#555', opacity: 0.7 }
+                    ]}
                     onPress={runMultiViewAnalysis}
+                    disabled={!isAiReady}
                     activeOpacity={0.8}
                   >
-                    <Feather name="zap" size={16} color={COLORS.background} style={{ marginRight: 6 }} />
-                    <Text style={styles.analyzeBtnText}>ANALYZE VIEWS</Text>
+                    {isAiPreparing ? (
+                      <ActivityIndicator size="small" color={COLORS.background} style={{ marginRight: 6 }} />
+                    ) : (
+                      <Feather name={isAiReady ? "zap" : "alert-triangle"} size={16} color={COLORS.background} style={{ marginRight: 6 }} />
+                    )}
+                    <Text style={styles.analyzeBtnText}>
+                      {isAiPreparing ? 'Preparing AI...' : !isAiReady ? 'AI Unavailable' : 'ANALYZE VIEWS'}
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -1736,6 +1915,66 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
     lineHeight: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    ...TYPOGRAPHY.bodyMedium,
+    marginTop: SPACING.md,
+  },
+  onboardingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  onboardingContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.lg,
+  },
+  onboardingIcon: {
+    marginBottom: SPACING.xl,
+    opacity: 0.9,
+  },
+  onboardingTitle: {
+    color: COLORS.textPrimary,
+    ...TYPOGRAPHY.h1,
+    fontWeight: '700',
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  onboardingDescription: {
+    color: COLORS.textSecondary,
+    ...TYPOGRAPHY.bodyMedium,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: SPACING.xl * 1.5,
+  },
+  onboardingButton: {
+    backgroundColor: COLORS.gold,
+    height: 48,
+    borderRadius: BORDER_RADIUS.md,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  onboardingButtonText: {
+    color: COLORS.background,
+    ...TYPOGRAPHY.button,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
 });
 

@@ -122,6 +122,22 @@ export interface IReferenceImage {
   licenseUrl?: string;
 }
 
+export interface IHeritagePreviewImage {
+  id?: string;
+  _id?: string;
+  uri: string;
+  viewType: string;
+  title: string;
+  description?: string;
+  caption?: string;
+  category?: 'Exterior' | 'Entrance' | 'Gopuram' | 'Vimana' | 'Mandapam' | 'Sculptures' | 'Inscriptions' | 'Interior' | 'Courtyard' | 'Architecture' | 'Historical View' | 'Cultural Detail' | 'Other';
+  order: number;
+  displayOrder?: number;
+  enabled: boolean;
+  featured?: boolean;
+  visible?: boolean;
+}
+
 export interface IMonument extends Document {
   historySections?: IHistorySection[];
   historicalImages?: IMonumentImage[];
@@ -130,6 +146,12 @@ export interface IMonument extends Document {
   restorationImages?: IMonumentImage[];
   sculptureImages?: IMonumentImage[];
   inscriptionImages?: IMonumentImage[];
+  heritagePreviewImages?: IHeritagePreviewImage[];
+  coverImageUrl?: string;
+  interactivePreviewEnabled?: boolean;
+  modelUrl?: string;
+
+
   name: string;
   slug: string;
   location: string;
@@ -424,7 +446,26 @@ const ReferenceImageSchema = new Schema<IReferenceImage>({
   licenseUrl: { type: String }
 }, { _id: false });
 
+const HeritagePreviewImageSchema = new Schema<IHeritagePreviewImage>({
+  uri: { type: String, required: true },
+  viewType: { type: String, required: true },
+  title: { type: String, required: true },
+  description: { type: String },
+  caption: { type: String },
+  category: {
+    type: String,
+    enum: ['Exterior', 'Entrance', 'Gopuram', 'Vimana', 'Mandapam', 'Sculptures', 'Inscriptions', 'Interior', 'Courtyard', 'Architecture', 'Historical View', 'Cultural Detail', 'Gallery', 'Other'],
+    default: 'Exterior'
+  },
+  order: { type: Number, required: true, default: 0 },
+  displayOrder: { type: Number, default: 0 },
+  enabled: { type: Boolean, required: true, default: true },
+  featured: { type: Boolean, default: false },
+  visible: { type: Boolean, default: true }
+});
+
 const MonumentSchema = new Schema<IMonument>({
+
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, trim: true, index: true },
   location: { type: String, required: true, trim: true },
@@ -633,6 +674,10 @@ const MonumentSchema = new Schema<IMonument>({
   restorationImages: { type: [MonumentImageSchema], default: [] },
   sculptureImages: { type: [MonumentImageSchema], default: [] },
   inscriptionImages: { type: [MonumentImageSchema], default: [] },
+  heritagePreviewImages: { type: [HeritagePreviewImageSchema], default: [] },
+  coverImageUrl: { type: String, trim: true },
+  interactivePreviewEnabled: { type: Boolean, default: true },
+  modelUrl: { type: String, trim: true },
 }, {
   timestamps: true
 });

@@ -82,6 +82,11 @@ const updateEnvFile = () => {
     envContent = fs.readFileSync(envPath, 'utf8');
   }
 
+  if (envContent.includes('EXPO_PUBLIC_API_URL=https://')) {
+    console.log('[HERIXA-IP] Production HTTPS API URL detected in .env; skipping local LAN IP override.');
+    return;
+  }
+
   // Check if EXPO_PUBLIC_LAN_IP is present in env file
   if (envContent.includes('EXPO_PUBLIC_LAN_IP=')) {
     envContent = envContent.replace(/EXPO_PUBLIC_LAN_IP=.*/g, `EXPO_PUBLIC_LAN_IP=${localIp}`);
@@ -89,8 +94,16 @@ const updateEnvFile = () => {
     envContent += `\nEXPO_PUBLIC_LAN_IP=${localIp}`;
   }
 
+  // Check if EXPO_PUBLIC_API_URL is present in env file
+  if (envContent.includes('EXPO_PUBLIC_API_URL=')) {
+    envContent = envContent.replace(/EXPO_PUBLIC_API_URL=http:\/\/[\d\.]+:(\d+)/g, `EXPO_PUBLIC_API_URL=http://${localIp}:$1`);
+    envContent = envContent.replace(/EXPO_PUBLIC_API_URL=http:\/\/localhost:(\d+)/g, `EXPO_PUBLIC_API_URL=http://${localIp}:$1`);
+  } else {
+    envContent += `\nEXPO_PUBLIC_API_URL=http://${localIp}:5000`;
+  }
+
   fs.writeFileSync(envPath, envContent, 'utf8');
-  console.log(`[HERIXA-IP] Updated .env file with EXPO_PUBLIC_LAN_IP=${localIp}`);
+  console.log(`[HERIXA-IP] Updated .env file with EXPO_PUBLIC_LAN_IP=${localIp} and EXPO_PUBLIC_API_URL`);
   
   runAdbReverse();
 };

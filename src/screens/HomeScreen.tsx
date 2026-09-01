@@ -107,11 +107,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         </View>
         <TouchableOpacity
           style={styles.headerARButton}
-          onPress={() => navigation.navigate('AR')}
+          onPress={() => navigation.navigate('Main', { screen: 'SmartScan' })}
           activeOpacity={0.8}
         >
-          <Feather name="aperture" size={16} color={COLORS.background} style={{ marginRight: 6 }} />
-          <Text style={styles.headerARButtonText}>SCAN IN AR</Text>
+          <Feather name="camera" size={16} color={COLORS.background} style={{ marginRight: 6 }} />
+          <Text style={styles.headerARButtonText}>SMART SCAN</Text>
         </TouchableOpacity>
       </View>
 
@@ -123,7 +123,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.heroTagline}>PRESERVE & EXPLORE</Text>
             <Text style={styles.heroTitle}>Discover India's Heritage</Text>
             <Text style={styles.heroSubtitle}>
-              Explore ancient monuments through immersive Augmented Reality and intelligent digital assistance.
+              Explore ancient monuments through visual preview and intelligent digital assistance.
             </Text>
           </View>
           
@@ -139,10 +139,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <TouchableOpacity
               style={styles.heroSecondaryCTA}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('AR')}
+              onPress={() => navigation.navigate('Main', { screen: 'SmartScan' })}
             >
-              <Feather name="aperture" size={16} color={COLORS.gold} style={{ marginRight: 6 }} />
-              <Text style={styles.heroSecondaryCTAText}>Scan in AR</Text>
+              <Feather name="camera" size={16} color={COLORS.gold} style={{ marginRight: 6 }} />
+              <Text style={styles.heroSecondaryCTAText}>Smart Scan</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -184,7 +184,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </View>
 
           {/* Card 3 */}
-          <View style={styles.offerCard}>
+          <TouchableOpacity
+            style={styles.offerCard}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('HeritageAssistant' as any)}
+          >
             <View style={styles.offerIconWrapper}>
               <Feather name="cpu" size={20} color={COLORS.gold} />
             </View>
@@ -192,7 +196,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.offerCardDesc}>
               Ask questions and learn more about India's cultural heritage with intelligent assistance.
             </Text>
-          </View>
+          </TouchableOpacity>
 
           {/* Card 4 */}
           <View style={styles.offerCard}>

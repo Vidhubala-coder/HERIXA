@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, StatusBar, ActivityIndicator } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { COLORS, SPACING, TYPOGRAPHY } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
@@ -31,12 +32,32 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
       }),
     ]).start();
 
-    // Navigate to Main tabs after 2.5s
-    const timer = setTimeout(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main', params: { screen: 'Home' } }],
-      });
+    // Navigate based on role after 2.8s
+    const timer = setTimeout(async () => {
+      try {
+        const storedRole = await AsyncStorage.getItem('user_role');
+        const storedId = await AsyncStorage.getItem('active_user_id');
+        const storedToken = await AsyncStorage.getItem('auth_token');
+
+        // Only redirect to admin if we have a full valid session
+        if (storedRole === 'admin' && storedId && storedToken) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'AdminPortal' }],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Main', params: { screen: 'Home' } }],
+          });
+        }
+      } catch {
+        // Fallback on any storage error
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main', params: { screen: 'Home' } }],
+        });
+      }
     }, 2800);
 
     return () => clearTimeout(timer);

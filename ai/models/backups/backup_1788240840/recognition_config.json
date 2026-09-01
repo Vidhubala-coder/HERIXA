@@ -1,0 +1,44 @@
+{
+  "model_version": "hybrid_3g_3l",
+  "hybrid_strategy": "3G Preferred (0.10)",
+  "model_format": "onnx",
+  "checkpoint": "best_model_multiclass_v2.pth",
+  "class_mapping": {
+    "0": "Brihadeeswarar",
+    "1": "Meenakshi-Amman",
+    "2": "Mahabalipuram",
+    "3": "Gangaikonda-Cholapuram",
+    "4": "Airavatesvara",
+    "5": "Thirumalai-Nayakkar",
+    "6": "Hard_Negatives"
+  },
+  "preprocessing": {
+    "image_size": 224,
+    "color_mode": "RGB",
+    "normalization": {
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ]
+    },
+    "resize_method": "Resize((224, 224))",
+    "tensor_conversion": "ToTensor()"
+  },
+  "confidence_threshold": 0.35,
+  "class_thresholds": {
+    "Brihadeeswarar": 0.35,
+    "Meenakshi-Amman": 0.35,
+    "Mahabalipuram": 0.35,
+    "Gangaikonda-Cholapuram": 0.35,
+    "Airavatesvara": 0.35,
+    "Thirumalai-Nayakkar": 0.35
+  },
+  "threshold_status": "configurable_experimental",
+  "uncertainty_policy": "reject_low_confidence"
+}

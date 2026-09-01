@@ -11,20 +11,22 @@ import { verifyToken } from '../utils/cryptoAuth';
  */
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    let userId: string | null = null;
-    
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      userId = verifyToken(token);
-    } else {
-      userId = req.headers['x-user-id'] as string;
-    }
-    
-    if (!userId) {
-      res.status(403).json({
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
         success: false,
-        message: 'Forbidden: Missing active User ID in headers or token.',
+        message: 'Unauthorized: Missing or invalid Authorization header.',
+      });
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    const userId = verifyToken(token);
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Unauthorized: Invalid token signature.',
       });
       return;
     }
@@ -32,9 +34,9 @@ export const requireAdmin = async (req: Request, res: Response, next: NextFuncti
     // Verify user exists and role is admin in MongoDB
     const user = await User.findById(userId);
     if (!user) {
-      res.status(403).json({
+      res.status(401).json({
         success: false,
-        message: 'Forbidden: User not found in database.',
+        message: 'Unauthorized: User not found in database.',
       });
       return;
     }

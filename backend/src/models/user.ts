@@ -14,6 +14,10 @@ export interface IUser extends Document {
   otpSentAt?: Date;
   profileImageUrl?: string;
   preferredLanguage?: string;
+  lastLoginAt?: Date;
+  scanCount: number;
+  accountStatus: 'ACTIVE' | 'DELETED';
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,9 +36,16 @@ const UserSchema = new Schema<IUser>({
   otpSentAt: { type: Date },
   profileImageUrl: { type: String },
   preferredLanguage: { type: String, default: null },
+  lastLoginAt: { type: Date, default: null, index: true },
+  scanCount: { type: Number, default: 0, index: true },
+  accountStatus: { type: String, enum: ['ACTIVE', 'DELETED'], default: 'ACTIVE', index: true },
+  deletedAt: { type: Date, default: null },
 }, {
   timestamps: true
 });
+
+UserSchema.index({ role: 1 });
+UserSchema.index({ createdAt: -1 });
 
 export const User = model<IUser>('User', UserSchema);
 export default User;

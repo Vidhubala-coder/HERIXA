@@ -41,8 +41,16 @@ import {
   getImageUrl
 } from '../services/monumentService'; 
 import { PrimaryButton } from '../components/PrimaryButton'; 
+import { useFavorites } from '../context/FavoritesContext';
  
 export const AdminUploadScreen: React.FC<{ navigation: any }> = ({ navigation }) => { 
+  const { activeUserId, authToken } = useFavorites();
+
+  useEffect(() => {
+    console.log('[HERIXA-ADMIN] Redirecting legacy AdminUpload screen to AdminPortal');
+    navigation.replace('AdminPortal');
+  }, [navigation]);
+
   const [monuments, setMonuments] = useState<ApiMonument[]>([]); 
   const [selectedMonument, setSelectedMonument] = useState<ApiMonument | null>(null); 
   const [imageUri, setImageUri] = useState<string | null>(null); 

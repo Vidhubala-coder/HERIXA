@@ -2,6 +2,7 @@
   "expo": {
     "name": "HERIXA",
     "slug": "herixa",
+    "scheme": "herixa",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,7 +28,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.anonymous.herixa"
+      "package": "com.herixa.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -46,7 +47,8 @@
           "speechRecognitionPermission": "Allow HERIXA to recognize your speech for voice questions."
         }
       ],
-      "@reactvision/react-viro"
+      "@reactvision/react-viro",
+      "expo-sharing"
     ]
   }
 }

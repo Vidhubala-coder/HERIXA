@@ -27,8 +27,8 @@ import { getConnectivityState } from '../services/api';
 import { ApiMonument } from '../services/monumentService';
 
 type FavoritesScreenNavigationProp = CompositeNavigationProp<
-  BottomTabNavigationProp<MainTabParamList, 'Favorites'>,
-  NativeStackNavigationProp<RootStackParamList>
+  NativeStackNavigationProp<RootStackParamList, 'Favorites'>,
+  BottomTabNavigationProp<MainTabParamList>
 >;
 
 interface FavoritesScreenProps {
@@ -59,10 +59,12 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
   };
 
   const fetchPopulatedFavorites = async (showLoadingIndicator = true) => {
+    const userIdForRequest = activeUserId;
     if (showLoadingIndicator) {
       setIsLoading(true);
     }
     setError(null);
+    setSavedMonuments([]); // Reset previous user's favorite monuments immediately
 
     if (getConnectivityState() === 'unavailable') {
       loadLocalFallback();
@@ -72,13 +74,15 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
     }
 
     try {
-      if (activeUserId && authToken) {
-        const data = await getFavorites(activeUserId, authToken);
+      if (userIdForRequest && authToken) {
+        const data = await getFavorites(userIdForRequest, authToken);
+        if (userIdForRequest !== activeUserId) return;
         setSavedMonuments(data);
       } else {
         loadLocalFallback();
       }
     } catch (err: any) {
+      if (userIdForRequest !== activeUserId) return;
       console.warn('FavoritesScreen: Failed to fetch populated favorites. Falling back to local data matching.', err);
       
       if (err.status && err.status >= 400 && err.status !== 503) {
@@ -89,8 +93,10 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
 
       loadLocalFallback();
     } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      if (userIdForRequest === activeUserId) {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
     }
   };
 
@@ -138,7 +144,7 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
   };
 
   const handleNavigateToExplore = () => {
-    navigation.navigate('Explore');
+    navigation.navigate('Main', { screen: 'Explore' });
   };
 
   const handleMonumentPress = (id: string) => {

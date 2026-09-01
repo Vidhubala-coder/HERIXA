@@ -1,4 +1,4 @@
-import { apiFetch, getApiUrl, isEmulator, getMetroIP } from './api';
+import { apiFetch, getApiUrl, isEmulator, getMetroIP, getConnectivityState } from './api';
 import { Monument as LocalMonument, MONUMENTS } from '../data/monuments';
 import { Platform } from 'react-native';
 
@@ -101,7 +101,9 @@ export interface ScanEvidence {
 }
 
 // Extend the local monument to support backend _id and slug for mapping
-export interface ApiMonument extends Omit<LocalMonument, 'image'> {
+export interface ApiMonument extends Omit<LocalMonument, 'image' | 'category'> {
+  category: 'Temples' | 'Sculptures' | 'Forts' | 'Artifacts' | 'Historical Sites';
+  featured?: boolean;
   historySections?: ApiHistorySection[];
   historicalImages?: ApiMonumentImage[];
   modernImages?: ApiMonumentImage[];
@@ -259,6 +261,13 @@ export interface ApiMonument extends Omit<LocalMonument, 'image'> {
   sculptures?: string;
   materials?: string;
   uniqueArchitecturalFeatures?: string;
+
+  // 3D / Visualization
+  modelUrl?: string;
+  modelFormat?: string;
+  heritagePreviewImages?: { _id?: string; id?: string; uri: string; viewType: string; title: string; description?: string; order: number; enabled: boolean }[];
+  interactivePreviewEnabled?: boolean;
+  coverImageUrl?: string;
 }
 
 export const getImageUrl = (imagePath: any, isModel = false): any => {
@@ -404,6 +413,34 @@ export const getMonuments = async (
   };
 };
 
+export interface AiRecognitionHealthResponse {
+  success: boolean;
+  backend: string;
+  ai_recognition: {
+    status: 'READY' | 'INITIALIZING' | 'UNAVAILABLE' | 'FAILED';
+    aiServiceReachable: boolean;
+    modelLoaded: boolean;
+    modelReady: boolean;
+  };
+}
+
+export const getAiRecognitionHealth = async (options?: RequestInit): Promise<AiRecognitionHealthResponse> => {
+  try {
+    return await apiFetch('/api/monuments/recognize/health', options);
+  } catch (err: any) {
+    return {
+      success: false,
+      backend: 'healthy',
+      ai_recognition: {
+        status: 'UNAVAILABLE',
+        aiServiceReachable: false,
+        modelLoaded: false,
+        modelReady: false
+      }
+    };
+  }
+};
+
 export const getFeaturedMonuments = async (options?: RequestInit): Promise<ApiMonument[]> => {
   const result = await apiFetch('/api/monuments/featured', options);
   return result.data.map(mapApiMonumentToLocal);
@@ -439,6 +476,15 @@ export const recognizeMonumentFromImage = async (
   base64Image: string,
   options?: RequestInit & { timeout?: number; latitude?: number; longitude?: number; viewType?: string; preferredLanguage?: string | null }
 ): Promise<ImageRecognitionResponse> => {
+  if (getConnectivityState() === 'unavailable') {
+    return {
+      success: false,
+      recognized: false,
+      status: 'unclear',
+      reason: 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.',
+      errorDetails: 'NETWORK_UNAVAILABLE'
+    };
+  }
   const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
   const startTime = Date.now();
   const apiURL = getApiUrl();
@@ -517,7 +563,7 @@ export const recognizeMonumentFromImage = async (
       recommendedNextView: result.recommendedNextView || null,
       data: result.data ? mapApiMonumentToLocal(result.data) : undefined,
       message: result.message,
-      errorDetails: result.errorDetails,
+      errorDetails: result.recognized ? 'SUCCESS' : (result.errorDetails || 'UNCERTAIN_RECOGNITION'),
     };
   } catch (err: any) {
     const duration = Date.now() - startTime;
@@ -529,17 +575,26 @@ export const recognizeMonumentFromImage = async (
 
     if (err.isCancelled) {
       userMessage = 'Recognition request was interrupted. Please try again.';
-      errorDetails = 'RECOGNITION_FAILED';
-    } else if (err.isTimeout || err.isNetworkError) {
-      userMessage = 'Unable to connect to HERIXA server. Please check the backend connection and try again.';
+      errorDetails = 'REQUEST_CANCELLED';
+    } else if (err.isTimeout) {
+      userMessage = 'API Request Timeout. Connection took too long.';
       status = 'unclear';
-      errorDetails = 'NETWORK_ERROR';
-    } else if (err.status === 401 || err.status === 429 || err.status === 502 || err.status === 503 || err.status === 504) {
+      errorDetails = 'REQUEST_TIMEOUT';
+    } else if (err.isNetworkError) {
+      userMessage = 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.';
+      status = 'unclear';
+      errorDetails = 'NETWORK_UNAVAILABLE';
+    } else if (err.status === 429) {
+      userMessage = 'Too many requests. Please try again later.';
+      status = 'uncertain';
+      errorDetails = 'RATE_LIMITED';
+    } else if (err.status === 503 || (err.responseBody?.errorDetails === 'MODEL_UNAVAILABLE') || (err.responseBody?.message?.includes('MODEL_UNAVAILABLE'))) {
       userMessage = 'HERIXA recognition service is temporarily unavailable. Please try again.';
       status = 'unknown';
       errorDetails = 'MODEL_UNAVAILABLE';
     } else {
       userMessage = err.message || 'Recognition failed. Please try again.';
+      status = 'unknown';
     }
 
     console.log('[HERIXA-RECOGNITION] Response received');
@@ -573,6 +628,15 @@ export const recognizeMonumentFromMultiView = async (
   scanEvidence: ScanEvidence[],
   options?: RequestInit & { timeout?: number; latitude?: number; longitude?: number; preferredLanguage?: string | null }
 ): Promise<ImageRecognitionResponse> => {
+  if (getConnectivityState() === 'unavailable') {
+    return {
+      success: false,
+      recognized: false,
+      status: 'unclear',
+      reason: 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.',
+      errorDetails: 'NETWORK_UNAVAILABLE'
+    };
+  }
   const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
   const startTime = Date.now();
   const apiURL = getApiUrl();
@@ -646,7 +710,7 @@ export const recognizeMonumentFromMultiView = async (
       recommendedNextView: result.recommendedNextView || null,
       data: result.data ? mapApiMonumentToLocal(result.data) : undefined,
       message: result.message,
-      errorDetails: result.errorDetails,
+      errorDetails: result.recognized ? 'SUCCESS' : (result.errorDetails || 'UNCERTAIN_RECOGNITION'),
     };
   } catch (err: any) {
     const duration = Date.now() - startTime;
@@ -658,17 +722,26 @@ export const recognizeMonumentFromMultiView = async (
 
     if (err.isCancelled) {
       userMessage = 'Recognition request was interrupted. Please try again.';
-      errorDetails = 'RECOGNITION_FAILED';
-    } else if (err.isTimeout || err.isNetworkError) {
-      userMessage = 'Unable to connect to HERIXA server. Please check the backend connection and try again.';
+      errorDetails = 'REQUEST_CANCELLED';
+    } else if (err.isTimeout) {
+      userMessage = 'API Request Timeout. Connection took too long.';
       status = 'unclear';
-      errorDetails = 'NETWORK_ERROR';
-    } else if (err.status === 401 || err.status === 429 || err.status === 502 || err.status === 503 || err.status === 504) {
+      errorDetails = 'REQUEST_TIMEOUT';
+    } else if (err.isNetworkError) {
+      userMessage = 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.';
+      status = 'unclear';
+      errorDetails = 'NETWORK_UNAVAILABLE';
+    } else if (err.status === 429) {
+      userMessage = 'Too many requests. Please try again later.';
+      status = 'uncertain';
+      errorDetails = 'RATE_LIMITED';
+    } else if (err.status === 503 || (err.responseBody?.errorDetails === 'MODEL_UNAVAILABLE') || (err.responseBody?.message?.includes('MODEL_UNAVAILABLE'))) {
       userMessage = 'HERIXA recognition service is temporarily unavailable. Please try again.';
       status = 'unknown';
       errorDetails = 'MODEL_UNAVAILABLE';
     } else {
       userMessage = err.message || 'Recognition failed. Please try again.';
+      status = 'unknown';
     }
 
     console.log('[HERIXA-RECOGNITION] Response received');
@@ -701,19 +774,25 @@ export const recognizeMonumentFromMultiView = async (
 export const uploadMonumentImage = async (
   id: string,
   formData: FormData,
-  activeUserId: string
+  activeUserId: string,
+  authToken?: string
 ): Promise<{ success: boolean; data?: ApiMonument; message?: string }> => {
   return new Promise((resolve, reject) => {
     const apiURL = getApiUrl();
     const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
     const url = `${baseUrl}/api/monuments/${id}/upload`;
 
-    console.log("[UPLOAD] Starting XMLHttpRequest upload");
+    console.log("[UPLOAD] Starting XMLHttpRequest upload to", url);
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     
     xhr.setRequestHeader('x-user-id', activeUserId);
+    if (authToken) {
+      xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    } else if (activeUserId) {
+      xhr.setRequestHeader('Authorization', `Bearer ${activeUserId}`);
+    }
     // Let the native networking layer generate the Content-Type boundary automatically
 
     xhr.timeout = 30000; // 30 seconds
@@ -824,12 +903,15 @@ export const deleteMonumentImage = async (
 export const updateMonumentDetails = async (
   id: string,
   details: Partial<ApiMonument>,
-  userId: string
+  authTokenOrUserId: string
 ): Promise<{ success: boolean; data?: ApiMonument; message?: string }> => {
   const result = await apiFetch(`/api/monuments/${id}`, {
     method: 'PUT',
     headers: {
-      'x-user-id': userId,
+      'Content-Type': 'application/json',
+      ...(authTokenOrUserId.length > 30 || authTokenOrUserId.startsWith('eyJ')
+        ? { 'Authorization': `Bearer ${authTokenOrUserId}` }
+        : { 'x-user-id': authTokenOrUserId }),
     },
     body: JSON.stringify(details),
   });
@@ -1189,3 +1271,199 @@ export const getWikimediaFallback = (monument: any): string => {
   const localMon = MONUMENTS.find(m => m.id === slug || m.name?.toLowerCase() === monument.name?.toLowerCase() || slug.includes(m.id));
   return localMon?.image || '';
 };
+
+export const createMonument = async (
+  monumentData: any,
+  authToken: string
+): Promise<{ success: boolean; data?: ApiMonument; message?: string }> => {
+  const result = await apiFetch('/api/monuments', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(monumentData),
+  });
+  return {
+    success: true,
+    data: result.data ? mapApiMonumentToLocal(result.data) : undefined,
+    message: result.message || 'Heritage site created successfully',
+  };
+};
+
+export const addHeritageView = async (
+  monumentId: string,
+  formData: FormData,
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  return new Promise((resolve, reject) => {
+    const apiURL = getApiUrl();
+    const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
+    const url = `${baseUrl}/api/admin/monuments/${monumentId}/visualization`;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    xhr.timeout = 30000;
+
+    xhr.onload = () => {
+      let resData: any;
+      try { resData = JSON.parse(xhr.responseText || '{}'); } catch (e) { resData = { message: 'Invalid response' }; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({ success: true, data: resData.data, message: resData.message });
+      } else {
+        resolve({ success: false, message: resData.message || 'Upload failed' });
+      }
+    };
+    xhr.onerror = () => resolve({ success: false, message: 'Network error occurred' });
+    xhr.ontimeout = () => resolve({ success: false, message: 'Upload timed out' });
+    xhr.send(formData);
+  });
+};
+
+export const editHeritageView = async (
+  monumentId: string,
+  imageId: string,
+  formData: FormData,
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  return new Promise((resolve, reject) => {
+    const apiURL = getApiUrl();
+    const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
+    const url = `${baseUrl}/api/admin/monuments/${monumentId}/visualization/${imageId}`;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    xhr.timeout = 30000;
+
+    xhr.onload = () => {
+      let resData: any;
+      try { resData = JSON.parse(xhr.responseText || '{}'); } catch (e) { resData = { message: 'Invalid response' }; }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({ success: true, data: resData.data, message: resData.message });
+      } else {
+        resolve({ success: false, message: resData.message || 'Update failed' });
+      }
+    };
+    xhr.onerror = () => resolve({ success: false, message: 'Network error occurred' });
+    xhr.ontimeout = () => resolve({ success: false, message: 'Upload timed out' });
+    xhr.send(formData);
+  });
+};
+
+export const deleteHeritageView = async (
+  monumentId: string,
+  imageId: string,
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  const result = await apiFetch(`/api/admin/monuments/${monumentId}/visualization/${imageId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  return { success: true, data: result.data, message: result.message };
+};
+
+export const updateVisualizationConfig = async (
+  monumentId: string,
+  config: { interactivePreviewEnabled?: boolean; coverImageUrl?: string; modelUrl?: string; arEnabled?: boolean },
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  const result = await apiFetch(`/api/admin/monuments/${monumentId}/visualization-config`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(config)
+  });
+  return { success: true, data: result.data, message: result.message };
+};
+
+export const reorderHeritageViews = async (
+  monumentId: string,
+  orderedIds: string[],
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  const result = await apiFetch(`/api/admin/monuments/${monumentId}/visualization/reorder`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ orderedIds })
+  });
+  return { success: true, data: result.data, message: result.message };
+};
+
+export const deleteMonument = async (
+  monumentId: string,
+  authToken: string
+): Promise<{ success: boolean; message?: string }> => {
+  const result = await apiFetch(`/api/admin/monuments/${monumentId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  return { success: true, message: result.message || 'Heritage site deleted successfully' };
+};
+
+// ── Multi-Image Heritage Visuals API ───────────────────────────────────────────
+
+export const uploadMonumentVisuals = async (
+  monumentId: string,
+  imageUris: string[],
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  const { getApiUrl } = require('./api');
+  const apiURL = getApiUrl();
+  const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
+  const url = `${baseUrl}/api/admin/monuments/${monumentId}/visuals`;
+
+  const formData = new FormData();
+  imageUris.forEach((uri, idx) => {
+    const fileName = uri.split('/').pop() || `visual_${idx}.jpg`;
+    formData.append('images', {
+      uri,
+      name: fileName,
+      type: 'image/jpeg'
+    } as any);
+  });
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${authToken}`
+    },
+    body: formData
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json.message || 'Failed to upload monument visuals.');
+  }
+  return json;
+};
+
+export const deleteMonumentVisual = async (
+  monumentId: string,
+  visualId: string,
+  authToken: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  return await apiFetch(`/api/admin/monuments/${monumentId}/visuals/${visualId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getMonumentVisuals = async (
+  monumentId: string,
+  authToken?: string
+): Promise<{ success: boolean; data: any[]; monument?: any }> => {
+  const headers: Record<string, string> = {};
+  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+  return await apiFetch(`/api/monuments/${monumentId}/visuals`, {
+    method: 'GET',
+    headers
+  });
+};
+

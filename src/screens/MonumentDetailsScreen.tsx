@@ -10,6 +10,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Modal,
+  FlatList,
   Platform,
 } from 'react-native';
 
@@ -22,8 +23,10 @@ import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/theme';
 import { MONUMENTS } from '../data/monuments';
 import { RootStackParamList } from '../navigation/types';
 import { useFavorites } from '../context/FavoritesContext';
+import { useFocusEffect } from '@react-navigation/native';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { getMonumentById, ApiMonument, getImageUrl, ApiMonumentImage, getWikimediaFallback } from '../services/monumentService';
+import { getMonumentById, ApiMonument, getImageUrl, ApiMonumentImage, getWikimediaFallback, getMonumentVisuals } from '../services/monumentService';
+import { setCurrentMonumentContext } from '../services/currentContextService';
 import { SafeImage } from '../components/SafeImage';
 import { VoiceAssistant } from '../components/VoiceAssistant';
 
@@ -84,6 +87,22 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
   const [zoomImageCaption, setZoomImageCaption] = useState<string | null>(null);
   const [activeDetailsGalleryTab, setActiveDetailsGalleryTab] = useState<'historical' | 'archival' | 'modern' | 'architecture' | 'sculpture' | 'inscription' | 'restoration'>('historical');
 
+  // Live Heritage Visuals State
+  const [liveVisuals, setLiveVisuals] = useState<any[]>([]);
+  const [visualViewerVisible, setVisualViewerVisible] = useState(false);
+  const [visualViewerIndex, setVisualViewerIndex] = useState(0);
+
+  const fetchLiveVisuals = React.useCallback(async (mId: string) => {
+    try {
+      const res = await getMonumentVisuals(mId);
+      if (res && res.success && Array.isArray(res.data)) {
+        setLiveVisuals(res.data);
+      }
+    } catch (e) {
+      console.warn('[MonumentDetails] Failed to fetch live visuals:', e);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchDetails = async () => {
       setIsLoading(true);
@@ -91,6 +110,12 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
       try {
         const data = await getMonumentById(monumentId);
         setMonument(data);
+        fetchLiveVisuals(monumentId);
+        setCurrentMonumentContext({
+          name: data.name,
+          location: `${data.location}, ${data.state}`,
+          period: `${data.period || ''} (${data.dynasty || ''})`
+        });
         addHistory('view', data._id || data.id).catch((err) =>
           console.warn('Failed to add view entry to history:', err)
         );
@@ -110,6 +135,12 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
             interestingFacts: localMon.facts,
           };
           setMonument(mappedLocal as any);
+          fetchLiveVisuals(localMon.id);
+          setCurrentMonumentContext({
+            name: mappedLocal.name,
+            location: mappedLocal.location,
+            period: mappedLocal.period || ''
+          });
           addHistory('view', mappedLocal._id || mappedLocal.id).catch((err) =>
             console.warn('Failed to add view entry to history:', err)
           );
@@ -123,6 +154,12 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
 
     fetchDetails();
   }, [monumentId]);
+
+  useEffect(() => {
+    return () => {
+      setCurrentMonumentContext(undefined);
+    };
+  }, []);
 
 
 
@@ -184,21 +221,9 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
     }
   };
 
-  const handleViewInAR = () => {
+  const handleExploreVisuals = () => {
     if (!monument) return;
-    // Navigate to AR tab in Main and pass the monumentId
-    navigation.reset({
-      index: 0,
-      routes: [
-        {
-          name: 'Main',
-          params: {
-            screen: 'AR',
-            params: { monumentId: monument.id }
-          }
-        }
-      ]
-    });
+    navigation.navigate('HeritageVisuals', { monumentId: monument._id || monument.id });
   };
 
   const handleReadHistory = () => {
@@ -388,9 +413,9 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
           {/* Action CTAs */}
           <View style={styles.actionRow}>
             <PrimaryButton
-              title="VIEW IN AR"
+              title="HERITAGE VISUALS"
               variant="solid"
-              onPress={handleViewInAR}
+              onPress={handleExploreVisuals}
               style={styles.actionButton}
             />
             <PrimaryButton
@@ -422,6 +447,138 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
             </View>
             <Feather name="chevron-right" size={20} color={COLORS.gold} />
           </TouchableOpacity>
+
+          {/* Ask Heritage Chatbot Banner */}
+          <TouchableOpacity
+            style={[styles.assistantBanner, { marginTop: SPACING.md }]}
+            onPress={() => {
+              if (monument) {
+                navigation.navigate('HeritageAssistant' as any, {
+                  monumentContext: {
+                    name: monument.name,
+                    location: `${monument.location}, ${monument.state}`,
+                    period: `${monument.period} (${monument.dynasty})`
+                  }
+                });
+              }
+            }}
+            activeOpacity={0.8}
+          >
+            <View style={styles.assistantBannerLeft}>
+              <View style={styles.assistantIconContainer}>
+                <Ionicons name="chatbubbles-outline" size={22} color={COLORS.background} />
+              </View>
+              <View>
+                <Text style={styles.assistantBannerTitle}>HERITAGE CHATBOT</Text>
+                <Text style={styles.assistantBannerSubtitle}>
+                  Chat with HERIXA Heritage Assistant
+                </Text>
+              </View>
+            </View>
+            <Feather name="chevron-right" size={20} color={COLORS.gold} />
+          </TouchableOpacity>
+
+          {/* Heritage Visuals Section */}
+          {(() => {
+            const staticVisuals = (monument.heritagePreviewImages || []).filter(
+              (img: any) => img.enabled !== false && img.visible !== false
+            );
+
+            // Merge static visuals and liveVisuals from API without duplicates
+            const combinedMap = new Map();
+            staticVisuals.forEach((v: any) => {
+              const key = v._id || v.id || v.uri;
+              if (key) combinedMap.set(key, v);
+            });
+            liveVisuals.forEach((v: any) => {
+              const key = v._id || v.id || v.uri;
+              if (key) combinedMap.set(key, v);
+            });
+
+            const allVisuals = Array.from(combinedMap.values());
+
+            if (allVisuals.length === 0) {
+              return (
+                <View style={styles.cardContainer}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardHeaderLeft}>
+                      <Feather name="image" size={16} color={COLORS.gold} style={styles.cardIcon} />
+                      <Text style={styles.cardTitle}>Heritage Visuals</Text>
+                    </View>
+                  </View>
+                  <View style={{ padding: SPACING.lg, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <Feather name="image" size={32} color={COLORS.gold} />
+                    <Text style={{ color: COLORS.textPrimary, fontSize: 14, fontWeight: '700', marginTop: 4 }}>
+                      No Heritage Visuals Yet
+                    </Text>
+                    <Text style={{ color: COLORS.textSecondary, fontSize: 12, textAlign: 'center' }}>
+                      More historical visuals will be added soon.
+                    </Text>
+                  </View>
+                </View>
+              );
+            }
+
+            const previewThumbnails = allVisuals.slice(0, 6);
+
+            return (
+              <View style={styles.cardContainer}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.cardHeaderLeft}>
+                    <Feather name="image" size={16} color={COLORS.gold} style={styles.cardIcon} />
+                    <Text style={styles.cardTitle}>Heritage Visuals</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('HeritageVisuals', { monumentId: monument._id || monument.id })}
+                  >
+                    <Text style={{ color: COLORS.gold, fontSize: 12, fontWeight: '700' }}>
+                      View All ({allVisuals.length}) →
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.cardContent}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: SPACING.xs }}>
+                    <View style={{ flexDirection: 'row', gap: SPACING.xs }}>
+                      {previewThumbnails.map((img: any, idx: number) => {
+                        const thumbUri = getImageUrl(img.uri || img.imageUrl);
+                        return (
+                          <TouchableOpacity
+                            key={img._id || img.id || idx}
+                            onPress={() => {
+                              setVisualViewerIndex(idx);
+                              setVisualViewerVisible(true);
+                            }}
+                            activeOpacity={0.85}
+                            style={{ position: 'relative' }}
+                          >
+                            <SafeImage
+                              source={{ uri: thumbUri }}
+                              style={{
+                                width: 90,
+                                height: 90,
+                                borderRadius: BORDER_RADIUS.md,
+                                borderWidth: 1,
+                                borderColor: COLORS.border,
+                              }}
+                              resizeMode="cover"
+                            />
+                            <View style={{
+                              position: 'absolute', bottom: 4, right: 4,
+                              backgroundColor: 'rgba(0,0,0,0.7)', paddingHorizontal: 4, paddingVertical: 1,
+                              borderRadius: 4
+                            }}>
+                              <Text style={{ color: COLORS.gold, fontSize: 9, fontWeight: '800' }}>#{idx + 1}</Text>
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </ScrollView>
+                </View>
+              </View>
+            );
+          })()}
 
           {/* ======================================================== */}
           {/* ACCORDION CARDS START                                    */}
@@ -1224,6 +1381,60 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
             )}
           </SafeAreaView>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Heritage Visuals Fullscreen Image Viewer Modal */}
+      <Modal
+        visible={visualViewerVisible}
+        animationType="fade"
+        transparent={false}
+        onRequestClose={() => setVisualViewerVisible(false)}
+        statusBarTranslucent
+      >
+        <View style={{ flex: 1, backgroundColor: '#000' }}>
+          <SafeAreaView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SPACING.md, paddingTop: SPACING.md, zIndex: 10 }}>
+            <TouchableOpacity onPress={() => setVisualViewerVisible(false)} style={{ padding: SPACING.xs }}>
+              <Feather name="x" size={24} color="#FFF" />
+            </TouchableOpacity>
+            <Text style={{ color: COLORS.gold, fontSize: 14, fontWeight: '800' }}>
+              {liveVisuals.length > 0 ? `${visualViewerIndex + 1} / ${liveVisuals.length}` : ''}
+            </Text>
+            <View style={{ width: 32 }} />
+          </SafeAreaView>
+
+          {liveVisuals.length > 0 && (
+            <FlatList
+              data={liveVisuals}
+              horizontal
+              pagingEnabled
+              initialScrollIndex={visualViewerIndex}
+              getItemLayout={(_: any, index: number) => ({
+                length: width,
+                offset: width * index,
+                index,
+              })}
+              onMomentumScrollEnd={(e: any) => {
+                const newIdx = Math.round(e.nativeEvent.contentOffset.x / width);
+                setVisualViewerIndex(newIdx);
+              }}
+              renderItem={({ item }: { item: any }) => {
+                const fullUri = getImageUrl(item.uri || item.imageUrl);
+                return (
+                  <View style={{ width, height: height - 120, justifyContent: 'center', alignItems: 'center' }}>
+                    <Image source={{ uri: fullUri }} style={{ width: width * 0.95, height: height * 0.65 }} resizeMode="contain" />
+                    {!!(item.title || item.caption) && (
+                      <View style={{ padding: SPACING.md, backgroundColor: 'rgba(24, 24, 22, 0.85)', borderRadius: BORDER_RADIUS.md, marginTop: SPACING.md, marginHorizontal: SPACING.md, maxWidth: width * 0.9 }}>
+                        <Text style={{ color: COLORS.textPrimary, fontSize: 14, fontWeight: '700', textAlign: 'center' }}>{item.title}</Text>
+                        {!!item.caption && <Text style={{ color: COLORS.textSecondary, fontSize: 12, textAlign: 'center', marginTop: 4 }}>{item.caption}</Text>}
+                      </View>
+                    )}
+                  </View>
+                );
+              }}
+              keyExtractor={(item: any, index: number) => item._id || item.id || String(index)}
+            />
+          )}
+        </View>
       </Modal>
     </View>
   );

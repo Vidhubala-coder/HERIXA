@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from PIL import Image, ImageOps
 from torchvision import transforms
 import onnxruntime
-from typing import List
+from typing import List, Optional
 
 # Configure path and logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,13 +18,20 @@ from src.utils import get_path, setup_logger
 LOG_FILE = get_path("results", "service.log")
 logger = setup_logger("service", log_file=LOG_FILE)
 
-app = FastAPI(title="HERIXA Monument Recognition ONNX Service", version="1.1")
+app = FastAPI(title="HERIXA Monument Recognition ONNX Hybrid Service", version="2.0")
 
-# Global variables for model session and config
-ort_session = None
-input_name = None
-output_name = None
+# Global variables for model sessions and config
+ort_session_3g = None
+ort_session_3l = None
+ort_session = None # Primary handle alias for health checks
+input_name_3g = None
+output_name_3g = None
+input_name_3l = None
+output_name_3l = None
+
 ai_service_state = "INITIALIZING"
+HYBRID_ENABLED = True
+HYBRID_MARGIN = 0.10  # Hybrid 3G Preferred (0.10) Strategy
 
 CLASSES = [
     "Brihadeeswarar",
@@ -38,131 +45,136 @@ CLASSES = [
 
 CONFIG = {
     "confidence_threshold": 0.65,
-    "uncertainty_policy": "reject_low_confidence"
+    "uncertainty_policy": "reject_low_confidence",
+    "model_version": "hybrid_3g_3l",
+    "hybrid_strategy": "3G Preferred (0.10)"
 }
 
 def load_onnx_model_globally():
-    """Loads the ONNX model and recognition configurations once into memory."""
-    global ort_session, input_name, output_name, CONFIG, ai_service_state
+    """Loads Phase 3G and Phase 3L ONNX models once into memory for hybrid inference."""
+    global ort_session_3g, ort_session_3l, ort_session, input_name_3g, output_name_3g, input_name_3l, output_name_3l, CONFIG, ai_service_state
     
     ai_service_state = "INITIALIZING"
-    onnx_path = get_path("models", "integration", "onnx", "herixa_phase3g.onnx")
-    config_path = get_path("models", "integration", "recognition_config.json")
+    print("[HERIXA-AI] Hybrid Model initialization started", flush=True)
+    
+    from pathlib import Path
+    dir_path = Path(__file__).resolve().parent
+    ai_root = dir_path.parent
+    onnx_path_3g = str(ai_root / "models" / "integration" / "onnx" / "herixa_phase3g.onnx")
+    onnx_path_3l = str(ai_root / "models" / "integration" / "onnx" / "phase3l" / "phase3l_candidate.onnx")
+    config_path = str(ai_root / "models" / "integration" / "recognition_config.json")
     
     # Load config
     if os.path.exists(config_path):
         try:
             with open(config_path, "r", encoding="utf-8") as f:
-                CONFIG = json.load(f)
+                CONFIG.update(json.load(f))
+            CONFIG["model_version"] = "hybrid_3g_3l"
+            CONFIG["hybrid_strategy"] = "3G Preferred (0.10)"
             logger.info(f"Successfully loaded recognition config: {CONFIG}")
         except Exception as e:
             logger.error(f"Failed to load recognition config: {e}")
             
     # Structured diagnostic logs
-    print("[HERIXA-MODEL] Loading recognition model...", flush=True)
-    print(f"[HERIXA-MODEL] Model path: {onnx_path}", flush=True)
-    model_exists = os.path.exists(onnx_path)
-    print(f"[HERIXA-MODEL] Model exists: {model_exists}", flush=True)
+    print(f"[HERIXA-AI] Resolved Phase 3G path: {onnx_path_3g}", flush=True)
+    print(f"[HERIXA-AI] Resolved Phase 3L path: {onnx_path_3l}", flush=True)
     
-    if model_exists:
-        try:
-            model_size = os.path.getsize(onnx_path)
-            print(f"[HERIXA-MODEL] Model size: {model_size} bytes", flush=True)
-        except Exception:
-            print("[HERIXA-MODEL] Model size: N/A", flush=True)
-    else:
-        print("[HERIXA-MODEL] Model size: N/A", flush=True)
-        
-    print("[HERIXA-MODEL] Model format: ONNX", flush=True)
+    g_exists = os.path.exists(onnx_path_3g)
+    l_exists = os.path.exists(onnx_path_3l)
     
-    # Load ONNX session
-    if not model_exists:
-        logger.error(f"ONNX model not found at {onnx_path}. Service starting without model loaded.")
-        ai_service_state = "MODEL_UNAVAILABLE"
-        print("[HERIXA-MODEL] MODEL_LOAD_FAILED", flush=True)
-        print("[HERIXA-MODEL] Error type: FileNotFoundError", flush=True)
-        print(f"[HERIXA-MODEL] Error message: ONNX model file not found at {onnx_path}", flush=True)
-        print(f"[HERIXA-MODEL] Model path: {onnx_path}", flush=True)
+    print(f"[HERIXA-AI] Phase 3G model exists: {str(g_exists).lower()}", flush=True)
+    print(f"[HERIXA-AI] Phase 3L model exists: {str(l_exists).lower()}", flush=True)
+    
+    if not (g_exists and l_exists):
+        logger.error(f"ONNX models missing. 3G: {g_exists}, 3L: {l_exists}. Service failed.")
+        ai_service_state = "FAILED"
+        print("[HERIXA-AI] MODEL_INITIALIZATION_FAILED", flush=True)
         return False
         
     try:
-        ort_session = onnxruntime.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
-        input_name = ort_session.get_inputs()[0].name
-        output_name = ort_session.get_outputs()[0].name
+        # Load Phase 3G
+        ort_session_3g = onnxruntime.InferenceSession(onnx_path_3g, providers=["CPUExecutionProvider"])
+        input_name_3g = ort_session_3g.get_inputs()[0].name
+        output_name_3g = ort_session_3g.get_outputs()[0].name
         
-        # Get shape info
-        input_shape = ort_session.get_inputs()[0].shape
-        output_shape = ort_session.get_outputs()[0].shape
+        # Load Phase 3L
+        ort_session_3l = onnxruntime.InferenceSession(onnx_path_3l, providers=["CPUExecutionProvider"])
+        input_name_3l = ort_session_3l.get_inputs()[0].name
+        output_name_3l = ort_session_3l.get_outputs()[0].name
         
-        providers = ort_session.get_providers()
+        ort_session = ort_session_3g # Alias for health check compatibility
+        
+        providers = ort_session_3g.get_providers()
         device_provider = providers[0] if providers else "CPUExecutionProvider"
         
-        # Class count and mapping
-        class_count = len(CLASSES)
-        class_mapping = CONFIG.get("class_mapping", {str(i): c for i, c in enumerate(CLASSES)})
-        
         print(f"[HERIXA-MODEL] Execution provider/device: {device_provider}", flush=True)
-        print(f"[HERIXA-MODEL] Input shape: {input_shape}", flush=True)
-        print(f"[HERIXA-MODEL] Output shape: {output_shape}", flush=True)
-        print(f"[HERIXA-MODEL] Class count: {class_count}", flush=True)
-        print(f"[HERIXA-MODEL] Class mapping: {class_mapping}", flush=True)
+        print(f"[HERIXA-MODEL] Phase 3G input/output: {input_name_3g} / {output_name_3g}", flush=True)
+        print(f"[HERIXA-MODEL] Phase 3L input/output: {input_name_3l} / {output_name_3l}", flush=True)
+        print(f"[HERIXA-MODEL] Class count: {len(CLASSES)}", flush=True)
+        print(f"[HERIXA-MODEL] Hybrid Strategy: 3G Preferred (0.10)", flush=True)
         
-        logger.info(f"ONNX model loaded globally. Input: {input_name}, Output: {output_name}")
-        print("[HERIXA-MODEL] Model loaded successfully", flush=True)
+        logger.info("Phase 3G and Phase 3L ONNX sessions loaded globally successfully.")
+        print("[HERIXA-AI] Model loaded successfully", flush=True)
+        print("[HERIXA-AI] Model status: READY", flush=True)
         ai_service_state = "READY"
         return True
     except Exception as e:
-        logger.error(f"Failed to load ONNX session: {e}")
-        ai_service_state = "ERROR"
-        print("[HERIXA-MODEL] MODEL_LOAD_FAILED", flush=True)
-        print(f"[HERIXA-MODEL] Error type: {type(e).__name__}", flush=True)
-        print(f"[HERIXA-MODEL] Error message: {str(e)}", flush=True)
-        print(f"[HERIXA-MODEL] Model path: {onnx_path}", flush=True)
+        import traceback
+        logger.error(f"Failed to load ONNX sessions: {e}")
+        ai_service_state = "FAILED"
+        print("[HERIXA-AI] MODEL_INITIALIZATION_FAILED", flush=True)
+        print(f"[HERIXA-AI] Reason: {str(e)}", flush=True)
+        print(traceback.format_exc(), flush=True)
         return False
 
 @app.on_event("startup")
 def startup_event():
-    # Force multiclass loading
     load_onnx_model_globally()
-    # Diagnostic Flush stdout
-    print("[HERIXA-AI] MODEL=herixa_phase3g.onnx", flush=True)
+    print("[HERIXA-AI] MODEL=hybrid_3g_3l.onnx", flush=True)
+    print("[HERIXA-AI] STRATEGY=3G Preferred (0.10)", flush=True)
     print("[HERIXA-AI] CLASSES=7", flush=True)
     print("[HERIXA-AI] SERVICE=multiclass", flush=True)
-    print("[HERIXA-AI] VERSION=phase3g", flush=True)
+    print("[HERIXA-AI] VERSION=hybrid_3g_3l", flush=True)
     print(f"[HERIXA-AI] Status: {ai_service_state}", flush=True)
 
 @app.get("/health")
 def health():
     """Returns health status indicating model readiness."""
-    global ai_service_state, ort_session
-    if ort_session is None:
-        load_onnx_model_globally()
-        
-    status = "READY" if (ai_service_state == "READY" and ort_session is not None) else "MODEL_UNAVAILABLE"
+    global ai_service_state, ort_session_3g, ort_session_3l
     
-    return {
-        "status": status,
-        "modelLoaded": ort_session is not None
+    loaded_val = (ort_session_3g is not None) and (ort_session_3l is not None)
+    status_val = ai_service_state
+    
+    response_content = {
+        "status": status_val,
+        "modelLoaded": loaded_val,
+        "hybrid_mode": HYBRID_ENABLED
     }
+    
+    if status_val == "READY" and loaded_val:
+        return JSONResponse(status_code=200, content=response_content)
+    elif status_val == "INITIALIZING":
+        return JSONResponse(status_code=200, content=response_content)
+    else:
+        return JSONResponse(status_code=503, content=response_content)
 
 @app.get("/model_info")
 def model_info():
-    """Returns metadata about the currently registered ONNX model."""
-    if ort_session is None:
+    """Returns metadata about the registered hybrid ONNX models."""
+    if ort_session_3g is None or ort_session_3l is None:
         load_onnx_model_globally()
-        if ort_session is None:
-            raise HTTPException(status_code=503, detail="ONNX model session not initialized.")
+        if ort_session_3g is None or ort_session_3l is None:
+            raise HTTPException(status_code=503, detail="ONNX model sessions not initialized.")
             
     return {
         "success": True,
-        "model_version": CONFIG.get("model_version", "phase3g"),
-        "model_format": "onnx",
+        "model_version": "hybrid_3g_3l",
+        "hybrid_strategy": "3G Preferred (0.10)",
+        "models": ["herixa_phase3g.onnx", "phase3l_candidate.onnx"],
         "class_mapping": CONFIG.get("class_mapping", {str(i): c for i, c in enumerate(CLASSES)}),
         "confidence_threshold": CONFIG.get("confidence_threshold", 0.65),
         "uncertainty_policy": CONFIG.get("uncertainty_policy", "reject_low_confidence")
     }
-
-from typing import List, Optional
 
 @app.post("/predict")
 async def predict(
@@ -170,17 +182,18 @@ async def predict(
     images: Optional[List[UploadFile]] = File(None)
 ):
     """
-    Accepts one or more images under 'image' or 'images', preprocesses them, runs ONNX inference,
+    Accepts one or more images under 'image' or 'images', preprocesses them,
+    runs Phase 3G and Phase 3L ONNX inference, applies Hybrid 3G Preferred (0.10) decision logic,
     averages probability vectors across views (multi-view fusion),
     and executes confidence threshold policy.
     """
-    global ort_session, input_name, output_name, CONFIG
+    global ort_session_3g, ort_session_3l, CONFIG, HYBRID_ENABLED, HYBRID_MARGIN
     
-    if ort_session is None:
+    if ort_session_3g is None or ort_session_3l is None:
         if not load_onnx_model_globally():
             return JSONResponse(
                 status_code=503,
-                content={"success": False, "error": "ONNX model session not initialized."}
+                content={"success": False, "error": "ONNX model sessions not initialized."}
             )
             
     input_files = []
@@ -196,9 +209,9 @@ async def predict(
     ])
     
     probs_list = []
+    hybrid_winners = []
     processed_count = 0
     
-    # Store primary image dimensions
     primary_width = 0
     primary_height = 0
     primary_orientation = 0
@@ -214,7 +227,6 @@ async def predict(
             content = await file.read()
             img = Image.open(io.BytesIO(content))
             
-            # Read EXIF orientation (tag 274 is Orientation)
             orientation_val = 1
             try:
                 exif = img.getexif()
@@ -230,23 +242,42 @@ async def predict(
                 primary_orientation = orientation_val or 1
                 primary_format = img.format or "unknown"
                 
-            # Apply EXIF transpose to auto-rotate image upright
             img = ImageOps.exif_transpose(img)
             img = img.convert("RGB")
             
-            # Preprocess to tensor
             tensor = val_trans(img).unsqueeze(0)
             input_np = tensor.numpy()
             
-            # Run ONNX Runtime session inference
-            onnx_outputs = ort_session.run([output_name], {input_name: input_np})
-            logits = onnx_outputs[0][0]
+            # Phase 3G Inference
+            outputs_3g = ort_session_3g.run([output_name_3g], {input_name_3g: input_np})
+            logits_3g = outputs_3g[0][0]
+            exp_3g = np.exp(logits_3g - np.max(logits_3g))
+            probs_3g = exp_3g / np.sum(exp_3g)
+            idx_3g = int(np.argmax(probs_3g))
+            conf_3g = float(probs_3g[idx_3g])
             
-            # Stable Softmax calculation
-            exp_logits = np.exp(logits - np.max(logits))
-            probs = exp_logits / np.sum(exp_logits)
-            
-            probs_list.append(probs)
+            if HYBRID_ENABLED:
+                # Phase 3L Inference
+                outputs_3l = ort_session_3l.run([output_name_3l], {input_name_3l: input_np})
+                logits_3l = outputs_3l[0][0]
+                exp_3l = np.exp(logits_3l - np.max(logits_3l))
+                probs_3l = exp_3l / np.sum(exp_3l)
+                idx_3l = int(np.argmax(probs_3l))
+                conf_3l = float(probs_3l[idx_3l])
+                
+                # Hybrid 3G Preferred (0.10) Strategy Logic
+                if conf_3l > conf_3g + HYBRID_MARGIN:
+                    final_probs = probs_3l
+                    winner = "Phase 3L"
+                else:
+                    final_probs = probs_3g
+                    winner = "Phase 3G"
+            else:
+                final_probs = probs_3g
+                winner = "Phase 3G Standalone"
+                
+            probs_list.append(final_probs)
+            hybrid_winners.append(winner)
             processed_count += 1
             
         except Exception as e:
@@ -258,25 +289,22 @@ async def predict(
             detail="No valid image files provided. Supported formats: JPEG, JPG, PNG, WEBP."
         )
         
-    # Multi-view fusion (average probabilities vector)
+    # Multi-view fusion (average probabilities vector across views)
     mean_probs = np.mean(probs_list, axis=0)
     pred_idx = int(np.argmax(mean_probs))
     max_prob = float(mean_probs[pred_idx])
     predicted_class = CLASSES[pred_idx]
     
-    # Calculate margins
     sorted_probs = np.sort(mean_probs)[::-1]
     margin = float(sorted_probs[0] - sorted_probs[1]) if len(sorted_probs) > 1 else 0.0
     second_confidence = float(sorted_probs[1]) if len(sorted_probs) > 1 else 0.0
     
     # Confidence Policy validation
     class_thresholds = CONFIG.get("class_thresholds", {})
-    threshold = class_thresholds.get(predicted_class, CONFIG.get("confidence_threshold", 0.35))
+    threshold = class_thresholds.get(predicted_class, CONFIG.get("confidence_threshold", 0.65))
     
-    # If prediction is Hard_Negatives or has low margin, reject it
     is_accepted = (max_prob >= threshold) and (predicted_class != "Hard_Negatives") and (margin >= 0.08)
     
-    # Class friendly display names mapping
     class_names_friendly = {
         "Brihadeeswarar": "Brihadeeswarar Temple",
         "Meenakshi-Amman": "Meenakshi Amman Temple",
@@ -287,12 +315,10 @@ async def predict(
         "Hard_Negatives": "Hard Negatives"
     }
     predicted_class_name = class_names_friendly.get(predicted_class, predicted_class)
-    
-    # Class probabilities dictionary mapping
     class_probs_dict = {CLASSES[i]: float(mean_probs[i]) for i in range(len(CLASSES))}
-    
-    # Also add standard p_brihadeeswarar for backward compatibility
     p_brihadeeswarar = float(mean_probs[0])
+    
+    most_common_winner = max(set(hybrid_winners), key=hybrid_winners.count) if hybrid_winners else "Phase 3G"
     
     response = {
         "success": True,
@@ -302,7 +328,9 @@ async def predict(
         "second_confidence": second_confidence,
         "margin": margin,
         "probabilities": class_probs_dict,
-        "model_version": CONFIG.get("model_version", "phase3g"),
+        "model_version": "hybrid_3g_3l",
+        "hybrid_strategy": "3G Preferred (0.10)",
+        "hybrid_winner": most_common_winner,
         "class_count": len(CLASSES),
         "original_width": int(primary_width),
         "original_height": int(primary_height),
@@ -321,11 +349,9 @@ async def predict(
         "fallbackUsed": not is_accepted
     }
     
-    logger.info(f"ONNX Prediction: views={processed_count}, predicted={predicted_class} (accepted={is_accepted}, conf={max_prob:.3f}, margin={margin:.3f})")
+    logger.info(f"ONNX Hybrid Prediction: views={processed_count}, winner={most_common_winner}, predicted={predicted_class} (accepted={is_accepted}, conf={max_prob:.3f}, margin={margin:.3f})")
     return response
 
 if __name__ == "__main__":
     import uvicorn
-    # Local dev uvicorn uvicorn.run("service:app", host="127.0.0.1", port=8001, reload=False)
-    # The port during local running should match what backend calls (e.g. 8001 or 8000)
     uvicorn.run("service:app", host="127.0.0.1", port=8001, reload=False)

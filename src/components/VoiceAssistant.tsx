@@ -227,13 +227,15 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
       const duration = Date.now() - startTime;
       console.error('[HERIXA ASSISTANT] Request failed in', duration, 'ms. Error:', err);
       if (isMountedRef.current) {
-        setError(
-          language === 'ta'
-            ? 'பதில் பெற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
-            : language === 'hi'
-            ? 'उत्तर प्राप्त करने में विफल। कृपया पुन: प्रयास करें।'
-            : 'Failed to fetch answer. Please try again.'
-        );
+        const fetchErrorMsgs: Record<string, string> = {
+          ta: 'பதில் பெற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+          hi: 'उत्तर प्राप्त करने में विफल। कृपया पुन: प्रयास करें।',
+          te: 'సమాధానం పొందడం విఫలమైంది. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+          ml: 'ഉത്തരം ലഭിക്കുന്നതിൽ പരാജയപ്പെട്ടു. വീണ്ടും ശ്രമിക്കുക.',
+          kn: 'ಉತ್ತರ ಪಡೆಯಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+          en: 'Failed to fetch answer. Please try again.',
+        };
+        setError(fetchErrorMsgs[language] || fetchErrorMsgs.en);
       }
     } finally {
       if (isMountedRef.current) {
@@ -334,7 +336,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
     console.log('[HERIXA VOICE] Recording started');
     
     speechRecognitionService.startListening(
-      language === 'ta' ? 'ta-IN' : language === 'hi' ? 'hi-IN' : 'en-US',
+      language === 'ta' ? 'ta-IN' : language === 'hi' ? 'hi-IN' : language === 'te' ? 'te-IN' : language === 'ml' ? 'ml-IN' : language === 'kn' ? 'kn-IN' : 'en-US',
       (text, isFinal) => {
         if (isMountedRef.current && voiceSessionIdRef.current === sessionId) {
           if (isFinal) {
@@ -356,13 +358,15 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
           console.log(`[HERIXA-VOICE] ERROR SessionID: ${sessionId}, Error: ${err}, Timestamp: ${Date.now()}`);
           console.log(`[HERIXA-VOICE] SESSION_ENDED SessionID: ${sessionId}, ListeningState: error, Timestamp: ${Date.now()}`);
           setRecordingState('error');
-          setError(
-            language === 'ta'
-              ? 'என்னால் குரலை அடையாளம் காண முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
-              : language === 'hi'
-              ? 'आवाज पहचानी नहीं जा सकी। कृपया पुन: प्रयास करें।'
-              : 'I couldn\'t understand the voice. Please try again.'
-          );
+          const voiceErrorMsgs: Record<string, string> = {
+            ta: 'என்னால் குரலை அடையாளம் காண முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+            hi: 'आवाज पहचानी नहीं जा सकी। कृपया पुन: प्रयास करें।',
+            te: 'గొంతు గుర్తించబడలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+            ml: 'ശബ്ദം തിരിച്ചറിയാനായില്ല. വീണ്ടും ശ്രമിക്കുക.',
+            kn: 'ಧ್ವನಿ ಗುರುತಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+            en: 'I couldn\'t understand the voice. Please try again.',
+          };
+          setError(voiceErrorMsgs[language] || voiceErrorMsgs.en);
           setTimeout(() => {
             if (isMountedRef.current && voiceSessionIdRef.current === sessionId) {
               setRecordingState('idle');
@@ -377,16 +381,41 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
   };
 
   const getRecordingStateLabel = () => {
-    switch (recordingState) {
-      case 'recording':
-        return language === 'ta' ? '🔴 கேட்டுக்கொண்டிருக்கிறது...' : language === 'hi' ? '🔴 सुन रहा है...' : '🔴 Listening...';
-      case 'processing':
-        return language === 'ta' ? '⏳ பதிலை செயலாக்குகிறது...' : language === 'hi' ? '⏳ संसाधित कर रहा है...' : '⏳ Processing...';
-      case 'error':
-        return language === 'ta' ? '⚠️ குரல் புரியவில்லை' : language === 'hi' ? '⚠️ आवाज समझ नहीं आई' : '⚠️ Could not understand';
-      default:
-        return language === 'ta' ? '🎤 குரல் மூலம் கேளுங்கள்' : language === 'hi' ? '🎤 वॉयस इनपुट' : '🎤 Ask by voice';
-    }
+    const labels: Record<string, Record<string, string>> = {
+      recording: {
+        en: '🔴 Listening...',
+        ta: '🔴 கேட்டுக்கொண்டிருக்கிறது...',
+        hi: '🔴 सुन रहा है...',
+        te: '🔴 వింటోంది...',
+        ml: '🔴 കേൾക്കുന്നു...',
+        kn: '🔴 ಕೇಳುತ್ತಿದೆ...',
+      },
+      processing: {
+        en: '⏳ Processing...',
+        ta: '⏳ பதிலை செயலாக்குகிறது...',
+        hi: '⏳ संसाधित कर रहा है...',
+        te: '⏳ ప్రాసెస్ చేస్తోంది...',
+        ml: '⏳ പ്രോസസ്സ് ചെയ്യുന്നു...',
+        kn: '⏳ ಪ್ರಕ್ರಿಯೆ ಮಾಡುತ್ತಿದೆ...',
+      },
+      error: {
+        en: '⚠️ Could not understand',
+        ta: '⚠️ குரல் புரியவில்லை',
+        hi: '⚠️ आवाज समझ नहीं आई',
+        te: '⚠️ అర్థం కాలేదు',
+        ml: '⚠️ മനസ്സിലായില്ല',
+        kn: '⚠️ ಅರ್ಥವಾಗಲಿಲ್ಲ',
+      },
+      idle: {
+        en: '🎤 Ask by voice',
+        ta: '🎤 குரல் மூலம் கேளுங்கள்',
+        hi: '🎤 वॉयस इनपुट',
+        te: '🎤 గొంతుతో అడగండి',
+        ml: '🎤 ശബ്ദത്തിലൂടെ ചോദിക്കൂ',
+        kn: '🎤 ಧ್ವನಿ ಮೂಲಕ ಕೇಳಿ',
+      },
+    };
+    return labels[recordingState]?.[language] || labels[recordingState]?.en || labels.idle.en;
   };
 
   return (

@@ -11,6 +11,7 @@ export interface UserProfile {
   preferredLanguage?: string | null;
   favoriteMonuments: string[];
   role: 'user' | 'admin';
+  scanCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -330,11 +331,15 @@ export const getProfileImageUrl = (imagePath: string | null | undefined): string
 };
 
 export const forgotPassword = async (
-  email: string
+  email: string,
+  method?: 'otp' | 'link'
 ): Promise<{ success: boolean; message: string }> => {
   const result = await apiFetch('/api/users/forgot-password', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({
+      email,
+      method,
+    }),
   });
   return result;
 };
@@ -345,7 +350,10 @@ export const verifyResetOtp = async (
 ): Promise<{ success: boolean; message: string; resetToken?: string }> => {
   const result = await apiFetch('/api/users/verify-reset-otp', {
     method: 'POST',
-    body: JSON.stringify({ email, otp }),
+    body: JSON.stringify({
+      email,
+      otp,
+    }),
   });
   return result;
 };
@@ -377,3 +385,236 @@ export const changePassword = async (
   });
   return result;
 };
+
+export const sendSettingsOtp = async (
+  authToken: string
+): Promise<{ success: boolean; message: string }> => {
+  const result = await apiFetch('/api/users/password-settings/send-otp', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+  });
+  return result;
+};
+
+export const verifySettingsOtp = async (
+  otp: string,
+  authToken: string
+): Promise<{ success: boolean; message: string; resetToken?: string }> => {
+  const result = await apiFetch('/api/users/password-settings/verify-otp', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ otp }),
+  });
+  return result;
+};
+
+export const deleteAccount = async (
+  password: string,
+  authToken: string
+): Promise<{ success: boolean; message: string }> => {
+  const result = await apiFetch('/api/users/account', {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ password }),
+  });
+  return result;
+};
+
+export const getAdminStats = async (
+  authToken: string
+): Promise<{ success: boolean; data: any }> => {
+  return await apiFetch('/api/admin/stats', {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminUsers = async (
+  authToken: string,
+  page: number,
+  limit: number,
+  search?: string
+): Promise<{ success: boolean; data: any; pagination: any }> => {
+  let url = `/api/admin/users?page=${page}&limit=${limit}`;
+  if (search) {
+    url += `&search=${encodeURIComponent(search)}`;
+  }
+  return await apiFetch(url, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminUserDetails = async (
+  authToken: string,
+  userId: string
+): Promise<{ success: boolean; data: { user: any; activities: any[] } }> => {
+  return await apiFetch(`/api/admin/users/${userId}`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminActivityLogs = async (
+  authToken: string,
+  page: number,
+  limit: number,
+  event?: string
+): Promise<{ success: boolean; data: any; pagination: any }> => {
+  let url = `/api/admin/activity?page=${page}&limit=${limit}`;
+  if (event && event !== 'ALL') {
+    url += `&event=${encodeURIComponent(event)}`;
+  }
+  return await apiFetch(url, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminHealth = async (
+  authToken: string
+): Promise<{ success: boolean; data: any }> => {
+  return await apiFetch('/api/admin/health', {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminTourismInsights = async (
+  authToken: string
+): Promise<{ success: boolean; data: any }> => {
+  return await apiFetch('/api/admin/tourism', {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminAiAnalytics = async (
+  authToken: string
+): Promise<{ success: boolean; data: any }> => {
+  return await apiFetch('/api/admin/analytics/ai', {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminProfileData = async (
+  authToken: string
+): Promise<{ success: boolean; data: any }> => {
+  return await apiFetch('/api/admin/profile', {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const deleteUserAdmin = async (
+  userId: string,
+  authToken: string
+): Promise<{ success: boolean; message?: string }> => {
+  return await apiFetch(`/api/admin/users/${userId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const getAdminNotifications = async (
+  authToken: string,
+  page: number = 1,
+  limit: number = 30
+): Promise<{ success: boolean; data: any[]; pagination: any }> => {
+  return await apiFetch(`/api/admin/notifications?page=${page}&limit=${limit}`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+
+export const updateAdminProfileData = async (
+  authToken: string,
+  payload: { name?: string; email?: string }
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  return await apiFetch('/api/admin/profile', {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+};
+
+export const uploadAdminAvatarData = async (
+  imageUri: string,
+  authToken: string,
+  activeUserId?: string
+): Promise<{ success: boolean; data?: any; message?: string }> => {
+  const { getApiUrl } = require('./api');
+  const apiURL = getApiUrl();
+  const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
+  const url = `${baseUrl}/api/admin/profile/avatar`;
+
+  const headers: Record<string, string> = {
+    'Authorization': `Bearer ${authToken}`,
+  };
+  if (activeUserId) {
+    headers['x-user-id'] = activeUserId;
+  }
+
+  console.log(`[AVATAR-UPLOAD] Uploading ${imageUri} to ${url}`);
+
+  try {
+    const FileSystem = require('expo-file-system/legacy');
+    const uploadResult = await FileSystem.uploadAsync(url, imageUri, {
+      httpMethod: 'POST',
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      fieldName: 'avatar',
+      headers,
+    });
+
+    console.log(`[AVATAR-UPLOAD] HTTP Status: ${uploadResult.status}`);
+    if (uploadResult.status >= 200 && uploadResult.status < 300) {
+      const data = JSON.parse(uploadResult.body);
+      console.log('[AVATAR-UPLOAD] Upload Success:', data.message || 'Avatar saved');
+      return data;
+    } else {
+      throw new Error(`Upload failed with HTTP status ${uploadResult.status}`);
+    }
+  } catch (fsErr) {
+    console.warn('[AVATAR-UPLOAD] FileSystem uploadAsync failed, falling back to FormData fetch:', fsErr);
+    const formData = new FormData();
+    const fileName = imageUri.split('/').pop() || 'avatar.jpg';
+    formData.append('avatar', {
+      uri: imageUri,
+      name: fileName,
+      type: 'image/jpeg',
+    } as any);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        ...(activeUserId ? { 'x-user-id': activeUserId } : {}),
+      },
+      body: formData,
+    });
+    const data = await res.json();
+    return data;
+  }
+};
+
+export const fetchAuditLogsForExport = async (
+  authToken: string,
+  userId?: string
+): Promise<{ success: boolean; data: any[] }> => {
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+  return await apiFetch(`/api/admin/audit-logs/export${query}`, {
+    method: 'GET',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+};
+

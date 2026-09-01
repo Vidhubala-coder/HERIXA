@@ -20,6 +20,10 @@ import {
   verifyResetOtp,
   resetPassword,
   changePassword,
+  sendSettingsOtp,
+  verifySettingsOtp,
+  resetPasswordRedirect,
+  deleteAccount,
 } from '../controllers/userController';
 import { requireAuth } from '../middleware/auth';
 
@@ -66,7 +70,11 @@ router.post('/otp/verify', verifyOtp);
 router.post('/forgot-password', forgotPassword);
 router.post('/verify-reset-otp', verifyResetOtp);
 router.post('/reset-password', resetPassword);
+router.get('/reset-password-redirect', resetPasswordRedirect);
 router.post('/change-password', requireAuth as any, changePassword);
+router.post('/password-settings/send-otp', requireAuth as any, sendSettingsOtp);
+router.post('/password-settings/verify-otp', requireAuth as any, verifySettingsOtp);
+router.delete('/account', requireAuth as any, deleteAccount as any);
 
 // Profile photo routes (using requireAuth and JWT extraction)
 router.post('/profile/photo', requireAuth as any, uploadProfile.single('photo'), uploadProfilePhoto as any);

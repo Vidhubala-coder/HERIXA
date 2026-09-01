@@ -4,7 +4,9 @@
   "description": "Backend API for HERIXA application",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev:backend": "node scripts/start-backend.js",
+    "dev:ai": "node scripts/start-ai.js",
+    "dev": "concurrently -n \"backend,ai\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:ai\"",
     "build": "rimraf dist && tsc",
     "start": "node dist/server.js",
     "seed": "ts-node-dev --transpile-only src/utils/seed.ts",
@@ -30,6 +32,7 @@
     "@types/multer": "^2.2.0",
     "@types/node": "^20.14.9",
     "@types/nodemailer": "^8.0.1",
+    "concurrently": "^10.0.5",
     "rimraf": "^5.0.7",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.3"

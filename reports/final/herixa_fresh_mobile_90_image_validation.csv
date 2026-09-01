@@ -1,0 +1,91 @@
+image_id,filename,ground_truth,predicted_monument,phase3g_pred,phase3g_conf,phase3l_pred,phase3l_conf,hybrid_pred,hybrid_conf,routing_decision,backend_status,recognized,slug,monument_name,final_result,latency_ms
+1,brihadeeswarar_fresh_01.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.9972,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2594.08
+2,brihadeeswarar_fresh_02.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.8575,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2532.04
+3,brihadeeswarar_fresh_03.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.7659,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2120.37
+4,brihadeeswarar_fresh_04.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.5649,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2105.12
+5,brihadeeswarar_fresh_05.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.978,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2113.25
+6,brihadeeswarar_fresh_06.jpg,Brihadeeswarar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2147.51
+7,brihadeeswarar_fresh_07.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.492,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2273.66
+8,brihadeeswarar_fresh_08.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.7595,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2100.96
+9,brihadeeswarar_fresh_09.jpg,Brihadeeswarar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2172.86
+10,brihadeeswarar_fresh_10.jpg,Brihadeeswarar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2162.29
+11,brihadeeswarar_fresh_11.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.9497,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2142.27
+12,brihadeeswarar_fresh_12.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.9038,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2110.75
+13,brihadeeswarar_fresh_13.jpg,Brihadeeswarar,Brihadeeswarar,N/A,0.0,N/A,0.0,brihadeeswarar,0.9297,N/A,200,True,brihadeeswarar,Brihadeeswarar Temple,CORRECT,2190.32
+14,brihadeeswarar_fresh_14.jpg,Brihadeeswarar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2125.58
+15,brihadeeswarar_fresh_15.jpg,Brihadeeswarar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2169.42
+16,meenakshi-amman_fresh_01.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9292,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2234.4
+17,meenakshi-amman_fresh_02.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.785,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2213.83
+18,meenakshi-amman_fresh_03.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9992,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2340.94
+19,meenakshi-amman_fresh_04.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9959,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2239.66
+20,meenakshi-amman_fresh_05.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9035,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2277.39
+21,meenakshi-amman_fresh_06.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9796,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2122.4
+22,meenakshi-amman_fresh_07.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9836,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2298.08
+23,meenakshi-amman_fresh_08.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9695,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2301.57
+24,meenakshi-amman_fresh_09.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9378,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2347.24
+25,meenakshi-amman_fresh_10.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9956,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2199.05
+26,meenakshi-amman_fresh_11.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9126,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2245.42
+27,meenakshi-amman_fresh_12.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9285,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2174.49
+28,meenakshi-amman_fresh_13.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9789,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2195.44
+29,meenakshi-amman_fresh_14.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9822,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2130.64
+30,meenakshi-amman_fresh_15.jpg,Meenakshi-Amman,Meenakshi-Amman,N/A,0.0,N/A,0.0,meenakshi-amman,0.9535,N/A,200,True,meenakshi-amman,Meenakshi Amman Temple,CORRECT,2091.07
+31,mahabalipuram_fresh_01.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9831,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2121.98
+32,mahabalipuram_fresh_02.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.96,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2120.42
+33,mahabalipuram_fresh_03.jpg,Mahabalipuram,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2101.86
+34,mahabalipuram_fresh_04.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9892,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2085.9
+35,mahabalipuram_fresh_05.jpg,Mahabalipuram,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2088.43
+36,mahabalipuram_fresh_06.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9997,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2089.62
+37,mahabalipuram_fresh_07.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9969,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2131.8
+38,mahabalipuram_fresh_08.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9999,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2078.8
+39,mahabalipuram_fresh_09.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9685,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2160.64
+40,mahabalipuram_fresh_10.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9757,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2161.13
+41,mahabalipuram_fresh_11.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9869,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2113.98
+42,mahabalipuram_fresh_12.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9794,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2274.77
+43,mahabalipuram_fresh_13.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9944,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2242.42
+44,mahabalipuram_fresh_14.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9856,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2114.26
+45,mahabalipuram_fresh_15.jpg,Mahabalipuram,Mahabalipuram,N/A,0.0,N/A,0.0,mahabalipuram,0.9795,N/A,200,True,mahabalipuram,Mahabalipuram Shore Temple,CORRECT,2112.7
+46,gangaikonda-cholapuram_fresh_01.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.4665,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2115.1
+47,gangaikonda-cholapuram_fresh_02.jpg,Gangaikonda-Cholapuram,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2096.75
+48,gangaikonda-cholapuram_fresh_03.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9406,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2265.44
+49,gangaikonda-cholapuram_fresh_04.jpg,Gangaikonda-Cholapuram,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2118.33
+50,gangaikonda-cholapuram_fresh_05.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.682,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2114.88
+51,gangaikonda-cholapuram_fresh_06.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9997,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2132.76
+52,gangaikonda-cholapuram_fresh_07.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9404,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2133.97
+53,gangaikonda-cholapuram_fresh_08.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9951,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2178.93
+54,gangaikonda-cholapuram_fresh_09.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9282,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2118.24
+55,gangaikonda-cholapuram_fresh_10.jpg,Gangaikonda-Cholapuram,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2135.15
+56,gangaikonda-cholapuram_fresh_11.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9658,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2125.38
+57,gangaikonda-cholapuram_fresh_12.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9523,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2159.6
+58,gangaikonda-cholapuram_fresh_13.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9067,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2149.96
+59,gangaikonda-cholapuram_fresh_14.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9338,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2171.88
+60,gangaikonda-cholapuram_fresh_15.jpg,Gangaikonda-Cholapuram,Gangaikonda-Cholapuram,N/A,0.0,N/A,0.0,gangaikonda-cholapuram,0.9998,N/A,200,True,gangaikonda-cholapuram,Gangaikonda Cholapuram,CORRECT,2118.18
+61,airavatesvara_fresh_01.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.9175,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2120.2
+62,airavatesvara_fresh_02.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.5789,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2101.99
+63,airavatesvara_fresh_03.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.7532,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2172.41
+64,airavatesvara_fresh_04.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.9573,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2125.74
+65,airavatesvara_fresh_05.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.963,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2177.21
+66,airavatesvara_fresh_06.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.55,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2118.84
+67,airavatesvara_fresh_07.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.9885,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2182.69
+68,airavatesvara_fresh_08.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.8855,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2202.28
+69,airavatesvara_fresh_09.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.9075,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2113.03
+70,airavatesvara_fresh_10.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.7564,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2207.13
+71,airavatesvara_fresh_11.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.9945,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2136.02
+72,airavatesvara_fresh_12.jpg,Airavatesvara,Airavatesvara,N/A,0.0,N/A,0.0,airavatesvara,0.9373,N/A,200,True,airavatesvara,Airavatesvara Temple,CORRECT,2138.61
+73,airavatesvara_fresh_13.jpg,Airavatesvara,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2093.62
+74,airavatesvara_fresh_14.jpg,Airavatesvara,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2141.18
+75,airavatesvara_fresh_15.jpg,Airavatesvara,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2121.03
+76,thirumalai-nayakkar_fresh_01.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.999,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2215.07
+77,thirumalai-nayakkar_fresh_02.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9561,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2192.96
+78,thirumalai-nayakkar_fresh_03.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9974,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2143.03
+79,thirumalai-nayakkar_fresh_04.jpg,Thirumalai-Nayakkar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2153.57
+80,thirumalai-nayakkar_fresh_05.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9947,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2116.0
+81,thirumalai-nayakkar_fresh_06.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9968,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2236.67
+82,thirumalai-nayakkar_fresh_07.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9973,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2089.07
+83,thirumalai-nayakkar_fresh_08.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.812,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2196.49
+84,thirumalai-nayakkar_fresh_09.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9984,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2098.59
+85,thirumalai-nayakkar_fresh_10.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9983,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2092.44
+86,thirumalai-nayakkar_fresh_11.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9972,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2139.49
+87,thirumalai-nayakkar_fresh_12.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9513,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2170.75
+88,thirumalai-nayakkar_fresh_13.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9927,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2142.26
+89,thirumalai-nayakkar_fresh_14.jpg,Thirumalai-Nayakkar,Unknown/Other,N/A,0.0,N/A,0.0,N/A,0.0,N/A,200,False,N/A,N/A,WRONG_PREDICTION,2120.63
+90,thirumalai-nayakkar_fresh_15.jpg,Thirumalai-Nayakkar,Thirumalai-Nayakkar,N/A,0.0,N/A,0.0,thirumalai-nayakkar,0.9606,N/A,200,True,thirumalai-nayakkar,Thirumalai Nayakkar Palace,CORRECT,2115.26

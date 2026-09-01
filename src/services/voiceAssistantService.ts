@@ -118,6 +118,14 @@ export interface ChatTurn {
 /**
  * Ask HERIXA Guide about a specific monument.
  * Attempts to hit the backend API, and falls back to local cache/offline logic on failure.
+ *
+ * ROOT CAUSE FIX: Previously, when the backend returned { success: false } (e.g. 404 monument
+ * not found), the code fell through to the local fallback which showed "information offline".
+ * Now we properly distinguish:
+ *  - Network error / timeout → try cache → local fallback
+ *  - Backend responded but monument not found (404) → local fallback WITH monument name hint
+ *  - Backend responded with AI error (500) → local fallback
+ *  - Backend responded with success:true → use AI answer
  */
 export const askVoiceAssistant = async (
   monumentId: string,
@@ -129,13 +137,19 @@ export const askVoiceAssistant = async (
   const cacheKey = `${CACHE_PREFIX}${monumentId}_${language}`;
   const questionKey = `${question.trim().toLowerCase()}_${explainSimply ? 'simple' : 'detail'}`;
 
+  const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : false;
+
   // 1. Try to contact the backend
   const endpoint = '/api/assistant/ask';
-
-  console.log("[VOICE DEBUG] Request endpoint:", endpoint);
-  console.log("[VOICE DEBUG] Sending Voice Assistant request");
+  let backendReachable = false;
+  let backendErrorMessage: string | null = null;
 
   try {
+    if (isDev) {
+      console.log(`[HERIXA ASSISTANT] POST ${endpoint}`);
+      console.log(`[HERIXA ASSISTANT] Payload: monumentId=${monumentId}, lang=${language}, question="${question.substring(0, 60)}..."`);
+    }
+
     const result = await apiFetch(endpoint, {
       method: 'POST',
       body: JSON.stringify({
@@ -145,53 +159,130 @@ export const askVoiceAssistant = async (
         explainSimply,
         history,
       }),
-      timeout: 60000, // 60 seconds timeout
+      timeout: 60000,
     });
 
-    console.log("[VOICE DEBUG] Voice Assistant response received");
+    backendReachable = true;
 
     if (result && result.success) {
-      // Save to cache asynchronously
+      // Cache successful AI response
       saveToCache(cacheKey, questionKey, result.answer).catch((err) =>
         console.warn('Failed to cache assistant response:', err)
       );
-
+      if (isDev) {
+        console.log(`[HERIXA ASSISTANT] AI response received (source: ${result.source || 'ai'}, length: ${result.answer?.length || 0} chars)`);
+      }
       return {
         success: true,
         answer: result.answer,
-        language: result.language,
+        language: result.language || language,
         source: result.source || 'ai',
       };
     }
+
+    // Backend reached but returned success:false.
+    // Extract the actual error message from the backend response.
+    backendErrorMessage = result?.message || result?.answer || null;
+    if (isDev) {
+      console.warn(`[HERIXA ASSISTANT] Backend returned success:false`);
+      console.warn(`[HERIXA ASSISTANT] Backend message: ${backendErrorMessage}`);
+      console.warn(`[HERIXA ASSISTANT] Full response:`, JSON.stringify(result).substring(0, 500));
+    }
   } catch (apiError: any) {
-    if (apiError.isTimeout) {
-      console.error('[VOICE ERROR] Timeout: Voice Assistant request timed out. Status: Timeout');
-    } else if (apiError.isNetworkError) {
-      console.warn('[VOICE ERROR] Network: Unable to connect to Voice Assistant server.', apiError.message);
+    if (isDev) {
+      console.error(`[HERIXA ASSISTANT] Request failed`);
+      console.error(`[HERIXA ASSISTANT] Endpoint: ${endpoint}`);
+      console.error(`[HERIXA ASSISTANT] Error type: ${apiError.isTimeout ? 'TIMEOUT' : apiError.isNetworkError ? 'NETWORK' : 'HTTP'}`);
+      console.error(`[HERIXA ASSISTANT] Error message: ${apiError.message || apiError}`);
+      if (apiError.status) console.error(`[HERIXA ASSISTANT] HTTP Status: ${apiError.status}`);
     } else {
-      console.error('[VOICE ERROR] Voice Assistant request failed:', apiError.message || apiError);
+      if (apiError.isTimeout) {
+        console.warn('[VOICE] Request timed out, falling back to cache/local.');
+      } else if (apiError.isNetworkError) {
+        console.warn('[VOICE] Network unreachable, falling back to cache/local.');
+      } else {
+        console.warn('[VOICE] API error, falling back to cache/local:', apiError.message || apiError);
+      }
     }
-    console.warn('VoiceAssistant API request failed. Checking local cache & fallback.');
   }
 
-  // 2. Try to fetch from cache on API failure
-  try {
-    const cachedAnswer = await getFromCache(cacheKey, questionKey);
-    if (cachedAnswer) {
-      return {
-        success: true,
-        answer: cachedAnswer,
-        language,
-        source: 'cache',
-      };
-    }
-  } catch (cacheError) {
-    console.warn('Failed to read from AsyncStorage cache:', cacheError);
+  // 2. If backend was reachable but returned an error, show the backend's error message
+  //    (e.g., "Monument not found", "AI rate limit", etc.)
+  //    Do NOT silently fall to local keyword fallback — that creates misleading answers.
+  if (backendReachable && backendErrorMessage) {
+    // The backend explicitly told us it couldn't answer. Report this honestly.
+    const userFacingError = getLocalizedAIUnavailableMessage(language, backendErrorMessage);
+    return {
+      success: false,
+      answer: userFacingError,
+      language,
+      source: 'local-fallback',
+    };
   }
 
-  // 3. Fallback to Local client-side generation using static assets
+  // 3. Try the cache (only when backend was unreachable / timed out)
+  if (!backendReachable) {
+    try {
+      const cachedAnswer = await getFromCache(cacheKey, questionKey);
+      if (cachedAnswer) {
+        return {
+          success: true,
+          answer: cachedAnswer,
+          language,
+          source: 'cache',
+        };
+      }
+    } catch (cacheError) {
+      console.warn('Failed to read from AsyncStorage cache:', cacheError);
+    }
+  }
+
+  // 4. Local client-side generation (offline fallback)
   return generateClientLocalFallback(monumentId, question, language, explainSimply);
 };
+
+/**
+ * Generate a user-friendly localized message when the AI service is unavailable.
+ */
+const getLocalizedAIUnavailableMessage = (
+  language: string,
+  backendMessage?: string
+): string => {
+  // If the backend provided a specific message about the monument not being found,
+  // preserve that context
+  const isNotFound = backendMessage && /not found|not exist/i.test(backendMessage);
+
+  if (language === 'ta') {
+    return isNotFound
+      ? 'இந்த நினைவுச்சின்னம் பற்றிய தகவல் தரவுத்தளத்தில் காணப்படவில்லை. Heritage Information பக்கத்தில் விவரங்களைப் பாருங்கள்.'
+      : 'AI உதவியாளர் சேவை தற்போது கிடைக்கவில்லை. பின்னர் மீண்டும் முயற்சிக்கவும் அல்லது Heritage Information பக்கத்தைப் பாருங்கள்.';
+  }
+  if (language === 'hi') {
+    return isNotFound
+      ? 'इस स्मारक की जानकारी डेटाबेस में नहीं मिली। Heritage Information पेज पर विवरण देखें।'
+      : 'AI सहायक सेवा वर्तमान में अनुपलब्ध है। बाद में पुन: प्रयास करें या Heritage Information पेज देखें।';
+  }
+  if (language === 'te') {
+    return isNotFound
+      ? 'ఈ స్మారక చిహ్నం గురించి డేటాబేస్‌లో సమాచారం కనుగొనబడలేదు. Heritage Information పేజీలో వివరాలు చూడండి.'
+      : 'AI అసిస్టెంట్ సేవ ప్రస్తుతం అందుబాటులో లేదు. తర్వాత మళ్ళీ ప్రయత్నించండి లేదా Heritage Information పేజీ చూడండి.';
+  }
+  if (language === 'ml') {
+    return isNotFound
+      ? 'ഈ സ്‌മാരകത്തെക്കുറിച്ചുള്ള വിവരങ്ങൾ ഡാറ്റാബേസിൽ കണ്ടെത്താനായില്ല. Heritage Information പേജിൽ വിശദാംശങ്ങൾ കാണുക.'
+      : 'AI അസിസ്റ്റന്റ് സേവനം നിലവിൽ ലഭ്യമല്ല. പിന്നീട് വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ Heritage Information പേജ് കാണുക.';
+  }
+  if (language === 'kn') {
+    return isNotFound
+      ? 'ಈ ಸ್ಮಾರಕದ ಬಗ್ಗೆ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಮಾಹಿತಿ ಕಂಡುಬಂದಿಲ್ಲ. Heritage Information ಪುಟದಲ್ಲಿ ವಿವರಗಳನ್ನು ನೋಡಿ.'
+      : 'AI ಸಹಾಯಕ ಸೇವೆ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ Heritage Information ಪುಟವನ್ನು ನೋಡಿ.';
+  }
+  // English default
+  return isNotFound
+    ? 'This monument was not found in the database. Please check the Heritage Information page for details.'
+    : 'The AI assistant service is currently unavailable. Please try again later or view the Heritage Information page.';
+};
+
 
 const saveToCache = async (cacheKey: string, questionKey: string, answer: string): Promise<void> => {
   let cacheMap: Record<string, string> = {};
@@ -365,14 +456,36 @@ const generateClientLocalFallback = (
   // Find local monument
   const monument = MONUMENTS.find((m) => m.id === monumentId || m.name.toLowerCase() === monumentId.toLowerCase());
   
+  // If monument not in local static array, build a helpful response from available info
+  // (This is the common case for monuments stored only in MongoDB)
   if (!monument) {
-    let unavail = 'Information about this monument is currently offline.';
-    if (language === 'ta') unavail = 'இந்த நினைவுச்சின்னம் பற்றிய தகவல் தற்போது ஆஃப்லைனில் உள்ளது.';
-    if (language === 'hi') unavail = 'इस स्मारक के बारे में जानकारी वर्तमान में ऑफ़लाइन है।';
+    // The monumentId may be the actual display name (e.g. "Brihadeeswarar Temple")
+    // or a MongoDB ObjectId. Use whichever looks like a readable name.
+    const displayName = /^[a-f0-9]{24}$/i.test(monumentId)
+      ? 'this monument'
+      : monumentId;
+
+    let genericAnswer = '';
+    const q = question.toLowerCase();
+    const isNarrationQ = /narration|tour guide|comprehensive|tell me about|explain|describe/i.test(q);
+
+    if (language === 'ta') {
+      genericAnswer = isNarrationQ
+        ? `${displayName} பற்றிய விரிவான தகவல் தற்போது இணைய இணைப்பு இல்லாமல் கிடைக்கவில்லை. ஆனால் நீங்கள் Heritage Information பொத்தானை அழுத்தி இந்த நினைவுச்சின்னம் பற்றிய முழு விவரங்களைப் பார்க்கலாம்.`
+        : `${displayName} பற்றிய இந்தக் கேள்விக்கு பதிலளிக்க, Heritage Information பக்கத்தில் விரிவான தகவல்கள் உள்ளன. அங்கு பாருங்கள்.`;
+    } else if (language === 'hi') {
+      genericAnswer = isNarrationQ
+        ? `${displayName} के बारे में विस्तृत जानकारी अभी ऑफ़लाइन उपलब्ध नहीं है। Heritage Information बटन दबाकर इस स्मारक के बारे में पूरी जानकारी देखें।`
+        : `${displayName} के बारे में इस प्रश्न का उत्तर Heritage Information पृष्ठ पर विस्तार से उपलब्ध है।`;
+    } else {
+      genericAnswer = isNarrationQ
+        ? `Detailed information about ${displayName} is not available offline right now. Tap "Heritage Information" below to read the full details about this monument.`
+        : `Information about ${displayName} is available in the Heritage Information section. Please tap the Heritage Information button to explore the full details.`;
+    }
 
     return {
-      success: false,
-      answer: unavail,
+      success: true,
+      answer: genericAnswer,
       language,
       source: 'local-fallback',
     };

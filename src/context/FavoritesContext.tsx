@@ -7,6 +7,8 @@ import { COLORS, SPACING, TYPOGRAPHY } from '../constants/theme';
 import { checkConnectivity, getConnectivityState } from '../services/api';
 import { MONUMENTS } from '../data/monuments';
 import { getMonuments } from '../services/monumentService';
+import * as ImagePicker from 'expo-image-picker';
+
 
 interface FavoritesContextType {
   favorites: string[];
@@ -16,7 +18,8 @@ interface FavoritesContextType {
   isLoading: boolean;
   activeUserId: string | null;
   authToken: string | null;
-  switchUser: (id: string, token: string) => Promise<void>;
+  userRole: 'user' | 'admin' | null;
+  switchUser: (id: string, token: string, role?: 'user' | 'admin') => Promise<void>;
   refreshFavorites: () => Promise<void>;
 
   // Auth Methods
@@ -25,10 +28,12 @@ interface FavoritesContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   verifyOTP: (email: string, otp: string) => Promise<{ success: boolean; data: any; token: string }>;
   resendOTPCode: (email: string) => Promise<{ success: boolean; message: string }>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  forgotPassword: (email: string, method?: 'otp' | 'link') => Promise<{ success: boolean; message: string }>;
   verifyResetOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string; resetToken?: string }>;
   resetPassword: (resetToken: string, newPassword: string, confirmPassword: string) => Promise<{ success: boolean; message: string }>;
   changePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<{ success: boolean; message: string }>;
+  sendSettingsOtp: () => Promise<{ success: boolean; message: string }>;
+  verifySettingsOtp: (otp: string) => Promise<{ success: boolean; message: string; resetToken?: string }>;
 
   // History Methods
   history: any[];
@@ -42,6 +47,14 @@ interface FavoritesContextType {
   // Language Methods
   selectedLanguage: string | null;
   changeLanguage: (lang: string | null) => Promise<void>;
+
+  // Recovery State
+  pendingProfilePhotoRecovery: boolean;
+
+  // Profile Management State
+  userProfile: any | null;
+  setUserProfile: React.Dispatch<React.SetStateAction<any | null>>;
+  refreshUserProfile: () => Promise<any>;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -73,10 +86,42 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeUserId, setActiveUserId] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<'user' | 'admin' | null>(null);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [pendingProfilePhotoRecovery, setPendingProfilePhotoRecovery] = useState<boolean>(false);
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
   const [isClearing, setIsClearing] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguageState] = useState<string | null>('en');
   const [monumentsList, setMonumentsList] = useState<any[]>([]);
+
+  const refreshUserProfile = React.useCallback(async () => {
+    if (!activeUserId || !authToken) return null;
+    try {
+      let p = null;
+      if (userRole === 'admin') {
+        const res = await userService.getAdminProfileData(authToken).catch(() => null);
+        if (res && res.success && res.data) p = res.data;
+      }
+      if (!p) {
+        p = await userService.getUserProfile(activeUserId, authToken).catch(() => null);
+      }
+      if (p) {
+        setUserProfile(p);
+        const storageKey = `@heritage_ar_profile_${activeUserId}`;
+        await AsyncStorage.setItem(storageKey, JSON.stringify(p)).catch(() => {});
+      }
+      return p;
+    } catch (err) {
+      console.warn('[FavoritesContext] refreshUserProfile error:', err);
+      return null;
+    }
+  }, [activeUserId, authToken, userRole]);
+
+  useEffect(() => {
+    if (activeUserId && authToken) {
+      refreshUserProfile();
+    }
+  }, [activeUserId, authToken, refreshUserProfile]);
 
   // Load monuments list for ObjectId resolution
   useEffect(() => {
@@ -127,15 +172,24 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const syncFavoritesPromiseRef = useRef<Promise<void> | null>(null);
   const syncHistoryPromiseRef = useRef<Promise<void> | null>(null);
 
-  const logout = async () => {
-    console.log('[HERIXA-AUTH] LOGOUT');
+  const logout = async (targetIdParam?: string | null) => {
+    console.log('[HERIXA-AUTH] LOGOUT / SESSION_CLEAR');
     try {
+      const idToClear = targetIdParam || activeUserId;
       await AsyncStorage.removeItem('active_user_id');
       await AsyncStorage.removeItem('auth_token');
+      await AsyncStorage.removeItem('user_role');
       
+      if (idToClear) {
+        await AsyncStorage.removeItem(`@heritage_ar_profile_${idToClear}`).catch(() => {});
+        await AsyncStorage.removeItem(`@heritage_ar_favorites_${idToClear}`).catch(() => {});
+        await AsyncStorage.removeItem(`@heritage_ar_history_${idToClear}`).catch(() => {});
+      }
+
       // Reset state immediately to Guest Mode
       setActiveUserId(null);
       setAuthToken(null);
+      setUserRole(null);
       setFavorites([]);
       setHistory([]);
     } catch (error) {
@@ -335,13 +389,32 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Initialize active user session on app mount
   useEffect(() => {
     const initUser = async () => {
+      let storedId: string | null = null;
+      let storedToken: string | null = null;
+      let savedLocalLang: string | null = null;
+      let storedRole: string | null = null;
+
       try {
         console.log('[HERIXA-STARTUP] Running initial backend connectivity health check...');
         const isOnline = await checkConnectivity();
         
-        const storedId = await AsyncStorage.getItem('active_user_id');
-        const storedToken = await AsyncStorage.getItem('auth_token');
-        const savedLocalLang = await AsyncStorage.getItem('@heritage_ar_selected_language');
+        storedId = await AsyncStorage.getItem('active_user_id');
+        storedToken = await AsyncStorage.getItem('auth_token');
+        savedLocalLang = await AsyncStorage.getItem('@heritage_ar_selected_language');
+        storedRole = await AsyncStorage.getItem('user_role');
+
+        // Check token / active_user_id consistency
+        if (storedToken && storedToken.includes('.')) {
+          const parts = storedToken.split('.');
+          if (parts.length === 2 && parts[0] && parts[0].length === 24) {
+            const tokenUserId = parts[0];
+            if (storedId && storedId !== tokenUserId) {
+              console.warn(`[HERIXA-AUTH] Session inconsistency detected: stored active_user_id (${storedId}) !== token identity (${tokenUserId}). Aligning to token identity.`);
+              storedId = tokenUserId;
+              await AsyncStorage.setItem('active_user_id', tokenUserId);
+            }
+          }
+        }
 
         if (isOnline && storedId && storedToken) {
           try {
@@ -351,6 +424,10 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               console.log('[HERIXA-AUTH] SESSION_RESTORED');
               setActiveUserId(storedId);
               setAuthToken(storedToken);
+              // Always use authoritative role from backend profile
+              const resolvedRole: 'user' | 'admin' = profile.role === 'admin' ? 'admin' : 'user';
+              setUserRole(resolvedRole);
+              await AsyncStorage.setItem('user_role', resolvedRole);
               if (profile.preferredLanguage) {
                 setSelectedLanguageState(profile.preferredLanguage);
                 await AsyncStorage.setItem('@heritage_ar_selected_language', profile.preferredLanguage);
@@ -359,10 +436,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               }
             } else {
               console.warn('[HERIXA-AUTH] Verification failed. Clearing invalid session.');
-              await AsyncStorage.removeItem('active_user_id');
-              await AsyncStorage.removeItem('auth_token');
-              setActiveUserId(null);
-              setAuthToken(null);
+              await logout(storedId);
               if (savedLocalLang) {
                 setSelectedLanguageState(savedLocalLang);
               }
@@ -370,11 +444,8 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           } catch (profileError: any) {
             const isClientError = profileError.status === 401 || profileError.status === 403 || profileError.status === 404;
             if (isClientError) {
-              console.warn('[HERIXA-AUTH] Verification failed (4xx client error). Clearing invalid session.');
-              await AsyncStorage.removeItem('active_user_id');
-              await AsyncStorage.removeItem('auth_token');
-              setActiveUserId(null);
-              setAuthToken(null);
+              console.warn(`[HERIXA-AUTH] Session verification failed (HTTP ${profileError.status}). Safely clearing invalid session.`);
+              await logout(storedId);
               if (savedLocalLang) {
                 setSelectedLanguageState(savedLocalLang);
               }
@@ -382,6 +453,8 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               console.warn('[HERIXA-AUTH] Backend session verification unreachable (network error), keeping offline session.');
               setActiveUserId(storedId);
               setAuthToken(storedToken);
+              // Use cached role when offline
+              setUserRole(storedRole === 'admin' ? 'admin' : storedRole ? 'user' : null);
               if (savedLocalLang) {
                 setSelectedLanguageState(savedLocalLang);
               }
@@ -393,10 +466,12 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             console.log('[HERIXA-AUTH] Offline mode. Restoring offline session.');
             setActiveUserId(storedId);
             setAuthToken(storedToken);
+            setUserRole(storedRole === 'admin' ? 'admin' : storedRole ? 'user' : null);
           } else {
             console.log('[HERIXA-AUTH] Defaulting to Guest Mode (Offline).');
             setActiveUserId(null);
             setAuthToken(null);
+            setUserRole(null);
           }
           if (savedLocalLang) {
             setSelectedLanguageState(savedLocalLang);
@@ -412,15 +487,22 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     initUser();
   }, []);
 
+
+
+
   // Reload favorites whenever activeUserId or authToken changes
   useEffect(() => {
     const loadFavorites = async () => {
+      const userIdForRequest = activeUserId;
       setIsLoading(true);
-      const storageKey = getFavoritesStorageKey(activeUserId);
+      setFavorites([]); // Clear previous user's favorites state immediately
+
+      const storageKey = getFavoritesStorageKey(userIdForRequest);
 
       // Guest Mode (read local only)
-      if (!activeUserId || !authToken) {
+      if (!userIdForRequest || !authToken) {
         const storedFavorites = await getSafeStorageItem<string[]>(storageKey, []);
+        if (userIdForRequest !== activeUserId) return;
         setFavorites(storedFavorites);
         setIsLoading(false);
         return;
@@ -435,6 +517,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (!isOnline) {
         console.log('[HERIXA-DATA] Offline mode: loading favorites from local cache.');
         const storedFavorites = await getSafeStorageItem<string[]>(storageKey, []);
+        if (userIdForRequest !== activeUserId) return;
         setFavorites(storedFavorites);
         setIsLoading(false);
         return;
@@ -444,23 +527,29 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         await syncPendingFavorites();
         
-        console.log(`[HERIXA-DATA] FAVORITES_FETCHED UserID: ${activeUserId}`);
-        const apiFavorites = await favoriteService.getFavorites(activeUserId, authToken);
+        if (userIdForRequest !== activeUserId) return;
+        console.log(`[HERIXA-DATA] FAVORITES_FETCHED UserID: ${userIdForRequest}`);
+        const apiFavorites = await favoriteService.getFavorites(userIdForRequest, authToken);
         const favoriteIds = apiFavorites.map((mon) => mon.id || mon._id);
 
+        if (userIdForRequest !== activeUserId) return;
         setFavorites(favoriteIds);
         await AsyncStorage.setItem(storageKey, JSON.stringify(favoriteIds));
       } catch (error: any) {
+        if (userIdForRequest !== activeUserId) return;
         if (error.status === 401 || error.status === 403) {
           console.warn('[HERIXA-DATA] Token expired during favorites load, logging out.');
           await logout();
         } else {
           console.warn('Backend API favorites unavailable, falling back to local user cache');
           const storedFavorites = await getSafeStorageItem<string[]>(storageKey, []);
+          if (userIdForRequest !== activeUserId) return;
           setFavorites(storedFavorites);
         }
       } finally {
-        setIsLoading(false);
+        if (userIdForRequest === activeUserId) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -470,11 +559,15 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Reload history whenever activeUserId or authToken changes
   useEffect(() => {
     const loadHistory = async () => {
-      const storageKey = getHistoryStorageKey(activeUserId);
+      const userIdForRequest = activeUserId;
+      setHistory([]); // Clear previous user's history state immediately
+
+      const storageKey = getHistoryStorageKey(userIdForRequest);
 
       // Guest Mode (read local only)
-      if (!activeUserId || !authToken) {
+      if (!userIdForRequest || !authToken) {
         const storedHistory = await getSafeStorageItem<any[]>(storageKey, []);
+        if (userIdForRequest !== activeUserId) return;
         setHistory(storedHistory);
         return;
       }
@@ -488,6 +581,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (!isOnline) {
         console.log('[HERIXA-DATA] Offline mode: loading history from local cache.');
         const storedHistory = await getSafeStorageItem<any[]>(storageKey, []);
+        if (userIdForRequest !== activeUserId) return;
         setHistory(storedHistory);
         return;
       }
@@ -496,19 +590,23 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         await syncPendingHistory();
 
-        console.log(`[HERIXA-DATA] HISTORY_FETCHED UserID: ${activeUserId}`);
-        const result = await userService.getUserHistory(activeUserId, authToken);
+        if (userIdForRequest !== activeUserId) return;
+        console.log(`[HERIXA-DATA] HISTORY_FETCHED UserID: ${userIdForRequest}`);
+        const result = await userService.getUserHistory(userIdForRequest, authToken);
         if (result.success && result.data) {
+          if (userIdForRequest !== activeUserId) return;
           setHistory(result.data);
           await AsyncStorage.setItem(storageKey, JSON.stringify(result.data));
         }
       } catch (error: any) {
+        if (userIdForRequest !== activeUserId) return;
         if (error.status === 401 || error.status === 403) {
           console.warn('[HERIXA-DATA] Token expired during history load, logging out.');
           await logout();
         } else {
           console.warn('Backend API history unavailable, falling back to local user cache');
           const storedHistory = await getSafeStorageItem<any[]>(storageKey, []);
+          if (userIdForRequest !== activeUserId) return;
           setHistory(storedHistory);
         }
       }
@@ -517,13 +615,22 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     loadHistory();
   }, [activeUserId, authToken]);
 
-  const switchUser = async (newUserId: string, token: string) => {
+  const switchUser = async (newUserId: string, token: string, role?: 'user' | 'admin') => {
     setIsLoading(true);
     try {
       await AsyncStorage.setItem('active_user_id', newUserId);
       await AsyncStorage.setItem('auth_token', token);
+      if (role) {
+        await AsyncStorage.setItem('user_role', role);
+        setUserRole(role);
+      }
       setActiveUserId(newUserId);
       setAuthToken(token);
+
+      // Pre-fetch and cache persistent user profile (with scanCount) from backend
+      userService.getUserProfile(newUserId, token).catch((err) => {
+        console.warn('[HERIXA-AUTH] Background profile pre-fetch failed:', err);
+      });
     } catch (error) {
       console.error('Failed to switch user:', error);
       setIsLoading(false);
@@ -578,7 +685,8 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const result = await userService.loginUser(email, password);
     if (result.success && (result as any).token) {
       const loginResult = result as any;
-      await switchUser(loginResult.data._id, loginResult.token);
+      const role: 'user' | 'admin' = loginResult.data?.role === 'admin' ? 'admin' : 'user';
+      await switchUser(loginResult.data._id, loginResult.token, role);
       if (loginResult.data.preferredLanguage) {
         setSelectedLanguageState(loginResult.data.preferredLanguage);
         await AsyncStorage.setItem('@heritage_ar_selected_language', loginResult.data.preferredLanguage);
@@ -590,7 +698,8 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const verifyOTP = async (email: string, otp: string) => {
     const result = await userService.verifyOtp(email, otp);
     if (result.success && result.token) {
-      await switchUser(result.data._id, result.token);
+      const role: 'user' | 'admin' = result.data?.role === 'admin' ? 'admin' : 'user';
+      await switchUser(result.data._id, result.token, role);
       if (result.data.preferredLanguage) {
         setSelectedLanguageState(result.data.preferredLanguage);
         await AsyncStorage.setItem('@heritage_ar_selected_language', result.data.preferredLanguage);
@@ -604,8 +713,8 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return result;
   };
 
-  const forgotPassword = async (email: string) => {
-    return await userService.forgotPassword(email);
+  const forgotPassword = async (email: string, method?: 'otp' | 'link') => {
+    return await userService.forgotPassword(email, method);
   };
 
   const verifyResetOtp = async (email: string, otp: string) => {
@@ -621,6 +730,20 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       throw new Error('User is not authenticated.');
     }
     return await userService.changePassword(currentPassword, newPassword, confirmPassword, authToken);
+  };
+
+  const sendSettingsOtp = async () => {
+    if (!authToken) {
+      throw new Error('User is not authenticated.');
+    }
+    return await userService.sendSettingsOtp(authToken);
+  };
+
+  const verifySettingsOtp = async (otp: string) => {
+    if (!authToken) {
+      throw new Error('User is not authenticated.');
+    }
+    return await userService.verifySettingsOtp(otp, authToken);
   };
 
   const changeLanguage = async (langCode: string | null) => {
@@ -914,6 +1037,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       isLoading,
       activeUserId,
       authToken,
+      userRole,
       switchUser,
       refreshFavorites,
       logout,
@@ -925,6 +1049,8 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       verifyResetOtp,
       resetPassword,
       changePassword,
+      sendSettingsOtp,
+      verifySettingsOtp,
       history,
       addHistory,
       refreshHistory,
@@ -934,6 +1060,10 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       isClearing,
       selectedLanguage,
       changeLanguage,
+      pendingProfilePhotoRecovery,
+      userProfile,
+      setUserProfile,
+      refreshUserProfile,
     }}>
       {children}
     </FavoritesContext.Provider>

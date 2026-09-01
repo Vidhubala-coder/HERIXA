@@ -5,11 +5,16 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import Monument from '../models/monument';
+import User from '../models/user';
+import History from '../models/history';
+import ScanActivity from '../models/ScanActivity';
+import { verifyToken } from '../utils/cryptoAuth';
+import { logEvent } from '../utils/auditLogger';
 import { syncWikimediaReferences } from '../services/wikimediaService';
 import { retrieveCandidates } from '../services/candidateService';
 import { AI_CONTENT_GENERATION_TIMEOUT, AI_IMAGE_DISCOVERY_TIMEOUT } from '../config/aiConfig';
 import { withAIRetry } from '../utils/aiRetry';
-import { checkAiServiceHealth, getAiServiceState } from '../services/aiService';
+import { checkAiServiceHealth, getAiServiceState, callPredictionService, isAiServiceAvailable } from '../services/aiService';
 
 const MONUMENT_COORDINATES: { [key: string]: { lat: number; lon: number; name: string } } = {
   'brihadeeswarar': { lat: 10.7828, lon: 79.1318, name: 'Brihadeeswarar Temple' },
@@ -19,6 +24,8 @@ const MONUMENT_COORDINATES: { [key: string]: { lat: number; lon: number; name: s
   'airavatesvara': { lat: 10.9483, lon: 79.3562, name: 'Airavatesvara Temple' },
   'thirumalai-nayakkar': { lat: 9.9149, lon: 78.1218, name: 'Thirumalai Nayakkar Palace' }
 };
+
+const processedScansMap = new Map<string, number>();
 
 const getHaversineDistanceKm = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // Earth radius in km
@@ -211,7 +218,7 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
     let imageToProcess: string | undefined = undefined;
     let viewTypeToProcess: string | undefined = undefined;
 
-    if (scanEvidence && Array.isArray(scanEvidence) && scanEvidence.length > 0) {
+    if (scanEvidence && Array.isArray(scanEvidence) && scanEvidence.length > 0 && scanEvidence[0].base64) {
       imageToProcess = scanEvidence[0].base64;
       viewTypeToProcess = scanEvidence[0].viewType;
     } else {
@@ -272,6 +279,8 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
       return;
     }
 
+    const tStart = Date.now();
+    console.log(`[HERIXA-TIMING] [Stage 0: Start] Request received at ${new Date(tStart).toISOString()}`);
     console.log('[AR DEBUG] Capturing image: base64 string received');
     console.log('[AR DEBUG] Sending image to backend: starting trained AI model analysis');
 
@@ -294,13 +303,24 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
     
     try {
       console.log('[HERIXA-RECOGNITION] Request started');
-      console.log('[HERIXA-RECOGNITION] Inference started');
+      const tHealthStart = Date.now();
+      const isAvailable = await isAiServiceAvailable();
+      const tHealthDuration = Date.now() - tHealthStart;
+      console.log(`[HERIXA-TIMING] [Stage 1: FastAPI Health Check] Duration: ${tHealthDuration}ms, isAvailable: ${isAvailable}`);
+
+      if (!isAvailable) {
+        console.log('[HERIXA-RECOGNITION] FastAPI unavailable');
+        res.status(503).json({
+          success: false,
+          status: 'error',
+          message: 'HERIXA recognition service is temporarily unavailable. Please try again.',
+          errorCode: 503,
+          errorDetails: 'MODEL_UNAVAILABLE'
+        });
+        return;
+      }
+      
       const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 6000);
-      const fastApiUrl = `${process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001'}/predict`;
-      
-      console.log('[HERIXA-AI] Request started');
-      console.log(`[HERIXA-AI] AI service URL: ${fastApiUrl}`);
-      
       const cleanBase64 = imageToProcess.replace(/^data:image\/\w+;base64,/, "");
       const buffer = Buffer.from(cleanBase64, 'base64');
       
@@ -325,11 +345,10 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
       const timeoutSignal = AbortSignal.timeout(timeoutMs);
       const combinedSignal = controller.signal ? AbortSignal.any([controller.signal, timeoutSignal]) : timeoutSignal;
       
-      const response = await fetch(fastApiUrl, {
-        method: 'POST',
-        body: formData,
-        signal: combinedSignal,
-      });
+      const tPredictStart = Date.now();
+      const response = await callPredictionService(formData, combinedSignal);
+      const tPredictDuration = Date.now() - tPredictStart;
+      console.log(`[HERIXA-TIMING] [Stage 2: FastAPI Predict Inference] Duration: ${tPredictDuration}ms`);
       
       if (response.ok) {
         fastApiResult = await response.json();
@@ -380,7 +399,8 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
           }
 
           // Phase 8 GPS Proximity Check
-          if (isAccepted) {
+          const bypassGps = process.env.BYPASS_GPS_CHECK === 'true';
+          if (isAccepted && !bypassGps) {
             const userLat = Number(req.body.latitude);
             const userLon = Number(req.body.longitude);
 
@@ -400,7 +420,9 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
 
           if (isAccepted) {
             const targetSlug = predictedClass.toLowerCase();
+            const tMongoMonStart = Date.now();
             matchedMonument = await Monument.findOne({ slug: targetSlug });
+            console.log(`[HERIXA-TIMING] [Stage 3: Monument DB Lookup] Duration: ${Date.now() - tMongoMonStart}ms`);
             if (matchedMonument) {
               recognized = true;
               finalStatus = 'identified';
@@ -413,6 +435,75 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
             }
           } else {
             finalStatus = 'uncertain';
+          }
+
+          // Authoritative Server-Side User Scan Count & Scan History Increment for ALL Server-Processed Scans
+          try {
+            const tMongoScanStart = Date.now();
+            let resolvedUserId: string | null = null;
+            const authHeader = (req.headers.authorization || req.headers['authorization']) as string | undefined;
+            const xUserIdHeader = (req.headers['x-user-id'] || req.headers['X-User-Id']) as string | undefined;
+
+            if (xUserIdHeader && mongoose.Types.ObjectId.isValid(xUserIdHeader)) {
+              resolvedUserId = xUserIdHeader;
+            } else if (authHeader && authHeader.startsWith('Bearer ')) {
+              const tokenStr = authHeader.split(' ')[1];
+              if (tokenStr && tokenStr.includes('.')) {
+                const parts = tokenStr.split('.');
+                if (parts[0] && mongoose.Types.ObjectId.isValid(parts[0])) {
+                  resolvedUserId = parts[0];
+                }
+              }
+            } else if ((req as any).user?._id) {
+              resolvedUserId = (req as any).user._id.toString();
+            } else if (req.body?.userId && mongoose.Types.ObjectId.isValid(req.body.userId)) {
+              resolvedUserId = req.body.userId;
+            }
+
+            console.log(`[HERIXA-DEBUG-SCAN] resolvedUserId: ${resolvedUserId}`);
+
+            if (resolvedUserId && mongoose.Types.ObjectId.isValid(resolvedUserId)) {
+              const scanEvidenceId = req.body.scanEvidence?.[0]?.capturedAt || req.body.scanEvidence?.[0]?.id || imageToProcess.substring(0, 80);
+              const dedupeKey = `${resolvedUserId}:${scanEvidenceId}`;
+
+              const now = Date.now();
+              const lastTimestamp = processedScansMap.get(dedupeKey);
+              let isDuplicateRetry = false;
+              if (lastTimestamp && (now - lastTimestamp < 3000)) {
+                isDuplicateRetry = true;
+                console.log(`[HERIXA-SCAN-COUNTER] Duplicate retry request detected for scan key: ${dedupeKey}. Skipping double increment.`);
+              } else {
+                processedScansMap.set(dedupeKey, now);
+              }
+
+              if (!isDuplicateRetry) {
+                const updatedUser = await User.findByIdAndUpdate(
+                  resolvedUserId,
+                  { $inc: { scanCount: 1 } },
+                  { new: true }
+                );
+                if (updatedUser) {
+                  const historyEntry = new History({
+                    userId: updatedUser._id,
+                    monumentId: matchedMonument ? matchedMonument._id : null,
+                    actionType: 'recognition',
+                    query: matchedMonument ? matchedMonument.name : (predictedClass || 'Unrecognized Scan')
+                  });
+                  await historyEntry.save();
+
+                  await logEvent('SCAN_PERFORMED', updatedUser._id, matchedMonument ? matchedMonument._id : undefined, 'USER', {
+                    monumentName: matchedMonument ? matchedMonument.name : (predictedClass || 'Unrecognized Scan'),
+                    slug: matchedMonument ? matchedMonument.slug : (predictedClass ? predictedClass.toLowerCase() : 'unknown'),
+                    confidence,
+                    status: finalStatus,
+                    isAccepted
+                  });
+                  console.log(`[HERIXA-TIMING] [Stage 4: MongoDB User Scan Increment & History Log] Duration: ${Date.now() - tMongoScanStart}ms, User: ${updatedUser.email}, scanCount: ${updatedUser.scanCount}`);
+                }
+              }
+            }
+          } catch (scanCounterErr: any) {
+            console.error('[HERIXA-SCAN-COUNTER] Non-blocking warning: Failed to record scan counter/history:', scanCounterErr.message || scanCounterErr);
           }
 
           // Sort probabilities to find top1 and top2
@@ -520,7 +611,7 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
           res.status(503).json({
             success: false,
             status: 'error',
-            message: 'Recognition service is temporarily unavailable.',
+            message: 'HERIXA recognition service is temporarily unavailable. Please try again.',
             errorCode: 503,
             errorDetails: 'MODEL_UNAVAILABLE'
           });
@@ -537,28 +628,43 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
         return;
       }
     } catch (err: any) {
-      const isConnectionRefused = err.code === 'ECONNREFUSED' || String(err).includes('ECONNREFUSED');
-      const isTimeout = err.name === 'AbortError' || err.message?.includes('timeout') || err.message?.includes('timed out');
-      
-      if (isConnectionRefused) {
-        console.error('[HERIXA-AI] Recognition failed: FastAPI service unreachable (ECONNREFUSED).');
-      } else if (isTimeout) {
-        console.error('[HERIXA-AI] Recognition failed: FastAPI service timed out.');
-      } else {
-        console.error(`[HERIXA-AI] Recognition failed: ${err.message || err}`);
-      }
-      
-      console.error('[HERIXA-AI] Model status: ERROR');
+      console.error('[HERIXA-RECOGNITION] MODEL_INFERENCE_FAILED');
+      const errDetails = err.message === 'MODEL_INITIALIZING' ? 'MODEL_INITIALIZING' : 'MODEL_UNAVAILABLE';
+      const userMsg = err.message === 'MODEL_INITIALIZING'
+        ? 'HERIXA AI is preparing. Please wait a moment.'
+        : 'HERIXA recognition service is temporarily unavailable. Please try again.';
+
       res.status(503).json({
         success: false,
         status: 'error',
-        message: 'Recognition service is temporarily unavailable.',
+        message: userMsg,
         errorCode: 503,
-        errorDetails: 'MODEL_UNAVAILABLE'
+        errorDetails: errDetails
       });
       return;
     }
     
+    // Asynchronous non-blocking Scan Activity logging for AI Intelligence & Tourism Insights
+    (async () => {
+      try {
+        const userId = (req as any).user?._id;
+        const confidenceVal = fastApiResult ? fastApiResult.confidence : 0;
+        await ScanActivity.create({
+          userId: userId || undefined,
+          monumentId: matchedMonument ? matchedMonument._id : undefined,
+          monumentName: matchedMonument ? matchedMonument.name : (fastApiResult ? fastApiResult.predicted_class : 'Unknown'),
+          confidence: confidenceVal,
+          recognized: Boolean(recognized),
+          devicePlatform: String(req.headers['user-agent'] || 'unknown'),
+          language: String(req.headers['accept-language'] || 'en'),
+        });
+      } catch (logErr) {
+        console.warn('[ScanActivity Logging Warning]', logErr);
+      }
+    })();
+
+    console.log(`[HERIXA-TIMING] [Stage 5: Final Response Sent] Total Server Processing Duration: ${Date.now() - tStart}ms`);
+
     res.status(200).json({
       success: true,
       recognized,
@@ -703,12 +809,22 @@ export const recognizeMonumentMultiViewRoute = async (req: Request, res: Respons
     
     try {
       console.log('[HERIXA-RECOGNITION] Request started');
-      console.log('[HERIXA-RECOGNITION] Inference started');
-      const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 6000);
-      const fastApiUrl = `${process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001'}/predict`;
       
-      console.log('[HERIXA-AI] Request started');
-      console.log(`[HERIXA-AI] AI service URL: ${fastApiUrl}`);
+      const isAvailable = await isAiServiceAvailable();
+      if (!isAvailable) {
+        console.log('[HERIXA-RECOGNITION] FastAPI unavailable');
+        res.status(503).json({
+          success: false,
+          status: 'error',
+          message: 'HERIXA recognition service is temporarily unavailable. Please try again.',
+          errorCode: 503,
+          errorDetails: 'MODEL_UNAVAILABLE'
+        });
+        return;
+      }
+      
+      console.log('[HERIXA-RECOGNITION] FastAPI health verified');
+      const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 6000);
       
       for (const base64Img of validImages) {
         const cleanBase64 = base64Img.replace(/^data:image\/\w+;base64,/, "");
@@ -735,11 +851,7 @@ export const recognizeMonumentMultiViewRoute = async (req: Request, res: Respons
         const timeoutSignal = AbortSignal.timeout(timeoutMs);
         const combinedSignal = controller.signal ? AbortSignal.any([controller.signal, timeoutSignal]) : timeoutSignal;
         
-        const response = await fetch(fastApiUrl, {
-          method: 'POST',
-          body: formData,
-          signal: combinedSignal,
-        });
+        const response = await callPredictionService(formData, combinedSignal);
         
         if (response.ok) {
           const result = (await response.json()) as any;
@@ -974,28 +1086,40 @@ export const recognizeMonumentMultiViewRoute = async (req: Request, res: Respons
         return;
       }
     } catch (err: any) {
-      const isConnectionRefused = err.code === 'ECONNREFUSED' || String(err).includes('ECONNREFUSED');
-      const isTimeout = err.name === 'AbortError' || err.message?.includes('timeout') || err.message?.includes('timed out');
-      
-      if (isConnectionRefused) {
-        console.error('[HERIXA-AI] Recognition failed: FastAPI service unreachable (ECONNREFUSED) for multi-view.');
-      } else if (isTimeout) {
-        console.error('[HERIXA-AI] Recognition failed: FastAPI service timed out for multi-view.');
-      } else {
-        console.error(`[HERIXA-AI] Recognition failed for multi-view: ${err.message || err}`);
-      }
-      
-      console.error('[HERIXA-AI] Model status: ERROR');
+      console.error('[HERIXA-RECOGNITION] MODEL_INFERENCE_FAILED');
+      const errDetails = err.message === 'MODEL_INITIALIZING' ? 'MODEL_INITIALIZING' : 'MODEL_UNAVAILABLE';
+      const userMsg = err.message === 'MODEL_INITIALIZING'
+        ? 'HERIXA AI is preparing. Please wait a moment.'
+        : 'HERIXA recognition service is temporarily unavailable. Please try again.';
+
       res.status(503).json({
         success: false,
         status: 'error',
-        message: 'Recognition service is temporarily unavailable.',
+        message: userMsg,
         errorCode: 503,
-        errorDetails: 'MODEL_UNAVAILABLE'
+        errorDetails: errDetails
       });
       return;
     }
     
+    // Asynchronous non-blocking Scan Activity logging for AI Intelligence & Tourism Insights
+    (async () => {
+      try {
+        const userId = (req as any).user?._id;
+        await ScanActivity.create({
+          userId: userId || undefined,
+          monumentId: matchedMonument ? matchedMonument._id : undefined,
+          monumentName: matchedMonument ? matchedMonument.name : (bestClass || 'Unknown'),
+          confidence: bestProb || 0,
+          recognized: Boolean(recognized),
+          devicePlatform: String(req.headers['user-agent'] || 'unknown'),
+          language: String(req.headers['accept-language'] || 'en'),
+        });
+      } catch (logErr) {
+        console.warn('[MultiView ScanActivity Logging Warning]', logErr);
+      }
+    })();
+
     res.status(200).json({
       success: true,
       recognized,
@@ -1284,6 +1408,67 @@ const EDITABLE_MONUMENT_FIELDS = [
   'recognitionProfile',
   'recognitionImages'
 ];
+
+export const createMonument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { name, location, state, country, category, period, dynasty } = req.body;
+
+    if (!name || !location || !state || !category || !period || !dynasty) {
+      res.status(400).json({
+        success: false,
+        message: 'Missing required fields. Name, location, state, category, period, and dynasty are required.'
+      });
+      return;
+    }
+
+    // Generate unique slug
+    let baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    let slug = baseSlug;
+    let counter = 1;
+    while (await Monument.findOne({ slug })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    // Populate required fields with empty/defaults to satisfy schema validation
+    const newMonumentData = {
+      ...req.body,
+      slug,
+      country: country || 'India',
+      description: req.body.description || `A heritage site named ${name} located in ${location}.`,
+      historicalBackground: req.body.historicalBackground || `Historical background for ${name}.`,
+      historicalSignificance: req.body.historicalSignificance || `Historical significance of ${name}.`,
+      architecture: req.body.architecture || `Architectural description for ${name}.`,
+      culturalSignificance: req.body.culturalSignificance || `Cultural significance of ${name}.`,
+      preservationStatus: req.body.preservationStatus || `Preservation status details for ${name}.`,
+      interestingFacts: req.body.interestingFacts || [`Seeded fact 1 for ${name}.`],
+      images: req.body.images || [],
+    };
+
+    const newMonument = new Monument(newMonumentData);
+    await newMonument.save();
+
+    console.log(`[CREATE MONUMENT] New heritage site created: ${name} (slug: ${slug})`);
+
+    const adminUser = (req as any).user;
+    const { logEvent } = require('../utils/auditLogger');
+    await logEvent(
+      'HERITAGE_SITE_CREATED',
+      undefined,
+      adminUser?._id,
+      'ADMIN',
+      { monumentId: newMonument._id, monumentName: newMonument.name, slug: newMonument.slug }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Heritage site created successfully',
+      data: newMonument
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const updateMonument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -2337,21 +2522,49 @@ export const syncWikimediaReferencesRoute = async (req: Request, res: Response, 
 
 export const getRecognizeHealth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    console.log('[HERIXA-AI] SERVICE_CHECK_STARTED');
     await checkAiServiceHealth();
     const state = getAiServiceState();
     
-    let statusValue = 'READY';
+    let statusValue: 'READY' | 'INITIALIZING' | 'UNAVAILABLE' | 'FAILED' = 'UNAVAILABLE';
+    let aiServiceReachable = false;
+    let modelLoaded = false;
+    let modelReady = false;
+
     if (state.state === 'READY') {
       statusValue = 'READY';
+      aiServiceReachable = true;
+      modelLoaded = true;
+      modelReady = true;
+      console.log('[HERIXA-AI] MODEL_STATUS: READY');
+    } else if (state.state === 'INITIALIZING') {
+      statusValue = 'INITIALIZING';
+      aiServiceReachable = true;
+      modelLoaded = false;
+      modelReady = false;
+      console.log('[HERIXA-AI] MODEL_STATUS: INITIALIZING');
     } else if (state.state === 'UNAVAILABLE') {
-      statusValue = 'UNREACHABLE';
+      statusValue = 'UNAVAILABLE';
+      aiServiceReachable = false;
+      modelLoaded = false;
+      modelReady = false;
+      console.log('[HERIXA-AI] FastAPI process unreachable');
     } else {
-      statusValue = 'MODEL_UNAVAILABLE';
+      statusValue = 'FAILED';
+      aiServiceReachable = true;
+      modelLoaded = false;
+      modelReady = false;
+      console.log('[HERIXA-AI] MODEL_STATUS: FAILED');
     }
     
     res.status(200).json({
+      success: true,
+      backend: 'healthy',
       ai_recognition: {
-        status: statusValue
+        status: statusValue,
+        aiServiceReachable,
+        modelLoaded,
+        modelReady
       }
     });
   } catch (err) {

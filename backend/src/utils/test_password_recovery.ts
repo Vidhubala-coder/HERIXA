@@ -35,8 +35,8 @@ async function runTests() {
   try {
     // Cleanup
     console.log('[RECOVERY-TEST] Cleaning up previous test records...');
-    await User.deleteMany({ email: testEmail });
-    await PasswordReset.deleteMany({ email: testEmail });
+    await User.deleteMany({ email: { $in: [testEmail, 'nonexistent_user@gmail.com'] } });
+    await PasswordReset.deleteMany({ email: { $in: [testEmail, 'nonexistent_user@gmail.com'] } });
 
     // Create target test user
     const user = new User({
@@ -340,14 +340,45 @@ async function runTests() {
     }
     console.log('✔ Change password succeeded.');
 
+    // 23. Direct Link Reset Password
+    console.log('\n--- TEST 23: Direct Link Reset Password (bypassing OTP) ---');
+    await PasswordReset.deleteMany({ email: testEmail });
+    const rawLinkToken = crypto.randomBytes(32).toString('hex');
+    const hashedLinkToken = crypto.createHash('sha256').update(rawLinkToken).digest('hex');
+    const linkRecord = new PasswordReset({
+      userId: user._id,
+      email: testEmail,
+      otpHash: 'dummy',
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      attempts: 0,
+      verified: false, // NOT verified via OTP!
+      resetTokenHash: hashedLinkToken,
+      resetTokenExpiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    });
+    await linkRecord.save();
+
+    const linkPassword = 'linksecurepassword123';
+    const req23 = { body: { resetToken: rawLinkToken, newPassword: linkPassword, confirmPassword: linkPassword } } as any;
+    const res23 = mockResponse();
+    await resetPassword(req23, res23, (err) => { if (err) throw err; });
+    console.log(`Status: ${res23.statusCode}`);
+    if (res23.statusCode !== 200 || !res23.jsonData.success) {
+      throw new Error('TEST 23 Failed: Direct link reset password failed');
+    }
+    const linkUser = await User.findOne({ email: testEmail });
+    if (!linkUser || !linkUser.passwordHash || !verifyPassword(linkPassword, linkUser.passwordHash)) {
+      throw new Error('TEST 23 Failed: Password hash not updated in database');
+    }
+    console.log('✔ Direct link reset password succeeded.');
+
     console.log('\n==================================================');
     console.log('ALL RECOVERY & MANAGEMENT INTEGRATION TESTS PASSED!');
     console.log('==================================================');
 
   } finally {
     // Cleanup
-    await User.deleteMany({ email: testEmail });
-    await PasswordReset.deleteMany({ email: testEmail });
+    await User.deleteMany({ email: { $in: [testEmail, 'nonexistent_user@gmail.com'] } });
+    await PasswordReset.deleteMany({ email: { $in: [testEmail, 'nonexistent_user@gmail.com'] } });
     await mongoose.disconnect();
   }
 }

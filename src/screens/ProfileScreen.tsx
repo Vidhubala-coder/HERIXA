@@ -13,6 +13,7 @@ import {
   Switch,
   Image,
   Platform,
+  AppState,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -30,7 +31,8 @@ import {
   deleteProfilePhoto,
   getProfileImageUrl,
 } from '../services/userService';
-import { getImageUrl } from '../services/monumentService';
+import { getImageUrl, getMonuments } from '../services/monumentService';
+import { MONUMENTS } from '../data/monuments';
 import { LANGUAGES, getLanguageByCode } from '../config/languages';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -39,6 +41,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     favorites,
     activeUserId,
     authToken,
+    userRole,
     logout,
     register,
     login,
@@ -48,6 +51,8 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     verifyResetOtp,
     resetPassword,
     changePassword,
+    sendSettingsOtp,
+    verifySettingsOtp,
     history,
     refreshHistory,
     selectedLanguage,
@@ -56,7 +61,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register' | 'otp' | 'forgot_password' | 'recovery_otp' | 'reset_password'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'otp' | 'forgot_password' | 'recovery_otp' | 'reset_password' | 'reset_success'>('login');
   
   const [nameInput, setNameInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
@@ -78,6 +83,17 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
   const [isChangePasswordVisible, setIsChangePasswordVisible] = useState(false);
   const [changePasswordSuccess, setChangePasswordSuccess] = useState<string | null>(null);
   const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
+
+  // Settings forgot password flow states
+  const [settingsFlowMode, setSettingsFlowMode] = useState<'normal' | 'forgot_otp_entry' | 'forgot_new_password'>('normal');
+  const [isSettingsOtpSent, setIsSettingsOtpSent] = useState(false);
+  const [settingsOtpInput, setSettingsOtpInput] = useState('');
+  const [settingsNewPasswordInput, setSettingsNewPasswordInput] = useState('');
+  const [settingsConfirmPasswordInput, setSettingsConfirmPasswordInput] = useState('');
+  const [settingsOtpTimer, setSettingsOtpTimer] = useState(0);
+  const [settingsResetToken, setSettingsResetToken] = useState<string | null>(null);
+  const [showSettingsNewPassword, setShowSettingsNewPassword] = useState(false);
+  const [showSettingsConfirmPassword, setShowSettingsConfirmPassword] = useState(false);
   
   const [registerPreferredLanguage, setRegisterPreferredLanguage] = useState<string | null>(null);
   const [langSearchQuery, setLangSearchQuery] = useState('');
@@ -99,8 +115,154 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
   const [isRemovingPhoto, setIsRemovingPhoto] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [avatarRevision, setAvatarRevision] = useState<number>(0);
+  const [monumentsCatalog, setMonumentsCatalog] = useState<any[]>([]);
 
   const isFocused = useIsFocused();
+
+  // Load catalog for heritage journey monument details resolution
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const res = await getMonuments({ limit: 100 });
+        if (res && res.data && isMounted) {
+          setMonumentsCatalog(res.data);
+        }
+      } catch (e) {
+        console.warn('[ProfileScreen] Catalog load error:', e);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [isFocused]);
+
+  const findMonument = React.useCallback((idOrSlug: string) => {
+    if (!idOrSlug) return null;
+    const found = monumentsCatalog.find((m: any) => m._id === idOrSlug || m.id === idOrSlug || m.slug === idOrSlug);
+    if (found) return found;
+    const staticFound = MONUMENTS.find((m: any) => m.id === idOrSlug || m.name?.toLowerCase() === idOrSlug.toLowerCase());
+    if (staticFound) return staticFound;
+    return null;
+  }, [monumentsCatalog]);
+
+  const getMonumentCoverImage = React.useCallback((monument: any): string => {
+    if (!monument) return getImageUrl('');
+    if (monument.coverImageUrl) {
+      return getImageUrl(monument.coverImageUrl);
+    }
+    if (monument.heritagePreviewImages && Array.isArray(monument.heritagePreviewImages)) {
+      const featuredVisible = monument.heritagePreviewImages.find(
+        (img: any) => (img.featured === true || img.featured === 'true') && img.enabled !== false && img.visible !== false
+      );
+      if (featuredVisible && featuredVisible.uri) {
+        return getImageUrl(featuredVisible.uri);
+      }
+      const firstVisible = monument.heritagePreviewImages.find(
+        (img: any) => img.enabled !== false && img.visible !== false
+      );
+      if (firstVisible && firstVisible.uri) {
+        return getImageUrl(firstVisible.uri);
+      }
+    }
+    const existingImage = monument.imageUrl || monument.image || monument.coverImage;
+    if (existingImage) {
+      return getImageUrl(existingImage);
+    }
+    return getImageUrl('');
+  }, []);
+
+  const formatRelativeTime = React.useCallback((dateInput: string | Date | undefined): string => {
+    if (!dateInput) return 'Recently';
+    const now = new Date();
+    const date = new Date(dateInput);
+    const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (isNaN(diffSec) || diffSec < 0) return 'Recently';
+    if (diffSec < 60) return 'Just now';
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (diffSec < 86400) {
+      const hours = Math.floor(diffSec / 3600);
+      return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+    }
+    if (diffSec < 172800) return 'Yesterday';
+    const days = Math.floor(diffSec / 86400);
+    return `${days} days ago`;
+  }, []);
+
+  const uniqueSitesExplored = React.useMemo(() => {
+    const set = new Set<string>();
+    history.forEach((h: any) => {
+      if (h.monumentId) {
+        const id = typeof h.monumentId === 'string' ? h.monumentId : (h.monumentId._id || h.monumentId.id);
+        if (id) set.add(id);
+      }
+    });
+    return set.size;
+  }, [history]);
+
+  const totalScansCount = React.useMemo(() => {
+    return history.filter((h: any) => h.actionType === 'recognition').length;
+  }, [history]);
+
+  const authoritativeScanCount = React.useMemo(() => {
+    if (profile?.scanCount !== undefined && profile?.scanCount !== null) {
+      return profile.scanCount;
+    }
+    return totalScansCount;
+  }, [profile?.scanCount, totalScansCount]);
+
+  const totalFavoritesCount = favorites.length;
+
+  const totalVisualsCount = React.useMemo(() => {
+    return history.filter((h: any) => h.actionType === 'view' || h.actionType === 'recognition').length;
+  }, [history]);
+
+  const recentExploredItems = React.useMemo(() => {
+    const items: { monument: any; monumentId: string; date: string; actionType: string }[] = [];
+    const seenIds = new Set<string>();
+
+    for (const h of history) {
+      let monId = '';
+      let monObj: any = null;
+
+      if (h.monumentId && typeof h.monumentId === 'object') {
+        monId = h.monumentId._id || h.monumentId.id;
+        monObj = h.monumentId;
+      } else if (typeof h.monumentId === 'string') {
+        monId = h.monumentId;
+      }
+
+      if (!monId && h.query) {
+        const match = findMonument(h.query);
+        if (match) {
+          monId = match._id || match.id;
+          monObj = match;
+        }
+      }
+
+      if (monId && !seenIds.has(monId)) {
+        seenIds.add(monId);
+        const fullMon = (monObj && monObj.coverImageUrl) ? monObj : (findMonument(monId) || monObj);
+        if (fullMon) {
+          items.push({
+            monument: fullMon,
+            monumentId: monId,
+            date: h.createdAt,
+            actionType: h.actionType,
+          });
+        }
+      }
+      if (items.length >= 4) break;
+    }
+    return items;
+  }, [history, monumentsCatalog, findMonument]);
+
+  const favoriteMonuments = React.useMemo(() => {
+    return favorites
+      .map((favId) => {
+        const mon = findMonument(favId);
+        return mon ? { ...mon, monumentId: mon._id || mon.id } : null;
+      })
+      .filter(Boolean);
+  }, [favorites, monumentsCatalog, findMonument]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -115,8 +277,22 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
   }, [otpTimer]);
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (settingsOtpTimer > 0) {
+      interval = setInterval(() => {
+        setSettingsOtpTimer(prev => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [settingsOtpTimer]);
+
+
+
+  useEffect(() => {
+    setProfile(null); // Reset profile details memory immediately on user change
     if (!activeUserId) {
-      setProfile(null);
       setIsProfileLoading(false);
       return;
     }
@@ -141,9 +317,11 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
       }
 
       try {
-        console.log('[HERIXA-DATA] PROFILE_FETCHED');
         const data = await getUserProfile(activeUserId, authToken);
         setProfile(data);
+        if (data && data._id) {
+          await AsyncStorage.setItem(storageKey, JSON.stringify(data)).catch(() => {});
+        }
         setEditName(data.name);
         setEditAvatar(data.avatar || 'GE');
         setImageError(false);
@@ -215,7 +393,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           return;
         }
         if (!/^\S+@\S+\.\S+$/.test(emailInput.trim())) {
-          setSubmitError('Please enter a valid email address.');
+          setSubmitError('Enter a valid email address.');
           setIsSubmitting(false);
           return;
         }
@@ -269,8 +447,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           setPasswordInput('');
           setConfirmPasswordInput('');
           setResetToken(null);
-          setAuthMode('login');
-          Alert.alert('Success', 'Your password has been reset successfully. Please log in.');
+          setAuthMode('reset_success');
         }
       } else {
         if (!otpInput.trim() || otpInput.trim().length !== 6) {
@@ -286,11 +463,53 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           setPasswordInput('');
           setOtpInput('');
           setAuthMode('login');
-          Alert.alert('Logged In', `Welcome back, ${res.data.name}!`);
+          // Role-based redirect: admins go to Admin Portal
+          if (res.data?.role === 'admin') {
+            navigation.reset({ index: 0, routes: [{ name: 'AdminPortal' }] });
+          } else {
+            Alert.alert('Logged In', `Welcome back, ${res.data.name}!`);
+          }
         }
       }
     } catch (err: any) {
       console.warn('Authentication action failed:', err);
+      setSubmitError(err.message || 'Verification failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleForgotPasswordSubmit = async (method: 'otp' | 'link') => {
+    setSubmitError(null);
+    if (!emailInput.trim()) {
+      setSubmitError('Email address is required.');
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(emailInput.trim())) {
+      setSubmitError('Enter a valid email address.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const res = await forgotPassword(emailInput.trim().toLowerCase(), method);
+      if (res.success) {
+        setOtpSentEmail(emailInput.trim().toLowerCase());
+        setOtpInput('');
+        if (method === 'otp') {
+          setAuthMode('recovery_otp');
+          setOtpTimer(60);
+          Alert.alert('Code Sent', 'If the email is registered, a verification code has been sent.');
+        } else {
+          Alert.alert(
+            'Link Sent', 
+            'If the email is registered, a password reset link has been sent. Tap the link in your email to open the HERIXA app directly.'
+          );
+          setAuthMode('login');
+        }
+      }
+    } catch (err: any) {
+      console.warn('Forgot password request failed:', err);
       setSubmitError(err.message || 'Verification failed. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -305,7 +524,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           Alert.alert('Rate Limit', `Please wait ${otpTimer} seconds before resending.`);
           return;
         }
-        await forgotPassword(otpSentEmail);
+        await forgotPassword(otpSentEmail, 'otp');
         setOtpTimer(60);
         Alert.alert('OTP Sent', 'A new verification code has been sent to your email.');
       } else {
@@ -359,6 +578,145 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     }
   };
 
+  const handleForgotPasswordSettingsClick = () => {
+    setChangePasswordError(null);
+    setChangePasswordSuccess(null);
+    setSettingsFlowMode('forgot_otp_entry');
+    setIsSettingsOtpSent(false);
+    setSettingsOtpInput('');
+    setSettingsOtpTimer(0);
+    setSettingsResetToken(null);
+  };
+
+  const handleSendSettingsOtp = async () => {
+    setChangePasswordError(null);
+    setChangePasswordSuccess(null);
+    setIsSavingProfile(true);
+    try {
+      const res = await sendSettingsOtp();
+      if (res.success) {
+        setIsSettingsOtpSent(true);
+        setSettingsOtpTimer(60);
+        Alert.alert('OTP Sent', res.message || 'A verification code has been sent to your email.');
+      } else {
+        setChangePasswordError(res.message || 'Failed to send OTP.');
+      }
+    } catch (err: any) {
+      setChangePasswordError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleResendSettingsOtp = async () => {
+    if (settingsOtpTimer > 0) {
+      Alert.alert('Rate Limit', `Please wait ${settingsOtpTimer} seconds before resending.`);
+      return;
+    }
+    setChangePasswordError(null);
+    setChangePasswordSuccess(null);
+    setIsSavingProfile(true);
+    try {
+      const res = await sendSettingsOtp();
+      if (res.success) {
+        setSettingsOtpTimer(60);
+        Alert.alert('OTP Sent', 'A new verification code has been sent to your email.');
+      } else {
+        setChangePasswordError(res.message || 'Failed to resend OTP.');
+      }
+    } catch (err: any) {
+      setChangePasswordError(err.message || 'Failed to resend OTP. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleVerifySettingsOtp = async () => {
+    setChangePasswordError(null);
+    setChangePasswordSuccess(null);
+    if (!settingsOtpInput.trim() || settingsOtpInput.trim().length !== 6) {
+      setChangePasswordError('Please enter the 6-digit verification code.');
+      return;
+    }
+    setIsSavingProfile(true);
+    try {
+      const res = await verifySettingsOtp(settingsOtpInput.trim());
+      if (res.success && res.resetToken) {
+        setSettingsResetToken(res.resetToken);
+        setSettingsNewPasswordInput('');
+        setSettingsConfirmPasswordInput('');
+        setSettingsFlowMode('forgot_new_password');
+      } else {
+        setChangePasswordError(res.message || 'Invalid verification code.');
+      }
+    } catch (err: any) {
+      setChangePasswordError(err.message || 'Verification failed. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleForgotNewPasswordSubmit = async () => {
+    setChangePasswordError(null);
+    setChangePasswordSuccess(null);
+    if (!settingsNewPasswordInput || !settingsConfirmPasswordInput) {
+      setChangePasswordError('Both password fields are required.');
+      return;
+    }
+    if (settingsNewPasswordInput.length < 8) {
+      setChangePasswordError('Password must be at least 8 characters long.');
+      return;
+    }
+    if (settingsNewPasswordInput !== settingsConfirmPasswordInput) {
+      setChangePasswordError('Passwords do not match.');
+      return;
+    }
+    if (!settingsResetToken) {
+      setChangePasswordError('Invalid reset session. Please request a new OTP.');
+      return;
+    }
+    setIsSavingProfile(true);
+    try {
+      const res = await resetPassword(settingsResetToken, settingsNewPasswordInput, settingsConfirmPasswordInput);
+      if (res.success) {
+        setChangePasswordSuccess('Password changed successfully.');
+        Alert.alert('Success', 'Your password has been changed successfully.');
+        // Reset and close
+        setIsChangePasswordVisible(false);
+        setCurrentPasswordInput('');
+        setChangeNewPasswordInput('');
+        setChangeConfirmPasswordInput('');
+        setSettingsFlowMode('normal');
+        setSettingsOtpInput('');
+        setSettingsNewPasswordInput('');
+        setSettingsConfirmPasswordInput('');
+        setSettingsOtpTimer(0);
+        setSettingsResetToken(null);
+        setShowSettingsNewPassword(false);
+        setShowSettingsConfirmPassword(false);
+      } else {
+        setChangePasswordError(res.message || 'Failed to update password.');
+      }
+    } catch (err: any) {
+      setChangePasswordError(err.message || 'Failed to update password. Please try again.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleCancelSettingsRecovery = () => {
+    setChangePasswordError(null);
+    setChangePasswordSuccess(null);
+    setSettingsFlowMode('normal');
+    setSettingsOtpInput('');
+    setSettingsNewPasswordInput('');
+    setSettingsConfirmPasswordInput('');
+    setSettingsOtpTimer(0);
+    setSettingsResetToken(null);
+    setShowSettingsNewPassword(false);
+    setShowSettingsConfirmPassword(false);
+  };
+
   const handleSaveProfile = async () => {
     if (!editName.trim()) {
       Alert.alert('Error', 'Name field cannot be left blank.');
@@ -386,21 +744,13 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     setIsPhotoModalVisible(true);
   };
 
-  const handlePickPhoto = async (fromGallery: boolean) => {
+  const handlePickPhoto = async () => {
     console.log('[HERIXA-PHOTO] Picker opened');
     try {
-      if (fromGallery) {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Media library permission is required to select a photo.');
-          return;
-        }
-      } else {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
-          return;
-        }
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Media library permission is required to select a photo.');
+        return;
       }
 
       setIsUploadingPhoto(true);
@@ -412,9 +762,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         quality: 0.8,
       };
 
-      const result = fromGallery
-        ? await ImagePicker.launchImageLibraryAsync(pickerOptions)
-        : await ImagePicker.launchCameraAsync(pickerOptions);
+      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
 
       if (result.canceled || !result.assets || result.assets.length === 0) {
         console.log('[HERIXA-PHOTO] Selection cancelled');
@@ -476,7 +824,6 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           setImageError(false);
           Alert.alert('Success', 'Profile photo updated successfully.');
         } else {
-          console.log('[HERIXA-PHOTO] Upload failed');
           Alert.alert('Upload Failed', res.message || 'Unable to upload image.');
         }
       }
@@ -597,20 +944,219 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         </View>
 
         <View style={styles.statsContainer}>
-          <View style={styles.statBox}>
+          <TouchableOpacity
+            style={styles.statBox}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Favorites')}
+          >
             <Text style={styles.statValue}>{favorites.length}</Text>
             <Text style={styles.statLabel}>Saved</Text>
-          </View>
+          </TouchableOpacity>
+
           <View style={styles.divider} />
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{profile ? '6' : '0'}</Text>
+
+          <TouchableOpacity
+            style={styles.statBox}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('Explore')}
+          >
+            <Text style={styles.statValue}>{uniqueSitesExplored}</Text>
             <Text style={styles.statLabel}>Sites</Text>
-          </View>
+          </TouchableOpacity>
+
           <View style={styles.divider} />
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{scanCount}</Text>
+
+          <TouchableOpacity
+            style={styles.statBox}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('UserHistory')}
+          >
+            <Text style={styles.statValue}>{authoritativeScanCount}</Text>
             <Text style={styles.statLabel}>Scans</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── MY HERITAGE JOURNEY ────────────────────────────────────────────── */}
+        <View style={styles.journeySectionContainer}>
+          {/* Journey Header */}
+          <View style={styles.journeyHeader}>
+            <View style={styles.journeyHeaderTitleRow}>
+              <View style={styles.journeyHeaderIconWrap}>
+                <Feather name="compass" size={18} color={COLORS.gold} />
+              </View>
+              <Text style={styles.journeyHeaderTitle}>MY HERITAGE JOURNEY</Text>
+            </View>
+            <Text style={styles.journeyHeaderSubtitle}>
+              Your journey through India's living heritage
+            </Text>
           </View>
+
+          {/* New User Onboarding State (If 0 history and 0 favorites) */}
+          {history.length === 0 && favorites.length === 0 ? (
+            <View style={styles.onboardingCard}>
+              <View style={styles.onboardingIconCircle}>
+                <Feather name="compass" size={32} color={COLORS.gold} />
+              </View>
+              <Text style={styles.onboardingTitle}>START YOUR HERITAGE JOURNEY</Text>
+              <Text style={styles.onboardingDesc}>
+                Scan a monument or explore the Heritage Map to begin discovering India's cultural heritage.
+              </Text>
+              <TouchableOpacity
+                style={styles.onboardingBtn}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('Main', { screen: 'Explore' })}
+              >
+                <Text style={styles.onboardingBtnText}>START EXPLORING</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {/* Recently Explored */}
+              <View style={styles.journeySubSection}>
+                <View style={styles.journeySubHeader}>
+                  <View>
+                    <Text style={styles.journeySubTitle}>RECENTLY EXPLORED</Text>
+                    <Text style={styles.journeySubDesc}>Places you've recently discovered</Text>
+                  </View>
+                  {history.length > 0 && (
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('UserHistory')}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.journeySeeAll}>VIEW ALL →</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {recentExploredItems.length === 0 ? (
+                  <Text style={styles.journeyEmptyText}>No recently explored sites yet.</Text>
+                ) : (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalScrollContent}
+                  >
+                    {recentExploredItems.map((item, idx) => {
+                      const mon = item.monument;
+                      const imageUri = getMonumentCoverImage(mon);
+                      const name = mon.name || 'Heritage Site';
+                      const location = mon.state || mon.location || mon.district || 'Tamil Nadu';
+                      const timeAgo = formatRelativeTime(item.date);
+
+                      return (
+                        <TouchableOpacity
+                          key={item.monumentId + '_' + idx}
+                          style={styles.exploredCard}
+                          activeOpacity={0.8}
+                          onPress={() =>
+                            navigation.navigate('MonumentDetails', { monumentId: item.monumentId })
+                          }
+                        >
+                          <Image source={{ uri: imageUri }} style={styles.exploredCardImage} />
+                          <View style={styles.exploredCardOverlay} />
+                          <View style={styles.exploredCardBody}>
+                            <Text style={styles.exploredCardName} numberOfLines={1}>
+                              {name}
+                            </Text>
+                            <View style={styles.exploredCardMeta}>
+                              <Feather name="map-pin" size={10} color={COLORS.gold} />
+                              <Text style={styles.exploredCardLocation} numberOfLines={1}>
+                                {location}
+                              </Text>
+                            </View>
+                            <Text style={styles.exploredCardTime}>Explored {timeAgo}</Text>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                )}
+              </View>
+
+              {/* My Favorites */}
+              <View style={styles.journeySubSection}>
+                <View style={styles.journeySubHeader}>
+                  <View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Text style={styles.journeySubTitle}>MY FAVORITES</Text>
+                      {favorites.length > 0 && (
+                        <View style={styles.favoriteCountBadge}>
+                          <Text style={styles.favoriteCountBadgeText}>{favorites.length}</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.journeySubDesc}>Your saved heritage sites</Text>
+                  </View>
+                  {favorites.length > 0 && (
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('Favorites')}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.journeySeeAll}>VIEW ALL →</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {favoriteMonuments.length === 0 ? (
+                  <View style={styles.favoritesEmptyCard}>
+                    <Feather name="bookmark" size={24} color={COLORS.gold} style={{ marginBottom: 6 }} />
+                    <Text style={styles.favoritesEmptyTitle}>NO SAVED HERITAGE SITES</Text>
+                    <Text style={styles.favoritesEmptyText}>
+                      Save monuments you love and they will appear here.
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.exploreBtn}
+                      activeOpacity={0.8}
+                      onPress={() => navigation.navigate('Explore')}
+                    >
+                      <Text style={styles.exploreBtnText}>EXPLORE HERITAGE</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalScrollContent}
+                  >
+                    {favoriteMonuments.map((mon: any, idx: number) => {
+                      const imageUri = getMonumentCoverImage(mon);
+                      const name = mon.name || 'Saved Site';
+                      const location = mon.state || mon.location || mon.district || 'Tamil Nadu';
+                      const monId = mon._id || mon.id;
+
+                      return (
+                        <TouchableOpacity
+                          key={monId + '_' + idx}
+                          style={styles.favoriteCard}
+                          activeOpacity={0.8}
+                          onPress={() =>
+                            navigation.navigate('MonumentDetails', { monumentId: monId })
+                          }
+                        >
+                          <Image source={{ uri: imageUri }} style={styles.favoriteCardImage} />
+                          <View style={styles.favoriteCardBody}>
+                            <Text style={styles.favoriteCardName} numberOfLines={1}>
+                              {name}
+                            </Text>
+                            <View style={styles.exploredCardMeta}>
+                              <Feather name="map-pin" size={10} color={COLORS.gold} />
+                              <Text style={styles.favoriteCardLocation} numberOfLines={1}>
+                                {location}
+                              </Text>
+                            </View>
+                            <View style={styles.savedBadgeRow}>
+                              <Feather name="heart" size={10} color={COLORS.gold} fill={COLORS.gold} />
+                              <Text style={styles.savedBadgeText}>Saved</Text>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                )}
+              </View>
+            </>
+          )}
         </View>
 
         <View style={styles.menuSection}>
@@ -660,63 +1206,13 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           )}
 
           {profile?.role === 'admin' && (
-            <TouchableOpacity style={styles.menuItem} activeOpacity={0.8} onPress={() => navigation.navigate('AdminUpload')}>
+            <TouchableOpacity style={styles.menuItem} activeOpacity={0.8} onPress={() => navigation.navigate('AdminPortal')}>
               <View style={styles.menuItemLeft}>
                 <Feather name="shield" size={18} color={COLORS.gold} />
                 <Text style={styles.menuItemText}>Admin Portal</Text>
               </View>
               <Feather name="chevron-right" size={16} color={COLORS.textSecondary} />
             </TouchableOpacity>
-          )}
-        </View>
-
-        <View style={styles.menuSection}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>YOUR HERITAGE JOURNEY</Text>
-            {history.length > 0 && (
-              <TouchableOpacity onPress={() => navigation.navigate('UserHistory')} activeOpacity={0.7}>
-                <Text style={styles.viewAllText}>View All</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          {history.length === 0 ? (
-            <View style={styles.emptyHistoryCard}>
-              <Feather name="clock" size={24} color={COLORS.textSecondary} style={{ marginBottom: 8 }} />
-              <Text style={styles.emptyHistoryText}>No history records yet. Start scanning and exploring!</Text>
-            </View>
-          ) : (
-            history.slice(0, 5).map((item: any, idx: number) => {
-              const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '';
-              let actionTitle = 'Viewed monument';
-              let icon: keyof typeof Feather.glyphMap = 'eye';
-              if (item.actionType === 'recognition') {
-                actionTitle = 'Recognized site';
-                icon = 'aperture';
-              } else if (item.actionType === 'search') {
-                actionTitle = `Searched: "${item.query || ''}"`;
-                icon = 'search';
-              } else if (item.actionType === 'ai_question') {
-                actionTitle = `Asked AI: "${item.query || ''}"`;
-                icon = 'cpu';
-              }
-
-              const monName = item.monumentId?.name || 'Heritage Monument';
-
-              return (
-                <View key={item._id || idx} style={styles.historyItemCard}>
-                  <View style={styles.historyIconWrapper}>
-                    <Feather name={icon} size={14} color={COLORS.gold} />
-                  </View>
-                  <View style={styles.historyInfo}>
-                    <Text style={styles.historyAction}>{actionTitle}</Text>
-                    {item.actionType !== 'search' && item.actionType !== 'ai_question' && (
-                      <Text style={styles.historyMonumentName}>{monName}</Text>
-                    )}
-                    <Text style={styles.historyDate}>{dateStr}</Text>
-                  </View>
-                </View>
-              );
-            })
           )}
         </View>
 
@@ -744,6 +1240,34 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           </TouchableOpacity>
         </View>
 
+        {profile?.role === 'admin' && (
+          <View style={styles.menuSection}>
+            <Text style={styles.sectionTitle}>ADMINISTRATIVE</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('AdminPortal')}
+            >
+              <View style={styles.menuItemLeft}>
+                <Feather name="sliders" size={18} color={COLORS.gold} />
+                <Text style={styles.menuItemText}>Admin Dashboard</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionTitle}>PRIVACY & LEGAL</Text>
+          <TouchableOpacity style={styles.menuItem} activeOpacity={0.8} onPress={() => navigation.navigate('PrivacyAndLegal')}>
+            <View style={styles.menuItemLeft}>
+              <Feather name="shield" size={18} color={COLORS.gold} />
+              <Text style={styles.menuItemText}>Privacy & Legal Settings</Text>
+            </View>
+            <Feather name="chevron-right" size={16} color={COLORS.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.menuSection}>
           <Text style={styles.sectionTitle}>INFORMATION</Text>
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.8} onPress={() => navigation.navigate('About')}>
@@ -755,8 +1279,8 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
           </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} activeOpacity={0.8} onPress={() => navigation.navigate('PrivacyPolicy')}>
             <View style={styles.menuItemLeft}>
-              <Feather name="shield" size={18} color={COLORS.gold} />
-              <Text style={styles.menuItemText}>Privacy & Security</Text>
+              <Feather name="lock" size={18} color={COLORS.gold} />
+              <Text style={styles.menuItemText}>Privacy Policy</Text>
             </View>
             <Feather name="chevron-right" size={16} color={COLORS.textSecondary} />
           </TouchableOpacity>
@@ -822,59 +1346,191 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                 setCurrentPasswordInput('');
                 setChangeNewPasswordInput('');
                 setChangeConfirmPasswordInput('');
+                setSettingsFlowMode('normal');
+                setSettingsOtpInput('');
+                setSettingsNewPasswordInput('');
+                setSettingsConfirmPasswordInput('');
+                setSettingsOtpTimer(0);
+                setSettingsResetToken(null);
+                setShowSettingsNewPassword(false);
+                setShowSettingsConfirmPassword(false);
               }}>
                 <Feather name="x" size={22} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.modalForm}>
-              <Text style={styles.modalLabel}>Current Password</Text>
-              <View style={styles.passwordInputContainer}>
-                <TextInput
-                  style={styles.passwordTextInput}
-                  value={currentPasswordInput}
-                  onChangeText={setCurrentPasswordInput}
-                  placeholder="Enter current password"
-                  placeholderTextColor={COLORS.textSecondary}
-                  secureTextEntry={!showPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
-                  <Feather name={showPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
-                </TouchableOpacity>
-              </View>
+              {settingsFlowMode === 'normal' && (
+                <>
+                  <Text style={styles.modalLabel}>Current Password</Text>
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput
+                      style={styles.passwordTextInput}
+                      value={currentPasswordInput}
+                      onChangeText={setCurrentPasswordInput}
+                      placeholder="Enter current password"
+                      placeholderTextColor={COLORS.textSecondary}
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
+                      <Feather name={showPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
 
-              <Text style={styles.modalLabel}>New Password</Text>
-              <View style={styles.passwordInputContainer}>
-                <TextInput
-                  style={styles.passwordTextInput}
-                  value={changeNewPasswordInput}
-                  onChangeText={setChangeNewPasswordInput}
-                  placeholder="Enter new password (min 8 chars)"
-                  placeholderTextColor={COLORS.textSecondary}
-                  secureTextEntry={!showNewPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowNewPassword(!showNewPassword)}>
-                  <Feather name={showNewPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity 
+                    style={styles.forgotCurrentPasswordLink}
+                    onPress={handleForgotPasswordSettingsClick}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.forgotCurrentPasswordText}>Forgot current password?</Text>
+                  </TouchableOpacity>
 
-              <Text style={styles.modalLabel}>Confirm New Password</Text>
-              <View style={styles.passwordInputContainer}>
-                <TextInput
-                  style={styles.passwordTextInput}
-                  value={changeConfirmPasswordInput}
-                  onChangeText={setChangeConfirmPasswordInput}
-                  placeholder="Confirm new password"
-                  placeholderTextColor={COLORS.textSecondary}
-                  secureTextEntry={!showConfirmPassword}
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
-                </TouchableOpacity>
-              </View>
+                  <Text style={styles.modalLabel}>New Password</Text>
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput
+                      style={styles.passwordTextInput}
+                      value={changeNewPasswordInput}
+                      onChangeText={setChangeNewPasswordInput}
+                      placeholder="Enter new password (min 8 chars)"
+                      placeholderTextColor={COLORS.textSecondary}
+                      secureTextEntry={!showNewPassword}
+                      autoCapitalize="none"
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowNewPassword(!showNewPassword)}>
+                      <Feather name={showNewPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text style={styles.modalLabel}>Confirm New Password</Text>
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput
+                      style={styles.passwordTextInput}
+                      value={changeConfirmPasswordInput}
+                      onChangeText={setChangeConfirmPasswordInput}
+                      placeholder="Confirm new password"
+                      placeholderTextColor={COLORS.textSecondary}
+                      secureTextEntry={!showConfirmPassword}
+                      autoCapitalize="none"
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                      <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+
+              {settingsFlowMode === 'forgot_otp_entry' && (
+                <>
+                  {!isSettingsOtpSent ? (
+                    <View style={{ marginBottom: SPACING.md }}>
+                      <Text style={[styles.sheetLoadingText, { textAlign: 'left', marginBottom: SPACING.md }]}>
+                        We'll send a verification OTP to your registered email:{"\n"}
+                        <Text style={{ color: COLORS.gold, fontWeight: '700' }}>{profile?.email || 'your registered email'}</Text>
+                      </Text>
+                      {isSavingProfile ? (
+                        <View style={styles.loginLoadingContainer}>
+                          <ActivityIndicator size="small" color={COLORS.gold} />
+                          <Text style={styles.loginLoadingText}>Sending OTP...</Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity style={styles.loginBtn} onPress={handleSendSettingsOtp} activeOpacity={0.8}>
+                          <Text style={styles.loginBtnText}>SEND OTP</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ) : (
+                    <View style={{ marginBottom: SPACING.md }}>
+                      <Text style={[styles.sheetLoadingText, { textAlign: 'left', marginBottom: SPACING.md }]}>
+                        Enter the 6-digit OTP sent to your registered email:{"\n"}
+                        <Text style={{ color: COLORS.gold, fontWeight: '700' }}>{profile?.email}</Text>
+                      </Text>
+                      <View style={styles.passwordInputContainer}>
+                        <TextInput
+                          style={styles.passwordTextInput}
+                          value={settingsOtpInput}
+                          onChangeText={setSettingsOtpInput}
+                          placeholder="Enter 6-digit OTP"
+                          placeholderTextColor={COLORS.textSecondary}
+                          keyboardType="number-pad"
+                          maxLength={6}
+                          autoCapitalize="none"
+                        />
+                      </View>
+
+                      {isSavingProfile ? (
+                        <View style={styles.loginLoadingContainer}>
+                          <ActivityIndicator size="small" color={COLORS.gold} />
+                          <Text style={styles.loginLoadingText}>Verifying...</Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity style={styles.loginBtn} onPress={handleVerifySettingsOtp} activeOpacity={0.8}>
+                          <Text style={styles.loginBtnText}>VERIFY OTP</Text>
+                        </TouchableOpacity>
+                      )}
+
+                      <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: SPACING.md, gap: SPACING.sm }}>
+                        {settingsOtpTimer > 0 ? (
+                          <Text style={styles.loginLoadingText}>Resend code in {settingsOtpTimer}s</Text>
+                        ) : (
+                          <TouchableOpacity onPress={handleResendSettingsOtp}>
+                            <Text style={[styles.loginLoadingText, { color: COLORS.gold, fontWeight: '700', textDecorationLine: 'underline' }]}>
+                              Resend OTP
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  )}
+                </>
+              )}
+
+              {settingsFlowMode === 'forgot_new_password' && (
+                <>
+                  <Text style={styles.modalLabel}>New Password</Text>
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput
+                      style={styles.passwordTextInput}
+                      value={settingsNewPasswordInput}
+                      onChangeText={setSettingsNewPasswordInput}
+                      placeholder="Enter new password (min 8 chars)"
+                      placeholderTextColor={COLORS.textSecondary}
+                      secureTextEntry={!showSettingsNewPassword}
+                      autoCapitalize="none"
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowSettingsNewPassword(!showSettingsNewPassword)}>
+                      <Feather name={showSettingsNewPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text style={styles.modalLabel}>Confirm New Password</Text>
+                  <View style={styles.passwordInputContainer}>
+                    <TextInput
+                      style={styles.passwordTextInput}
+                      value={settingsConfirmPasswordInput}
+                      onChangeText={setSettingsConfirmPasswordInput}
+                      placeholder="Confirm new password"
+                      placeholderTextColor={COLORS.textSecondary}
+                      secureTextEntry={!showSettingsConfirmPassword}
+                      autoCapitalize="none"
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowSettingsConfirmPassword(!showSettingsConfirmPassword)}>
+                      <Feather name={showSettingsConfirmPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                    </TouchableOpacity>
+                  </View>
+
+                  {isSavingProfile ? (
+                    <View style={styles.loginLoadingContainer}>
+                      <ActivityIndicator size="small" color={COLORS.gold} />
+                      <Text style={styles.loginLoadingText}>Updating password...</Text>
+                    </View>
+                  ) : (
+                    <TouchableOpacity style={styles.loginBtn} onPress={handleForgotNewPasswordSubmit} activeOpacity={0.8}>
+                      <Text style={styles.loginBtnText}>RESET PASSWORD</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
 
               {changePasswordError && (
                 <Text style={styles.loginErrorText}>{changePasswordError}</Text>
@@ -884,14 +1540,27 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                 <Text style={[styles.loginLoadingText, { color: '#4CD964' }]}>{changePasswordSuccess}</Text>
               )}
 
-              {isSavingProfile ? (
+              {settingsFlowMode === 'normal' && !isSavingProfile && (
+                <TouchableOpacity style={styles.loginBtn} onPress={handleChangePasswordSubmit} activeOpacity={0.8}>
+                  <Text style={styles.loginBtnText}>CHANGE PASSWORD</Text>
+                </TouchableOpacity>
+              )}
+
+              {settingsFlowMode === 'normal' && isSavingProfile && (
                 <View style={styles.loginLoadingContainer}>
                   <ActivityIndicator size="small" color={COLORS.gold} />
                   <Text style={styles.loginLoadingText}>Updating password...</Text>
                 </View>
-              ) : (
-                <TouchableOpacity style={styles.loginBtn} onPress={handleChangePasswordSubmit} activeOpacity={0.8}>
-                  <Text style={styles.loginBtnText}>CHANGE PASSWORD</Text>
+              )}
+
+              {settingsFlowMode !== 'normal' && (
+                <TouchableOpacity 
+                  style={[styles.loginBtn, { backgroundColor: 'transparent', borderWidth: 1, borderColor: COLORS.border, marginTop: SPACING.sm }]} 
+                  onPress={handleCancelSettingsRecovery}
+                  disabled={isSavingProfile}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.loginBtnText, { color: COLORS.textSecondary }]}>CANCEL</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -909,6 +1578,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                  authMode === 'forgot_password' ? 'Forgot Password' :
                  authMode === 'recovery_otp' ? 'Recovery Verification' :
                  authMode === 'reset_password' ? 'Reset Password' :
+                 authMode === 'reset_success' ? 'Success' :
                  'Verify Email OTP'}
               </Text>
               <TouchableOpacity onPress={() => {
@@ -1059,6 +1729,36 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
+                  
+                  {isSubmitting ? (
+                    <View style={styles.loginLoadingContainer}>
+                      <ActivityIndicator size="small" color={COLORS.gold} />
+                      <Text style={styles.loginLoadingText}>Processing...</Text>
+                    </View>
+                  ) : (
+                    <>
+                      <Text style={[styles.modalDesc, { marginTop: SPACING.md, fontStyle: 'italic' }]}>
+                        Select a recovery option. The reset link will launch the HERIXA app directly to change your password.
+                      </Text>
+                      
+                      <TouchableOpacity 
+                        style={[styles.loginBtn, { marginTop: SPACING.xs }]} 
+                        onPress={() => handleForgotPasswordSubmit('link')} 
+                        activeOpacity={0.8}
+                      >
+                        <Text style={styles.loginBtnText}>SEND RESET LINK</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity 
+                        style={[styles.loginBtn, { backgroundColor: COLORS.surfaceLight, borderWidth: 1, borderColor: COLORS.gold, marginTop: SPACING.sm }]} 
+                        onPress={() => handleForgotPasswordSubmit('otp')} 
+                        activeOpacity={0.8}
+                      >
+                        <Text style={[styles.loginBtnText, { color: COLORS.gold }]}>SEND OTP CODE</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+
                   <View style={styles.authModeSwitchRow}>
                     <TouchableOpacity onPress={() => {
                       setAuthMode('login');
@@ -1154,26 +1854,47 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                   </View>
                 </>
               )}
+
+              {authMode === 'reset_success' && (
+                <>
+                  <Text style={[styles.modalDesc, { textAlign: 'center', marginVertical: SPACING.lg, fontSize: 16, color: COLORS.textPrimary }]}>
+                    Password changed successfully.
+                  </Text>
+                  
+                  <TouchableOpacity 
+                    style={styles.loginBtn} 
+                    onPress={() => {
+                      setAuthMode('login');
+                      setSubmitError(null);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.loginBtnText}>Back to Login</Text>
+                  </TouchableOpacity>
+                </>
+              )}
               
               {submitError && (
                 <Text style={styles.loginErrorText}>{submitError}</Text>
               )}
 
-              {isSubmitting ? (
-                <View style={styles.loginLoadingContainer}>
-                  <ActivityIndicator size="small" color={COLORS.gold} />
-                  <Text style={styles.loginLoadingText}>Processing...</Text>
-                </View>
-              ) : (
-                <TouchableOpacity style={styles.loginBtn} onPress={handleAuthSubmit} activeOpacity={0.8}>
-                  <Text style={styles.loginBtnText}>
-                    {authMode === 'otp' || authMode === 'recovery_otp' ? 'VERIFY CODE' : 
-                     authMode === 'register' ? 'REGISTER' : 
-                     authMode === 'forgot_password' ? 'SEND CODE' : 
-                     authMode === 'reset_password' ? 'RESET PASSWORD' :
-                     'LOG IN'}
-                  </Text>
-                </TouchableOpacity>
+              {authMode !== 'reset_success' && authMode !== 'forgot_password' && (
+                isSubmitting ? (
+                  <View style={styles.loginLoadingContainer}>
+                    <ActivityIndicator size="small" color={COLORS.gold} />
+                    <Text style={styles.loginLoadingText}>Processing...</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.loginBtn} onPress={handleAuthSubmit} activeOpacity={0.8}>
+                    <Text style={styles.loginBtnText}>
+                      {(authMode as string) === 'otp' || (authMode as string) === 'recovery_otp' ? 'VERIFY CODE' : 
+                       (authMode as string) === 'register' ? 'REGISTER' : 
+                       (authMode as string) === 'forgot_password' ? 'SEND CODE' : 
+                       (authMode as string) === 'reset_password' ? 'RESET PASSWORD' :
+                       'LOG IN'}
+                    </Text>
+                  </TouchableOpacity>
+                )
               )}
             </View>
           </View>
@@ -1211,20 +1932,11 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
               <View style={styles.sheetButtonsContainer}>
                 <TouchableOpacity 
                   style={styles.sheetButton}
-                  onPress={() => handlePickPhoto(true)}
+                  onPress={handlePickPhoto}
                   activeOpacity={0.7}
                 >
                   <Feather name="image" size={18} color={COLORS.gold} />
                   <Text style={styles.sheetButtonText}>Choose from Gallery</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  style={styles.sheetButton}
-                  onPress={() => handlePickPhoto(false)}
-                  activeOpacity={0.7}
-                >
-                  <Feather name="camera" size={18} color={COLORS.gold} />
-                  <Text style={styles.sheetButtonText}>Take a Photo</Text>
                 </TouchableOpacity>
 
                 {profile?.profileImageUrl && (
@@ -1480,6 +2192,305 @@ const styles = StyleSheet.create({
   passwordInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.surfaceLight, borderWidth: 1, borderColor: COLORS.border, borderRadius: BORDER_RADIUS.md, height: 48, marginTop: SPACING.xs },
   passwordTextInput: { flex: 1, color: COLORS.textPrimary, paddingHorizontal: SPACING.md, ...TYPOGRAPHY.bodyMedium, height: '100%' },
   eyeButton: { paddingHorizontal: SPACING.md, justifyContent: 'center', alignItems: 'center' },
+  forgotCurrentPasswordLink: {
+    alignSelf: 'flex-start',
+    marginTop: 4,
+    marginBottom: SPACING.md,
+    paddingVertical: SPACING.xs,
+  },
+  forgotCurrentPasswordText: {
+    color: COLORS.gold,
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+
+  journeySectionContainer: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+    gap: SPACING.md,
+  },
+  journeyHeader: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    padding: SPACING.md,
+  },
+  journeyHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  journeyHeaderIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  journeyHeaderTitle: {
+    color: COLORS.textPrimary,
+    ...TYPOGRAPHY.h3,
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
+  journeyHeaderSubtitle: {
+    color: COLORS.textSecondary,
+    ...TYPOGRAPHY.caption,
+    marginTop: 4,
+    marginLeft: 40,
+  },
+
+  journeyStatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  journeyStatCard: {
+    flex: 1,
+    minWidth: '22%',
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+  },
+  journeyStatValue: {
+    color: COLORS.gold,
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  journeyStatLabel: {
+    color: COLORS.textSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+
+  journeySubSection: {
+    gap: SPACING.sm,
+  },
+  journeySubHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  journeySubTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  journeySubDesc: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
+  },
+  journeySeeAll: {
+    color: COLORS.gold,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  journeyEmptyText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    fontStyle: 'italic',
+    paddingVertical: SPACING.xs,
+  },
+
+  horizontalScrollContent: {
+    gap: SPACING.sm,
+    paddingVertical: 2,
+  },
+  exploredCard: {
+    width: 170,
+    height: 140,
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  exploredCardImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  exploredCardOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+  },
+  exploredCardBody: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: SPACING.xs + 2,
+  },
+  exploredCardName: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  exploredCardMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  exploredCardLocation: {
+    color: COLORS.textSecondary,
+    fontSize: 10,
+    flex: 1,
+  },
+  exploredCardTime: {
+    color: COLORS.gold,
+    fontSize: 9,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+
+  favoriteCard: {
+    width: 140,
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  favoriteCardImage: {
+    width: '100%',
+    height: 90,
+    resizeMode: 'cover',
+  },
+  favoriteCardBody: {
+    padding: SPACING.xs + 2,
+  },
+  favoriteCardName: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  favoriteCardLocation: {
+    color: COLORS.textSecondary,
+    fontSize: 10,
+    flex: 1,
+  },
+
+  favoritesEmptyCard: {
+    backgroundColor: COLORS.surface,
+    borderColor: COLORS.border,
+    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.md,
+    alignItems: 'center',
+  },
+  favoritesEmptyTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  favoritesEmptyText: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 2,
+    marginBottom: SPACING.sm,
+  },
+  exploreBtn: {
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+  },
+  exploreBtnText: {
+    color: COLORS.gold,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  favoriteCountBadge: {
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  favoriteCountBadgeText: {
+    color: COLORS.gold,
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  savedBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  savedBadgeText: {
+    color: COLORS.gold,
+    fontSize: 9,
+    fontWeight: '700',
+  },
+
+  onboardingCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    padding: SPACING.xl,
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  onboardingIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.xs,
+  },
+  onboardingTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    textAlign: 'center',
+  },
+  onboardingDesc: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  onboardingBtn: {
+    backgroundColor: COLORS.gold,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: 10,
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.xs,
+  },
+  onboardingBtnText: {
+    color: COLORS.background,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
 });
 
 export default ProfileScreen;

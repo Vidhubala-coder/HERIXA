@@ -16,7 +16,11 @@ export const connectDatabase = async (): Promise<void> => {
   });
 
   try {
-    await mongoose.connect(uri);
+    const isProduction = process.env.NODE_ENV === 'production';
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
+      autoIndex: !isProduction,
+    });
   } catch (error: any) {
     console.error(`Initial MongoDB connection failed: ${error.message}`);
     process.exit(1);

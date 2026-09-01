@@ -127,7 +127,7 @@ class SpeechRecognitionService {
   }
 
   /**
-   * Stop recording.
+   * Stop recording and process results.
    */
   public stopListening(): void {
     if (this.activeRecognition) {
@@ -135,6 +135,25 @@ class SpeechRecognitionService {
         this.activeRecognition.stop();
       } catch (err) {
         console.warn('[HERIXA VOICE] Error stopping recognition:', err);
+      } finally {
+        this.activeRecognition = null;
+      }
+    }
+  }
+
+  /**
+   * Cancel recording immediately without processing results.
+   */
+  public cancelListening(): void {
+    if (this.activeRecognition) {
+      try {
+        // Remove event handlers to prevent final results
+        this.activeRecognition.onresult = null;
+        this.activeRecognition.onerror = null;
+        this.activeRecognition.onend = null;
+        this.activeRecognition.abort();
+      } catch (err) {
+        console.warn('[HERIXA VOICE] Error cancelling recognition:', err);
       } finally {
         this.activeRecognition = null;
       }

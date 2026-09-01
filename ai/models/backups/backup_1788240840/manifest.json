@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Phase 3G ONNX",
+    "path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\integration\\onnx\\herixa_phase3g.onnx",
+    "backup_path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\backups\\backup_1788240840\\herixa_phase3g.onnx",
+    "size_bytes": 637985,
+    "sha256": "c804c429efcf4134e7fef937ede5c64d1386a1a93992a7a892ac8f0dc0e46d4c"
+  },
+  {
+    "name": "Phase 3L ONNX",
+    "path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\integration\\onnx\\phase3l\\phase3l_candidate.onnx",
+    "backup_path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\backups\\backup_1788240840\\phase3l_candidate.onnx",
+    "size_bytes": 16056075,
+    "sha256": "4451af9e496ce82e60ea22b427264e42605da0d49a6cb9ee16608bb32afd538e"
+  },
+  {
+    "name": "Phase 3G PyTorch Checkpoint",
+    "path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\best_model_multiclass.pth",
+    "backup_path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\backups\\backup_1788240840\\best_model_multiclass.pth",
+    "size_bytes": 16350835,
+    "sha256": "ebcb3e26fb9ace036346e2656af70d0251450e4da4cd18fa8d41bc94ae10cc64"
+  },
+  {
+    "name": "Phase 3L PyTorch Checkpoint",
+    "path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\phase3l\\checkpoints\\best_model_phase3l.pth",
+    "backup_path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\backups\\backup_1788240840\\best_model_phase3l.pth",
+    "size_bytes": 46119080,
+    "sha256": "86f109e2af0875c29ce02dcce128b85a80eb5fd5acb14af71b05a1a6298d0185"
+  },
+  {
+    "name": "Recognition Config",
+    "path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\integration\\recognition_config.json",
+    "backup_path": "C:\\Users\\LENOVO\\Desktop\\AR model\\ai\\models\\backups\\backup_1788240840\\recognition_config.json",
+    "size_bytes": 1085,
+    "sha256": "c57888c571c193fee5be6ba0a472d77e3ff6eed825affe0ca119b24fd50ba14a"
+  }
+]

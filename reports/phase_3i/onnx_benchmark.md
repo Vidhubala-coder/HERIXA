@@ -10,11 +10,11 @@ This report compares CPU inference performance between the original PyTorch mode
 ## 2. Speed Profiles Comparison
 | Metric | PyTorch CPU | ONNX Runtime CPU | Speedup Factor |
 | :--- | :---: | :---: | :---: |
-| **Model Loading Time** | 236.66 ms | 250.76 ms | 0.94x |
-| **Warm-up Inference Latency** | 95.49 ms | 12.08 ms | 7.90x |
-| **Mean Inference Latency** | 40.83 ms | 10.35 ms | 3.95x |
-| **Median Inference Latency** | 31.32 ms | 9.13 ms | 3.43x |
-| **P95 Inference Latency** | 58.51 ms | 11.57 ms | 5.06x |
+| **Model Loading Time** | 196.70 ms | 142.32 ms | 1.38x |
+| **Warm-up Inference Latency** | 54.34 ms | 14.12 ms | 3.85x |
+| **Mean Inference Latency** | 33.09 ms | 10.10 ms | 3.28x |
+| **Median Inference Latency** | 28.60 ms | 9.08 ms | 3.15x |
+| **P95 Inference Latency** | 55.08 ms | 15.28 ms | 3.61x |
 
 *Note: Speedup Factor is calculated as `PyTorch Latency / ONNX Latency`. Values > 1.0x represent an execution speedup under ONNX Runtime.*
 
