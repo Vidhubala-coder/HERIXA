@@ -23,6 +23,9 @@ export const connectDatabase = async (): Promise<void> => {
     });
   } catch (error: any) {
     console.error(`Initial MongoDB connection failed: ${error.message}`);
+    if (error.message && (error.message.includes('Could not connect to any servers') || error.message.includes('selection timed out'))) {
+      console.error('[MONGODB-ATLAS-DIAGNOSTIC] Network Access IP Blocked: Please ensure 0.0.0.0/0 (Allow Access From Anywhere) is added in MongoDB Atlas -> Security -> Network Access.');
+    }
     process.exit(1);
   }
 };
