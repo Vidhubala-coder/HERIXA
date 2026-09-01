@@ -13,3 +13,4 @@ imagehash
 onnx
 onnxruntime
 jinja2
+python-multipart
