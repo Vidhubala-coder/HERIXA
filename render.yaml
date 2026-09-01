@@ -32,7 +32,7 @@ services:
       - key: PASSWORD_RESET_BASE_URL
         sync: false
       - key: AI_SERVICE_URL
-        sync: false
+        value: https://herixa-ai.onrender.com
       - key: GEMINI_API_KEY
         sync: false
       - key: GROQ_API_KEY
