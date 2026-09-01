@@ -53,6 +53,12 @@ export const recordFailure = () => {
 
 // Start uvicorn process asynchronously from backend for recovery
 export const attemptRuntimeRecovery = async (): Promise<boolean> => {
+  const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
+  if (rawUrl.startsWith('https://')) {
+    // Remote cloud AI service (e.g. Render); skip local process spawning
+    return false;
+  }
+
   const now = Date.now();
   if (now - lastRecoveryTime < RECOVERY_COOLDOWN_MS) {
     console.warn('[HERIXA-AI] Runtime recovery check: in cooldown, skipping spawn');
@@ -86,7 +92,7 @@ export const attemptRuntimeRecovery = async (): Promise<boolean> => {
 };
 
 let activeHealthPromise: Promise<boolean> | null = null;
-const HEALTH_CACHE_TTL = 2000; // 2 seconds TTL
+const HEALTH_CACHE_TTL = 5000; // 5 seconds TTL to avoid rapid polling
 
 const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean> => {
   const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
@@ -101,7 +107,7 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
     const res = await fetch(healthUrl, {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(2000) // Short 2 seconds timeout
+      signal: AbortSignal.timeout(8000) // Increased to 8s for cloud cold starts
     });
 
     if (res.ok) {
@@ -147,6 +153,17 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
         return false;
       }
       
+      // HTTP 502 (Bad Gateway), 503 (Service Unavailable), 504 (Gateway Timeout), or 429 (Rate Limited)
+      // are temporary gateway / cold-start conditions, not permanent model failures
+      if (res.status === 502 || res.status === 503 || res.status === 504 || res.status === 429) {
+        aiServiceState = 'UNAVAILABLE';
+        lastFailureReason = `AI service gateway response (HTTP ${res.status}). Service may be waking up.`;
+        if (!silentMode) {
+          console.warn(`[HERIXA-AI] AI service gateway temporary status: HTTP ${res.status}`);
+        }
+        return false;
+      }
+
       aiServiceState = 'FAILED';
       lastFailureReason = `FastAPI returned HTTP status ${res.status}`;
       console.warn(`[HERIXA-AI] MODEL_STATUS: FAILED. Reason: ${lastFailureReason}`);
@@ -156,13 +173,13 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
     aiServiceState = 'UNAVAILABLE';
     lastFailureReason = err.message || String(err);
     if (!silentMode) {
-      console.log('[HERIXA-AI] FastAPI service unreachable or unavailable');
+      console.log('[HERIXA-AI] FastAPI service unreachable or unavailable:', lastFailureReason);
     }
     return false;
   }
 };
 
-export const checkAiServiceHealthOnStartup = async (maxRetries = 15, delayMs = 1000): Promise<boolean> => {
+export const checkAiServiceHealthOnStartup = async (maxRetries = 6, delayMs = 3000): Promise<boolean> => {
   console.log('[HERIXA-AI] SERVICE_CHECK_STARTED');
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const isReady = await checkAiServiceHealthInternal(true);
@@ -171,11 +188,13 @@ export const checkAiServiceHealthOnStartup = async (maxRetries = 15, delayMs = 1
       return true;
     }
     if (attempt < maxRetries) {
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      // Exponential backoff: 3s, 4.2s, 5.8s, 8.2s, 11.5s to prevent HTTP 429 rate limits during cold starts
+      const backoff = delayMs * Math.pow(1.4, attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, Math.min(backoff, 12000)));
     }
   }
 
-  console.log('[HERIXA-AI] FastAPI service unreachable or unavailable');
+  console.log('[HERIXA-AI] FastAPI service unreachable or unavailable during startup check');
   lastCheckTime = Date.now();
   return false;
 };

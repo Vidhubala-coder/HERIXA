@@ -1,4 +1,12 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+
+// Force Node.js DNS lookup to prioritize IPv4 over IPv6 on Linux cloud hosts (Render) to prevent ENETUNREACH on port 587
+try {
+  if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+  }
+} catch (e) {}
 
 export const validateSmtpConfig = (): { configured: boolean; error?: string } => {
   const host = (process.env.EMAIL_HOST || '').trim();
@@ -88,7 +96,8 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
       auth: { user, pass },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
-    });
+      family: 4,
+    } as any);
 
     await transporter.verify();
     console.log('[HERIXA-EMAIL] SMTP_CONFIGURED');
@@ -154,7 +163,8 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
       port,
       secure: port === 465,
       auth: { user, pass },
-    });
+      family: 4,
+    } as any);
 
     // Verify before sending
     await transporter.verify();
@@ -301,7 +311,8 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
       port,
       secure: port === 465,
       auth: { user, pass },
-    });
+      family: 4,
+    } as any);
 
     await transporter.verify();
 
@@ -384,7 +395,8 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
       port,
       secure: port === 465,
       auth: { user, pass },
-    });
+      family: 4,
+    } as any);
 
     await transporter.verify();
 
