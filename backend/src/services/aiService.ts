@@ -89,7 +89,8 @@ let activeHealthPromise: Promise<boolean> | null = null;
 const HEALTH_CACHE_TTL = 2000; // 2 seconds TTL
 
 const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean> => {
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
+  const aiServiceUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
   const healthUrl = `${aiServiceUrl}/health`;
   
   if (!silentMode) {
@@ -268,7 +269,8 @@ export const waitForModelReady = async (): Promise<boolean> => {
 };
 
 export const callPredictionService = async (formData: any, signal?: AbortSignal): Promise<Response> => {
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
+  const aiServiceUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
   const predictUrl = `${aiServiceUrl}/predict`;
 
   const available = await isAiServiceAvailable();
