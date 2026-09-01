@@ -8,17 +8,17 @@ services:
     startCommand: npm start
     envVars:
       - key: PORT
-        value: 5000
+        value: "5000"
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
-        generateWith: 32
+        sync: false
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
-        value: 587
+        value: "587"
       - key: EMAIL_USER
         sync: false
       - key: EMAIL_PASSWORD
@@ -32,6 +32,12 @@ services:
       - key: PASSWORD_RESET_BASE_URL
         sync: false
       - key: AI_SERVICE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TRIPOD_API_KEY
         sync: false
       - key: CLIENT_URL
         value: http://localhost:8081
