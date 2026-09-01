@@ -13,7 +13,8 @@
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos",
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to use your camera",
-        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use your microphone"
+        "NSMicrophoneUsageDescription": "Allow HERIXA to use the microphone for voice questions.",
+        "NSSpeechRecognitionUsageDescription": "Allow HERIXA to recognize your speech for voice questions."
       }
     },
     "android": {
@@ -48,7 +49,13 @@
         }
       ],
       "@reactvision/react-viro",
-      "expo-sharing"
-    ]
+      "expo-sharing",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9c54530a-db87-4166-8540-8b2dc2957802"
+      }
+    }
   }
 }
