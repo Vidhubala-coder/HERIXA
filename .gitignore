@@ -60,7 +60,8 @@ env/
 # Datasets
 datasets/
 dataset/
-data/
+/data/
+backend/data/
 uploads/
 
 # Temporary files
