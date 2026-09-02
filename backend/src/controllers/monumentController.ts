@@ -204,11 +204,12 @@ const isBase64ValidImage = (base64Str: string): boolean => {
   }
   // Sanitize white spaces and newlines
   const sanitized = clean.replace(/[\s\r\n]+/g, '');
-  // Base64 regex check
   const base64Regex = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-  if (sanitized.length < 2000) return false; // obviously too small for a 1024px jpeg
+  if (sanitized.length < 2000) return false;
   return base64Regex.test(sanitized.substring(0, 100));
 };
+
+
 
 export const recognizeMonument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -309,11 +310,11 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
       console.log(`[HERIXA-TIMING] [Stage 1: FastAPI Health Check] Duration: ${tHealthDuration}ms, isAvailable: ${isAvailable}`);
 
       if (!isAvailable) {
-        console.log('[HERIXA-RECOGNITION] FastAPI unavailable');
+        console.log('[HERIXA-RECOGNITION] Custom EfficientNet-B0 FastAPI recognition service offline.');
         res.status(503).json({
           success: false,
           status: 'error',
-          message: 'HERIXA recognition service is temporarily unavailable. Please try again.',
+          message: 'HERIXA custom recognition service is temporarily unavailable. Please try again.',
           errorCode: 503,
           errorDetails: 'MODEL_UNAVAILABLE'
         });

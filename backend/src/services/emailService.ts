@@ -141,8 +141,9 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
     return false;
   }
 
-  const host = (process.env.EMAIL_HOST || '').trim();
-  const port = parseInt((process.env.EMAIL_PORT || '').trim() || '587');
+  const host = (process.env.EMAIL_HOST || 'smtp.gmail.com').trim();
+  const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '465');
+  const port = host === 'smtp.gmail.com' ? 465 : rawPort;
   const user = (process.env.EMAIL_USER || '').trim();
   let pass = (process.env.EMAIL_PASSWORD || '').trim();
   const from = (process.env.EMAIL_FROM || '').trim();
@@ -163,15 +164,11 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
       port,
       secure: port === 465,
       auth: { user, pass },
-      connectionTimeout: 4000,
-      greetingTimeout: 4000,
-      socketTimeout: 4000,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
       family: 4,
     } as any);
-
-    // Verify before sending
-    await transporter.verify();
-    console.log('[HERIXA-EMAIL] SMTP_CONNECTION_VERIFIED');
 
     console.log('[HERIXA-EMAIL] OTP_EMAIL_SEND_STARTED');
 

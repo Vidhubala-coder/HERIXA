@@ -57,12 +57,14 @@ env/
 *.h5
 *.hdf5
 
-# Datasets
-datasets/
-dataset/
-/data/
-backend/data/
-uploads/
+# Uploads
+/uploads/
+backend/uploads/avatars/
+backend/uploads/profiles/
+backend/uploads/monuments/debug_scans/
+!backend/uploads/monuments/*.jpeg
+!backend/uploads/monuments/*.jpg
+!backend/uploads/monuments/*.png
 
 # Temporary files
 scratch/
