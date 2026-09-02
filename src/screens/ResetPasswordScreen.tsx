@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, StatusBar, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, StatusBar, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
@@ -87,83 +87,93 @@ export const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({ route,
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
-      
-      <View style={styles.header}>
-        <View style={styles.logoRing}>
-          <Feather name="aperture" size={32} color={COLORS.gold} />
-        </View>
-        <Text style={styles.appName}>HERIXA</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.title}>Create New Password</Text>
-
-        {success ? (
-          <View style={styles.successContainer}>
-            <View style={styles.successIconCircle}>
-              <Feather name="check" size={36} color={COLORS.gold} />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <View style={styles.logoRing}>
+              <Feather name="aperture" size={32} color={COLORS.gold} />
             </View>
-            <Text style={styles.successText}>Password changed successfully.</Text>
-            
-            <TouchableOpacity style={styles.btn} onPress={handleBackToLogin} activeOpacity={0.8}>
-              <Text style={styles.btnText}>Back to Login</Text>
-            </TouchableOpacity>
+            <Text style={styles.appName}>HERIXA</Text>
           </View>
-        ) : (
-          <View style={styles.form}>
-            <Text style={styles.label}>New Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={passwordInput}
-                onChangeText={setPasswordInput}
-                placeholder="Enter new password (min 8 chars)"
-                placeholderTextColor={COLORS.textSecondary}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
-                <Feather name={showPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            </View>
 
-            <Text style={styles.label}>Confirm New Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={confirmPasswordInput}
-                onChangeText={setConfirmPasswordInput}
-                placeholder="Confirm new password"
-                placeholderTextColor={COLORS.textSecondary}
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            </View>
+          <View style={styles.card}>
+            <Text style={styles.title}>Create New Password</Text>
 
-            {submitError && <Text style={styles.errorText}>{submitError}</Text>}
-
-            {isSubmitting ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color={COLORS.gold} />
-                <Text style={styles.loadingText}>Resetting password...</Text>
+            {success ? (
+              <View style={styles.successContainer}>
+                <View style={styles.successIconCircle}>
+                  <Feather name="check" size={36} color={COLORS.gold} />
+                </View>
+                <Text style={styles.successText}>Password changed successfully.</Text>
+                
+                <TouchableOpacity style={styles.btn} onPress={handleBackToLogin} activeOpacity={0.8}>
+                  <Text style={styles.btnText}>Back to Login</Text>
+                </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity style={styles.btn} onPress={handleResetPassword} activeOpacity={0.8}>
-                <Text style={styles.btnText}>Reset Password</Text>
-              </TouchableOpacity>
-            )}
+              <View style={styles.form}>
+                <Text style={styles.label}>New Password</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={passwordInput}
+                    onChangeText={setPasswordInput}
+                    placeholder="Enter new password (min 8 chars)"
+                    placeholderTextColor={COLORS.textSecondary}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
+                    <Feather name={showPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                  </TouchableOpacity>
+                </View>
 
-            <TouchableOpacity style={styles.cancelBtn} onPress={handleBackToLogin} disabled={isSubmitting}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
+                <Text style={styles.label}>Confirm New Password</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    value={confirmPasswordInput}
+                    onChangeText={setConfirmPasswordInput}
+                    placeholder="Confirm new password"
+                    placeholderTextColor={COLORS.textSecondary}
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color={COLORS.textSecondary} />
+                  </TouchableOpacity>
+                </View>
+
+                {submitError && <Text style={styles.errorText}>{submitError}</Text>}
+
+                {isSubmitting ? (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color={COLORS.gold} />
+                    <Text style={styles.loadingText}>Resetting password...</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.btn} onPress={handleResetPassword} activeOpacity={0.8}>
+                    <Text style={styles.btnText}>Reset Password</Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity style={styles.cancelBtn} onPress={handleBackToLogin} disabled={isSubmitting}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-        )}
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -172,8 +182,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     paddingHorizontal: SPACING.lg,
     justifyContent: 'center',
+    paddingVertical: SPACING.xl,
   },
   header: {
     alignItems: 'center',

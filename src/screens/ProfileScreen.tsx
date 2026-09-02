@@ -14,6 +14,7 @@ import {
   Image,
   Platform,
   AppState,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -1335,8 +1336,16 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
       </Modal>
 
       <Modal visible={isChangePasswordVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+          style={styles.modalOverlay}
+        >
+          <ScrollView 
+            contentContainerStyle={styles.modalScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Password Settings</Text>
               <TouchableOpacity onPress={() => {
@@ -1565,12 +1574,21 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
               )}
             </View>
           </View>
-        </View>
-      </Modal>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Modal>
 
       <Modal visible={isAuthModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+          style={styles.modalOverlay}
+        >
+          <ScrollView 
+            contentContainerStyle={styles.modalScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {authMode === 'login' ? 'Explorer Account Login' : 
@@ -1898,8 +1916,9 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
               )}
             </View>
           </View>
-        </View>
-      </Modal>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Modal>
 
       {/* PROFILE PHOTO EDIT SHEET MODAL */}
       <Modal
@@ -2082,7 +2101,8 @@ const styles = StyleSheet.create({
   menuItemLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   menuItemText: { color: COLORS.textPrimary, ...TYPOGRAPHY.bodyMedium, fontWeight: '500' },
   versionText: { color: COLORS.textSecondary, ...TYPOGRAPHY.bodySmall, textAlign: 'center', opacity: 0.5, marginTop: SPACING.md },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.85)', justifyContent: 'center', padding: SPACING.xl },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.85)', justifyContent: 'center' },
+  modalScrollContent: { flexGrow: 1, justifyContent: 'center', padding: SPACING.xl },
   modalContent: { backgroundColor: COLORS.surface, borderRadius: BORDER_RADIUS.lg, borderWidth: 1, borderColor: COLORS.border, overflow: 'hidden' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: SPACING.lg, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   modalTitle: { color: COLORS.textPrimary, ...TYPOGRAPHY.h3, fontWeight: '700' },
