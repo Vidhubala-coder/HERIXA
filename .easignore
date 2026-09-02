@@ -1,7 +1,20 @@
-# EAS Ignore - exclude heavy dataset and node_modules from EAS upload tarball
-node_modules/
-backend/
+# EAS Ignore configuration
+/ai
+/backend
+/android/.gradle
+/android/app/build
+/android/build
+/node_modules
+/.git
+/.expo
+/dist
+/scratch
 ai/
+backend/
+android/.gradle/
+android/app/build/
+android/build/
+node_modules/
 .git/
 .expo/
 dist/
