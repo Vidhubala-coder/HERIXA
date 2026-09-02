@@ -75,8 +75,9 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
     return false;
   }
 
-  const host = (process.env.EMAIL_HOST || '').trim();
-  const port = parseInt((process.env.EMAIL_PORT || '').trim() || '587');
+  const host = (process.env.EMAIL_HOST || 'smtp.gmail.com').trim();
+  const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '465');
+  const port = host === 'smtp.gmail.com' ? 465 : rawPort;
   const user = (process.env.EMAIL_USER || '').trim();
   let pass = (process.env.EMAIL_PASSWORD || '').trim();
 
