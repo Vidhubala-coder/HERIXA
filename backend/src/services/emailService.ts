@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import dns from 'dns';
 
-// Force Node.js DNS lookup to prioritize IPv4 over IPv6 on Linux cloud hosts
+// Force Node.js DNS lookup to prioritize IPv4 over IPv6 on Linux cloud hosts (Render) to prevent ENETUNREACH
 try {
   if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
@@ -9,12 +9,12 @@ try {
 } catch (e) {}
 
 const getSmtpCredentials = () => {
-  const host = (process.env.EMAIL_HOST || 'smtp.resend.com').trim();
+  const host = (process.env.EMAIL_HOST || 'smtp.gmail.com').trim();
   const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '465');
-  const port = (host === 'smtp.gmail.com' || host.includes('resend')) ? 465 : rawPort;
-  const user = (process.env.EMAIL_USER || (host.includes('resend') ? 'resend' : '')).trim();
-  let pass = (process.env.RESEND_API_KEY || process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || 'HERIXA Verification <onboarding@resend.dev>').trim();
+  const port = host === 'smtp.gmail.com' ? 465 : rawPort;
+  const user = (process.env.EMAIL_USER || '').trim();
+  let pass = (process.env.EMAIL_PASSWORD || '').trim();
+  const from = (process.env.EMAIL_FROM || user || 'HERIXA Verification').trim();
 
   // Gmail App Password spaces normalization if using Gmail SMTP
   if (host === 'smtp.gmail.com') {
@@ -35,7 +35,7 @@ export const validateSmtpConfig = (): { configured: boolean; error?: string } =>
     if (!host) missing.push('EMAIL_HOST');
     if (!port) missing.push('EMAIL_PORT');
     if (!user) missing.push('EMAIL_USER');
-    if (!pass) missing.push('EMAIL_PASSWORD / RESEND_API_KEY');
+    if (!pass) missing.push('EMAIL_PASSWORD');
     if (!from) missing.push('EMAIL_FROM');
     return {
       configured: false,
@@ -64,51 +64,18 @@ export const logSmtpDiagnostics = () => {
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] FROM_CONFIGURED=${from !== ''}`);
 };
 
-const dispatchEmail = async (mailOptions: { from?: string; to: string; subject: string; text: string; html: string }): Promise<boolean> => {
+const dispatchSmtpEmail = async (mailOptions: { from?: string; to: string; subject: string; text: string; html: string }): Promise<boolean> => {
   const { host, port, user, pass, from } = getSmtpCredentials();
-  const apiKey = (process.env.RESEND_API_KEY || pass).trim();
 
-  // Mode 1: Resend HTTP API (Bulletproof over HTTPS Port 443 on Render)
-  if (apiKey.startsWith('re_') || host.includes('resend')) {
-    try {
-      console.log('[HERIXA-EMAIL] Dispatching email via Resend HTTP API (Port 443 HTTPS)...');
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: mailOptions.from || from,
-          to: mailOptions.to,
-          subject: mailOptions.subject,
-          text: mailOptions.text,
-          html: mailOptions.html,
-        }),
-      });
-
-      if (response.ok) {
-        const resData: any = await response.json().catch(() => ({}));
-        console.log(`[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (Resend HTTP API ID: ${resData.id || 'N/A'})`);
-        return true;
-      } else {
-        const errData: any = await response.json().catch(() => ({}));
-        console.error(`[HERIXA-EMAIL] Resend HTTP API error (Status ${response.status}):`, errData.message || JSON.stringify(errData));
-        return false;
-      }
-    } catch (err: any) {
-      console.error('[HERIXA-EMAIL] Resend HTTP API network error:', err.message || String(err));
-      return false;
-    }
-  }
-
-  // Mode 2: Standard Nodemailer Transport Fallback (for custom local SMTP)
   try {
     const transporter = nodemailer.createTransport({
       host,
       port,
       secure: port === 465,
       auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
       family: 4,
     } as any);
 
@@ -125,10 +92,17 @@ const dispatchEmail = async (mailOptions: { from?: string; to: string; subject: 
       return false;
     }
 
-    console.log('[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (SMTP)');
+    console.log('[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (Gmail SMTP)');
     return true;
   } catch (error: any) {
-    console.error('[HERIXA-EMAIL] SMTP Error:', error.message || String(error));
+    const code = error.code || 'UNKNOWN';
+    const responseCode = error.responseCode || 'NONE';
+    const message = error.message || String(error);
+
+    console.error('[HERIXA-EMAIL] SMTP_ERROR');
+    console.error(`code=${code}`);
+    console.error(`responseCode=${responseCode}`);
+    console.error(`message=${message}`);
     return false;
   }
 };
@@ -143,14 +117,6 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
   }
 
   const { host, port, user, pass } = getSmtpCredentials();
-  const apiKey = (process.env.RESEND_API_KEY || pass).trim();
-
-  // If using Resend, API key presence confirms readiness without a blocking TCP handshake
-  if (apiKey.startsWith('re_') || host.includes('resend')) {
-    console.log('[HERIXA-EMAIL] RESEND_HTTP_API_CONFIGURED');
-    console.log('[HERIXA-EMAIL] CONNECTION_VERIFIED');
-    return true;
-  }
 
   try {
     const transporter = nodemailer.createTransport({
@@ -160,6 +126,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
       auth: { user, pass },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
+      socketTimeout: 10000,
       family: 4,
     } as any);
 
@@ -245,7 +212,7 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
         </div>
       `;
 
-    return await dispatchEmail({
+    return await dispatchSmtpEmail({
       from,
       to: email,
       subject,
@@ -298,7 +265,7 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
       </div>
     `;
 
-    return await dispatchEmail({
+    return await dispatchSmtpEmail({
       from,
       to: email,
       subject,
@@ -349,7 +316,7 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
       </div>
     `;
 
-    return await dispatchEmail({
+    return await dispatchSmtpEmail({
       from,
       to: adminRecipient,
       subject,
