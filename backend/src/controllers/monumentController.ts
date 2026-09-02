@@ -214,7 +214,7 @@ const isBase64ValidImage = (base64Str: string): boolean => {
 export const recognizeMonument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { image, scanEvidence, latitude, longitude } = req.body;
-    res.setTimeout(10000); // 10 seconds timeout for local AI model inference
+    res.setTimeout(35000); // 35 seconds timeout to allow Render Free-Tier AI cold start
 
     let imageToProcess: string | undefined = undefined;
     let viewTypeToProcess: string | undefined = undefined;
