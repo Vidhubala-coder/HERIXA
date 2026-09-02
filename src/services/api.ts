@@ -276,7 +276,7 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
     for (const url of uniqueCandidates) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout per candidate ping
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per candidate ping for cold starts / network latency
 
         const response = await fetch(`${url}/api/health`, {
           method: 'GET',
@@ -325,6 +325,15 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
       
       return true;
     } else {
+      // If configured URL is a production HTTPS domain, keep it available rather than locking into offline mode
+      if (configuredUrl.startsWith('https://')) {
+        resolvedApiUrl = configuredUrl;
+        setConnectivityState('available');
+        lastHealthCheckTime = Date.now();
+        console.log(`[HERIXA-API] Production HTTPS URL active despite health ping delay: ${configuredUrl}`);
+        return true;
+      }
+
       resolvedApiUrl = null;
       setConnectivityState('unavailable');
       lastHealthCheckTime = Date.now();

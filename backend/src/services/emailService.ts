@@ -163,6 +163,9 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
       port,
       secure: port === 465,
       auth: { user, pass },
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 4000,
       family: 4,
     } as any);
 
