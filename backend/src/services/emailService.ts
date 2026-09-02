@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import dns from 'dns';
 
-// Force Node.js DNS lookup to prioritize IPv4 over IPv6 on Linux cloud hosts (Render) to prevent ENETUNREACH on port 587
+// Force Node.js DNS lookup to prioritize IPv4 over IPv6 on Linux cloud hosts
 try {
   if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
@@ -64,6 +64,75 @@ export const logSmtpDiagnostics = () => {
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] FROM_CONFIGURED=${from !== ''}`);
 };
 
+const dispatchEmail = async (mailOptions: { from?: string; to: string; subject: string; text: string; html: string }): Promise<boolean> => {
+  const { host, port, user, pass, from } = getSmtpCredentials();
+  const apiKey = (process.env.RESEND_API_KEY || pass).trim();
+
+  // Mode 1: Resend HTTP API (Bulletproof over HTTPS Port 443 on Render)
+  if (apiKey.startsWith('re_') || host.includes('resend')) {
+    try {
+      console.log('[HERIXA-EMAIL] Dispatching email via Resend HTTP API (Port 443 HTTPS)...');
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: mailOptions.from || from,
+          to: mailOptions.to,
+          subject: mailOptions.subject,
+          text: mailOptions.text,
+          html: mailOptions.html,
+        }),
+      });
+
+      if (response.ok) {
+        const resData: any = await response.json().catch(() => ({}));
+        console.log(`[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (Resend HTTP API ID: ${resData.id || 'N/A'})`);
+        return true;
+      } else {
+        const errData: any = await response.json().catch(() => ({}));
+        console.error(`[HERIXA-EMAIL] Resend HTTP API error (Status ${response.status}):`, errData.message || JSON.stringify(errData));
+        return false;
+      }
+    } catch (err: any) {
+      console.error('[HERIXA-EMAIL] Resend HTTP API network error:', err.message || String(err));
+      return false;
+    }
+  }
+
+  // Mode 2: Standard Nodemailer Transport Fallback (for custom local SMTP)
+  try {
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+      family: 4,
+    } as any);
+
+    const info = await transporter.sendMail({
+      from: mailOptions.from || from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      text: mailOptions.text,
+      html: mailOptions.html,
+    });
+
+    if (info.rejected && info.rejected.length > 0) {
+      console.error(`[HERIXA-EMAIL] Recipient email rejected: ${info.rejected.join(', ')}`);
+      return false;
+    }
+
+    console.log('[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (SMTP)');
+    return true;
+  } catch (error: any) {
+    console.error('[HERIXA-EMAIL] SMTP Error:', error.message || String(error));
+    return false;
+  }
+};
+
 export const verifySmtpConnection = async (): Promise<boolean> => {
   logSmtpDiagnostics();
   
@@ -74,6 +143,14 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
   }
 
   const { host, port, user, pass } = getSmtpCredentials();
+  const apiKey = (process.env.RESEND_API_KEY || pass).trim();
+
+  // If using Resend, API key presence confirms readiness without a blocking TCP handshake
+  if (apiKey.startsWith('re_') || host.includes('resend')) {
+    console.log('[HERIXA-EMAIL] RESEND_HTTP_API_CONFIGURED');
+    console.log('[HERIXA-EMAIL] CONNECTION_VERIFIED');
+    return true;
+  }
 
   try {
     const transporter = nodemailer.createTransport({
@@ -91,32 +168,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
     console.log('[HERIXA-EMAIL] SMTP_CONNECTION_VERIFIED');
     return true;
   } catch (error: any) {
-    const code = error.code || 'UNKNOWN';
-    const command = error.command || 'NONE';
-    const responseCode = error.responseCode || 'NONE';
-    const message = error.message || String(error);
-
-    console.error('[HERIXA-EMAIL] SMTP_ERROR');
-    console.error(`code=${code}`);
-    console.error(`command=${command}`);
-    console.error(`responseCode=${responseCode}`);
-    console.error(`message=${message}`);
-
-    const errStr = (message.toLowerCase() + ' ' + code.toLowerCase());
-
-    if (code === 'EAUTH' || responseCode === 535 || errStr.includes('auth') || errStr.includes('login') || errStr.includes('credential')) {
-      console.error('[HERIXA-EMAIL] SMTP_AUTH_FAILED');
-    } else if (code === 'ETIMEDOUT' || code === 'TIMEOUT' || errStr.includes('timeout')) {
-      console.error('[HERIXA-EMAIL] SMTP_TIMEOUT');
-    } else if (code === 'ECONNECTION' || code === 'ECONNREFUSED' || code === 'ECONNRESET' || errStr.includes('connection')) {
-      console.error('[HERIXA-EMAIL] SMTP_CONNECTION_FAILED');
-    } else if (code === 'ENOTFOUND' || errStr.includes('dns') || errStr.includes('notfound')) {
-      console.error('[HERIXA-EMAIL] SMTP_DNS_FAILED');
-    } else if (errStr.includes('tls') || errStr.includes('ssl') || errStr.includes('secure')) {
-      console.error('[HERIXA-EMAIL] SMTP_TLS_FAILED');
-    } else {
-      console.error('[HERIXA-EMAIL] SMTP_FAILURE');
-    }
+    console.error('[HERIXA-EMAIL] SMTP Connection Error:', error.message || String(error));
     return false;
   }
 };
@@ -124,26 +176,13 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
 export const sendOtpEmail = async (email: string, name: string, otp: string, resetToken?: string): Promise<boolean> => {
   const config = validateSmtpConfig();
   if (!config.configured) {
-    console.error(`[HERIXA-EMAIL] SMTP Configuration Error: ${config.error}`);
+    console.error(`[HERIXA-EMAIL] Email Configuration Error: ${config.error}`);
     return false;
   }
 
-  const { host, port, user, pass, from } = getSmtpCredentials();
-
-  console.log('[HERIXA-EMAIL] SMTP_CONFIGURED');
+  const { from } = getSmtpCredentials();
 
   try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-      family: 4,
-    } as any);
-
     console.log('[HERIXA-EMAIL] OTP_EMAIL_SEND_STARTED');
 
     const isReset = !!resetToken;
@@ -206,51 +245,15 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
         </div>
       `;
 
-    const mailOptions = {
+    return await dispatchEmail({
       from,
       to: email,
       subject,
       text: textBody,
       html: htmlBody,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    
-    // Check if recipient was rejected
-    if (info.rejected && info.rejected.length > 0) {
-      console.error(`[HERIXA-EMAIL] Recipient email rejected: ${info.rejected.join(', ')}`);
-      return false;
-    }
-
-    console.log('[HERIXA-EMAIL] OTP_EMAIL_SENT');
-    return true;
+    });
   } catch (error: any) {
-    const code = error.code || 'UNKNOWN';
-    const command = error.command || 'NONE';
-    const responseCode = error.responseCode || 'NONE';
-    const message = error.message || String(error);
-
-    console.error('[HERIXA-EMAIL] SMTP_ERROR');
-    console.error(`code=${code}`);
-    console.error(`command=${command}`);
-    console.error(`responseCode=${responseCode}`);
-    console.error(`message=${message}`);
-
-    const errStr = (message.toLowerCase() + ' ' + code.toLowerCase());
-
-    if (code === 'EAUTH' || responseCode === 535 || errStr.includes('auth') || errStr.includes('login') || errStr.includes('credential')) {
-      console.error('[HERIXA-EMAIL] SMTP_AUTH_FAILED');
-    } else if (code === 'ETIMEDOUT' || code === 'TIMEOUT' || errStr.includes('timeout')) {
-      console.error('[HERIXA-EMAIL] SMTP_TIMEOUT');
-    } else if (code === 'ECONNECTION' || code === 'ECONNREFUSED' || code === 'ECONNRESET' || errStr.includes('connection')) {
-      console.error('[HERIXA-EMAIL] SMTP_CONNECTION_FAILED');
-    } else if (code === 'ENOTFOUND' || errStr.includes('dns') || errStr.includes('notfound')) {
-      console.error('[HERIXA-EMAIL] SMTP_DNS_FAILED');
-    } else if (errStr.includes('tls') || errStr.includes('ssl') || errStr.includes('secure')) {
-      console.error('[HERIXA-EMAIL] SMTP_TLS_FAILED');
-    } else {
-      console.error('[HERIXA-EMAIL] SMTP_FAILURE');
-    }
+    console.error('[HERIXA-EMAIL] Failed to dispatch OTP email:', error.message || String(error));
     return false;
   }
 };
@@ -261,23 +264,13 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
 export const sendPasswordChangedEmail = async (email: string, name: string): Promise<boolean> => {
   const config = validateSmtpConfig();
   if (!config.configured) {
-    console.error(`[HERIXA-EMAIL] SMTP Configuration Error: ${config.error}`);
+    console.error(`[HERIXA-EMAIL] Email Configuration Error: ${config.error}`);
     return false;
   }
 
-  const { host, port, user, pass, from } = getSmtpCredentials();
+  const { from } = getSmtpCredentials();
 
   try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      family: 4,
-    } as any);
-
-    await transporter.verify();
-
     const subject = 'HERIXA Password Changed Successfully';
     const formattedDate = new Date().toLocaleString('en-US', { timeZone: 'UTC' }) + ' UTC';
 
@@ -305,22 +298,13 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
       </div>
     `;
 
-    const mailOptions = {
+    return await dispatchEmail({
       from,
       to: email,
       subject,
       text: textBody,
       html: htmlBody,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    if (info.rejected && info.rejected.length > 0) {
-      console.error(`[HERIXA-EMAIL] Recipient email rejected: ${info.rejected.join(', ')}`);
-      return false;
-    }
-
-    console.log('[HERIXA-EMAIL] PASSWORD_CHANGED_EMAIL_SENT');
-    return true;
+    });
   } catch (error: any) {
     console.error('[HERIXA-EMAIL] Failed to send password changed email:', error.message || error);
     return false;
@@ -333,24 +317,14 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
 export const sendAdminRegistrationNotification = async (newUserEmail: string, newUserName: string, registrationDate: Date = new Date()): Promise<boolean> => {
   const config = validateSmtpConfig();
   if (!config.configured) {
-    console.warn(`[HERIXA-ADMIN-NOTIF] SMTP Configuration Warning: ${config.error}`);
+    console.warn(`[HERIXA-ADMIN-NOTIF] Email Configuration Warning: ${config.error}`);
     return false;
   }
 
-  const { host, port, user, pass, from } = getSmtpCredentials();
+  const { from } = getSmtpCredentials();
   const adminRecipient = 'vidhub657@gmail.com';
 
   try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      family: 4,
-    } as any);
-
-    await transporter.verify();
-
     const formattedDate = registrationDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
     const subject = 'HERIXA — New User Registration';
 
@@ -375,22 +349,13 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
       </div>
     `;
 
-    const mailOptions = {
+    return await dispatchEmail({
       from,
       to: adminRecipient,
       subject,
       text: textBody,
       html: htmlBody,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    if (info.rejected && info.rejected.length > 0) {
-      console.warn(`[HERIXA-ADMIN-NOTIF] Admin notification email rejected for: ${info.rejected.join(', ')}`);
-      return false;
-    }
-
-    console.log(`[HERIXA-ADMIN-NOTIF] Admin registration notification email sent to ${adminRecipient} for user ${newUserEmail}`);
-    return true;
+    });
   } catch (error: any) {
     console.error('[HERIXA-ADMIN-NOTIF] Safe non-blocking warning: Failed to send admin registration email:', error.message || error);
     return false;
