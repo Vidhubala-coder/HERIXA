@@ -423,7 +423,7 @@ export const apiFetch = async (
       }
     }
 
-    const timeoutMs = options.timeout ?? 15000; // 15 seconds default timeout
+    const timeoutMs = options.timeout ?? (isWriteRequest ? 30000 : 15000); // 30s timeout for write requests (register, scan, email), 15s for GET
     let timedOut = false;
     const timeoutId = setTimeout(() => {
       timedOut = true;

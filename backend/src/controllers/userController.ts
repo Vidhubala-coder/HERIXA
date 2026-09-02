@@ -270,7 +270,12 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
 
     const emailSent = await sendOtpEmail(normalizedEmail, user.name, otp);
     if (!emailSent) {
-      console.warn(`[HERIXA-AUTH] Warning: Verification email dispatch failed or timed out for ${normalizedEmail}. OTP logged for security/fallback: ${otp}`);
+      console.warn(`[HERIXA-AUTH] Warning: Verification email dispatch failed or timed out for ${normalizedEmail}.`);
+      res.status(502).json({
+        success: false,
+        message: 'We could not send the verification email. Please check your address and try again.',
+      });
+      return;
     }
 
     if (process.env.NODE_ENV === 'development') {
