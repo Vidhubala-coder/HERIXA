@@ -1,0 +1,8 @@
+# EAS Ignore - exclude heavy dataset and node_modules from EAS upload tarball
+node_modules/
+backend/
+ai/
+.git/
+.expo/
+dist/
+scratch/
