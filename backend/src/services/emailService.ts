@@ -8,19 +8,34 @@ try {
   }
 } catch (e) {}
 
+const getSmtpCredentials = () => {
+  const host = (process.env.EMAIL_HOST || 'smtp.resend.com').trim();
+  const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '465');
+  const port = (host === 'smtp.gmail.com' || host.includes('resend')) ? 465 : rawPort;
+  const user = (process.env.EMAIL_USER || (host.includes('resend') ? 'resend' : '')).trim();
+  let pass = (process.env.RESEND_API_KEY || process.env.EMAIL_PASSWORD || '').trim();
+  const from = (process.env.EMAIL_FROM || 'HERIXA Verification <onboarding@resend.dev>').trim();
+
+  // Gmail App Password spaces normalization if using Gmail SMTP
+  if (host === 'smtp.gmail.com') {
+    const stripped = pass.replace(/\s+/g, '');
+    if (stripped.length === 16) {
+      pass = stripped;
+    }
+  }
+
+  return { host, port, user, pass, from };
+};
+
 export const validateSmtpConfig = (): { configured: boolean; error?: string } => {
-  const host = (process.env.EMAIL_HOST || '').trim();
-  const port = (process.env.EMAIL_PORT || '').trim();
-  const user = (process.env.EMAIL_USER || '').trim();
-  const pass = (process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || '').trim();
+  const { host, port, user, pass, from } = getSmtpCredentials();
 
   if (!host || !port || !user || !pass || !from) {
     const missing = [];
     if (!host) missing.push('EMAIL_HOST');
     if (!port) missing.push('EMAIL_PORT');
     if (!user) missing.push('EMAIL_USER');
-    if (!pass) missing.push('EMAIL_PASSWORD');
+    if (!pass) missing.push('EMAIL_PASSWORD / RESEND_API_KEY');
     if (!from) missing.push('EMAIL_FROM');
     return {
       configured: false,
@@ -39,21 +54,7 @@ export const validateSmtpConfig = (): { configured: boolean; error?: string } =>
 };
 
 export const logSmtpDiagnostics = () => {
-  const host = (process.env.EMAIL_HOST || '').trim();
-  const port = (process.env.EMAIL_PORT || '').trim();
-  const user = (process.env.EMAIL_USER || '').trim();
-  const pass = (process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || '').trim();
-
-  // Normalize password for diagnostics length checking
-  let normalizedPass = pass;
-  if (host === 'smtp.gmail.com') {
-    const stripped = pass.replace(/\s+/g, '');
-    // Gmail App Password must be 16 characters
-    if (stripped.length === 16) {
-      normalizedPass = stripped;
-    }
-  }
+  const { host, port, user, pass, from } = getSmtpCredentials();
 
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] HOST=${host}`);
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PORT=${port}`);
@@ -61,9 +62,6 @@ export const logSmtpDiagnostics = () => {
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PASSWORD_CONFIGURED=${pass !== ''}`);
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PASSWORD_LENGTH=${pass.length}`);
   console.log(`[HERIXA-EMAIL-DIAGNOSTIC] FROM_CONFIGURED=${from !== ''}`);
-  if (host === 'smtp.gmail.com') {
-    console.log(`[HERIXA-EMAIL-DIAGNOSTIC] GMAIL_NORMALIZED_LENGTH=${normalizedPass.length}`);
-  }
 };
 
 export const verifySmtpConnection = async (): Promise<boolean> => {
@@ -75,19 +73,7 @@ export const verifySmtpConnection = async (): Promise<boolean> => {
     return false;
   }
 
-  const host = (process.env.EMAIL_HOST || 'smtp.gmail.com').trim();
-  const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '465');
-  const port = host === 'smtp.gmail.com' ? 465 : rawPort;
-  const user = (process.env.EMAIL_USER || '').trim();
-  let pass = (process.env.EMAIL_PASSWORD || '').trim();
-
-  // Gmail App Password spaces normalization
-  if (host === 'smtp.gmail.com') {
-    const stripped = pass.replace(/\s+/g, '');
-    if (stripped.length === 16) {
-      pass = stripped;
-    }
-  }
+  const { host, port, user, pass } = getSmtpCredentials();
 
   try {
     const transporter = nodemailer.createTransport({
@@ -142,20 +128,7 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
     return false;
   }
 
-  const host = (process.env.EMAIL_HOST || 'smtp.gmail.com').trim();
-  const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '465');
-  const port = host === 'smtp.gmail.com' ? 465 : rawPort;
-  const user = (process.env.EMAIL_USER || '').trim();
-  let pass = (process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || '').trim();
-
-  // Gmail App Password spaces normalization
-  if (host === 'smtp.gmail.com') {
-    const stripped = pass.replace(/\s+/g, '');
-    if (stripped.length === 16) {
-      pass = stripped;
-    }
-  }
+  const { host, port, user, pass, from } = getSmtpCredentials();
 
   console.log('[HERIXA-EMAIL] SMTP_CONFIGURED');
 
@@ -292,19 +265,7 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
     return false;
   }
 
-  const host = (process.env.EMAIL_HOST || '').trim();
-  const port = parseInt((process.env.EMAIL_PORT || '').trim() || '587');
-  const user = (process.env.EMAIL_USER || '').trim();
-  let pass = (process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || '').trim();
-
-  // Gmail App Password spaces normalization
-  if (host === 'smtp.gmail.com') {
-    const stripped = pass.replace(/\s+/g, '');
-    if (stripped.length === 16) {
-      pass = stripped;
-    }
-  }
+  const { host, port, user, pass, from } = getSmtpCredentials();
 
   try {
     const transporter = nodemailer.createTransport({
@@ -376,19 +337,8 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
     return false;
   }
 
-  const host = (process.env.EMAIL_HOST || '').trim();
-  const port = parseInt((process.env.EMAIL_PORT || '').trim() || '587');
-  const user = (process.env.EMAIL_USER || '').trim();
-  let pass = (process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || '').trim();
+  const { host, port, user, pass, from } = getSmtpCredentials();
   const adminRecipient = 'vidhub657@gmail.com';
-
-  if (host === 'smtp.gmail.com') {
-    const stripped = pass.replace(/\s+/g, '');
-    if (stripped.length === 16) {
-      pass = stripped;
-    }
-  }
 
   try {
     const transporter = nodemailer.createTransport({
