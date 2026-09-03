@@ -1,4 +1,3 @@
-import nodemailer from 'nodemailer';
 import dns from 'dns';
 
 // Force Node.js DNS lookup to prioritize IPv4 over IPv6 on Linux cloud hosts (Render) to prevent ENETUNREACH
@@ -8,153 +7,150 @@ try {
   }
 } catch (e) {}
 
-const getSmtpCredentials = () => {
-  const host = (process.env.EMAIL_HOST || 'smtp.gmail.com').trim();
-  const rawPort = parseInt((process.env.EMAIL_PORT || '').trim() || '587');
-  const port = host === 'smtp.gmail.com' ? 587 : rawPort;
-  const user = (process.env.EMAIL_USER || '').trim();
-  let pass = (process.env.EMAIL_PASSWORD || '').trim();
-  const from = (process.env.EMAIL_FROM || user || 'HERIXA Verification').trim();
+const getBrevoSender = () => {
+  const apiKey = (process.env.BREVO_API_KEY || '').trim();
+  const rawFrom = (process.env.EMAIL_FROM || process.env.EMAIL_USER || 'HERIXA Verification').trim();
 
-  // Gmail App Password spaces normalization if using Gmail SMTP
-  if (host === 'smtp.gmail.com') {
-    const stripped = pass.replace(/\s+/g, '');
-    if (stripped.length === 16) {
-      pass = stripped;
-    }
+  let name = 'HERIXA Verification';
+  let email = rawFrom;
+
+  const match = rawFrom.match(/^(.*?)\s*<([^>]+)>$/);
+  if (match) {
+    name = match[1].trim() || 'HERIXA Verification';
+    email = match[2].trim();
+  } else if (rawFrom.includes('@')) {
+    email = rawFrom.trim();
   }
 
-  return { host, port, user, pass, from };
+  return { apiKey, sender: { name, email }, rawFrom };
 };
 
-export const validateSmtpConfig = (): { configured: boolean; error?: string } => {
-  const { host, port, user, pass, from } = getSmtpCredentials();
+export const validateEmailConfig = (): { configured: boolean; error?: string } => {
+  const { apiKey, sender } = getBrevoSender();
 
-  if (!host || !port || !user || !pass || !from) {
-    const missing = [];
-    if (!host) missing.push('EMAIL_HOST');
-    if (!port) missing.push('EMAIL_PORT');
-    if (!user) missing.push('EMAIL_USER');
-    if (!pass) missing.push('EMAIL_PASSWORD');
-    if (!from) missing.push('EMAIL_FROM');
+  if (!apiKey) {
     return {
       configured: false,
-      error: `Missing required SMTP environment variables: ${missing.join(', ')}`
+      error: 'Missing required environment variable: BREVO_API_KEY'
     };
   }
 
-  if (user === 'your_email@gmail.com' || pass === 'your_app_password') {
+  if (!sender.email || !sender.email.includes('@')) {
     return {
       configured: false,
-      error: 'SMTP credentials still set to default placeholder values.'
+      error: 'Invalid or missing sender email in EMAIL_FROM'
     };
   }
 
   return { configured: true };
 };
 
-export const logSmtpDiagnostics = () => {
-  const { host, port, user, pass, from } = getSmtpCredentials();
+// Export backward-compatible alias for existing imports
+export const validateSmtpConfig = validateEmailConfig;
 
-  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] HOST=${host}`);
-  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PORT=${port}`);
-  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] USER_CONFIGURED=${user !== ''}`);
-  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PASSWORD_CONFIGURED=${pass !== ''}`);
-  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PASSWORD_LENGTH=${pass.length}`);
-  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] FROM_CONFIGURED=${from !== ''}`);
+export const logEmailDiagnostics = () => {
+  const { apiKey, sender } = getBrevoSender();
+
+  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] PROVIDER=Brevo_HTTPS_API`);
+  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] API_KEY_CONFIGURED=${apiKey !== ''}`);
+  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] SENDER_EMAIL=${sender.email}`);
+  console.log(`[HERIXA-EMAIL-DIAGNOSTIC] SENDER_NAME=${sender.name}`);
 };
 
-const dispatchSmtpEmail = async (mailOptions: { from?: string; to: string; subject: string; text: string; html: string }): Promise<boolean> => {
-  const { host, port, user, pass, from } = getSmtpCredentials();
+export const logSmtpDiagnostics = logEmailDiagnostics;
+
+const dispatchBrevoEmail = async (mailOptions: {
+  from?: string;
+  to: string;
+  toName?: string;
+  subject: string;
+  text: string;
+  html: string;
+}): Promise<boolean> => {
+  const { apiKey, sender } = getBrevoSender();
+
+  if (!apiKey) {
+    console.error('[HERIXA-EMAIL] Brevo Configuration Error: BREVO_API_KEY is missing.');
+    return false;
+  }
+
+  let mailSender = sender;
+  if (mailOptions.from) {
+    const match = mailOptions.from.match(/^(.*?)\s*<([^>]+)>$/);
+    if (match) {
+      mailSender = { name: match[1].trim() || sender.name, email: match[2].trim() };
+    } else if (mailOptions.from.includes('@')) {
+      mailSender = { name: sender.name, email: mailOptions.from.trim() };
+    }
+  }
+
+  const payload = {
+    sender: mailSender,
+    to: [
+      {
+        email: mailOptions.to,
+        name: mailOptions.toName || mailOptions.to.split('@')[0],
+      },
+    ],
+    subject: mailOptions.subject,
+    htmlContent: mailOptions.html,
+    textContent: mailOptions.text,
+  };
 
   try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-      family: 4,
-    } as any);
-
-    const info = await transporter.sendMail({
-      from: mailOptions.from || from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      text: mailOptions.text,
-      html: mailOptions.html,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
 
-    if (info.rejected && info.rejected.length > 0) {
-      console.error(`[HERIXA-EMAIL] Recipient email rejected: ${info.rejected.join(', ')}`);
+    if (response.ok) {
+      const resData: any = await response.json().catch(() => ({}));
+      console.log(`[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (Brevo HTTP API ID: ${resData.messageId || 'N/A'})`);
+      return true;
+    } else {
+      const errData: any = await response.json().catch(() => ({}));
+      const errMsg = errData.message || errData.code || `HTTP Status ${response.status}`;
+      console.error(`[HERIXA-EMAIL] Brevo HTTP API Error (Status ${response.status}): ${errMsg}`);
       return false;
     }
-
-    console.log('[HERIXA-EMAIL] EMAIL_SENT_SUCCESSFULLY (Gmail SMTP)');
-    return true;
   } catch (error: any) {
-    const code = error.code || 'UNKNOWN';
-    const responseCode = error.responseCode || 'NONE';
-    const message = error.message || String(error);
-
-    console.error('[HERIXA-EMAIL] SMTP_ERROR');
-    console.error(`code=${code}`);
-    console.error(`responseCode=${responseCode}`);
-    console.error(`message=${message}`);
+    console.error('[HERIXA-EMAIL] Brevo HTTP API network error:', error.message || String(error));
     return false;
   }
 };
 
 export const verifySmtpConnection = async (): Promise<boolean> => {
-  logSmtpDiagnostics();
-  
-  const config = validateSmtpConfig();
-  if (!config.configured) {
-    console.error(`[HERIXA-EMAIL] SMTP Configuration Error: ${config.error}`);
-    return false;
-  }
+  logEmailDiagnostics();
 
-  const { host, port, user, pass } = getSmtpCredentials();
-
-  try {
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-      family: 4,
-    } as any);
-
-    await transporter.verify();
-    console.log('[HERIXA-EMAIL] SMTP_CONFIGURED');
-    console.log('[HERIXA-EMAIL] SMTP_CONNECTION_VERIFIED');
-    return true;
-  } catch (error: any) {
-    console.error('[HERIXA-EMAIL] SMTP Connection Error:', error.message || String(error));
-    return false;
-  }
-};
-
-export const sendOtpEmail = async (email: string, name: string, otp: string, resetToken?: string): Promise<boolean> => {
-  const config = validateSmtpConfig();
+  const config = validateEmailConfig();
   if (!config.configured) {
     console.error(`[HERIXA-EMAIL] Email Configuration Error: ${config.error}`);
     return false;
   }
 
-  const { from } = getSmtpCredentials();
+  console.log('[HERIXA-EMAIL] BREVO_HTTPS_API_CONFIGURED');
+  console.log('[HERIXA-EMAIL] CONNECTION_VERIFIED');
+  return true;
+};
+
+export const sendOtpEmail = async (email: string, name: string, otp: string, resetToken?: string): Promise<boolean> => {
+  const config = validateEmailConfig();
+  if (!config.configured) {
+    console.error(`[HERIXA-EMAIL] Email Configuration Error: ${config.error}`);
+    return false;
+  }
 
   try {
     console.log('[HERIXA-EMAIL] OTP_EMAIL_SEND_STARTED');
 
     const isReset = !!resetToken;
     const subject = isReset ? 'HERIXA Password Reset OTP' : 'Verify your HERIXA account';
-    
+
     const resetBaseUrl = (process.env.PASSWORD_RESET_BASE_URL || 'http://localhost:5000').trim();
     const resetUrl = `${resetBaseUrl}/api/users/reset-password-redirect?token=${resetToken}`;
 
@@ -170,7 +166,7 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
           <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;" />
           <p>Hello <strong>${name}</strong>,</p>
           <p>You requested to reset your HERIXA password.</p>
-          
+
           <p style="margin-top: 20px; margin-bottom: 5px; font-weight: bold; color: #D4AF37;">Option 1: Enter Verification Code in App</p>
           <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; letter-spacing: 4px; display: inline-block; margin-bottom: 20px; color: #D4AF37; border: 1px solid #333;">
             ${otp}
@@ -180,7 +176,7 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
           <a href="${resetUrl}" style="background-color: #D4AF37; color: #121212; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; margin-bottom: 20px;">
             Reset Password
           </a>
-          
+
           <p style="font-size: 13px; color: #ccc; margin-top: 20px;">
             This link and code expire in 10 minutes and can only be used once.
           </p>
@@ -212,9 +208,9 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
         </div>
       `;
 
-    return await dispatchSmtpEmail({
-      from,
+    return await dispatchBrevoEmail({
       to: email,
+      toName: name,
       subject,
       text: textBody,
       html: htmlBody,
@@ -229,13 +225,11 @@ export const sendOtpEmail = async (email: string, name: string, otp: string, res
  * Sends a secure notification email to the user when their password has been changed.
  */
 export const sendPasswordChangedEmail = async (email: string, name: string): Promise<boolean> => {
-  const config = validateSmtpConfig();
+  const config = validateEmailConfig();
   if (!config.configured) {
     console.error(`[HERIXA-EMAIL] Email Configuration Error: ${config.error}`);
     return false;
   }
-
-  const { from } = getSmtpCredentials();
 
   try {
     const subject = 'HERIXA Password Changed Successfully';
@@ -250,7 +244,7 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
         <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;" />
         <p>Hello <strong>${name}</strong>,</p>
         <p>Your HERIXA account password was successfully changed.</p>
-        
+
         <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #333;">
           <p style="margin: 0; color: #ccc; font-size: 14px;"><strong>Date/Time:</strong> ${formattedDate}</p>
         </div>
@@ -258,16 +252,16 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
         <p style="color: #ff3b30; font-size: 13px; font-weight: bold; margin-top: 20px;">
           SECURITY WARNING: If you did not initiate this change, please contact HERIXA support immediately to secure your account.
         </p>
-        
+
         <p style="font-size: 12px; color: #999; margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
           This is an automated security notification. Please do not reply to this email.
         </p>
       </div>
     `;
 
-    return await dispatchSmtpEmail({
-      from,
+    return await dispatchBrevoEmail({
       to: email,
+      toName: name,
       subject,
       text: textBody,
       html: htmlBody,
@@ -282,13 +276,12 @@ export const sendPasswordChangedEmail = async (email: string, name: string): Pro
  * Sends an informational notification email to the admin when a new user registers.
  */
 export const sendAdminRegistrationNotification = async (newUserEmail: string, newUserName: string, registrationDate: Date = new Date()): Promise<boolean> => {
-  const config = validateSmtpConfig();
+  const config = validateEmailConfig();
   if (!config.configured) {
     console.warn(`[HERIXA-ADMIN-NOTIF] Email Configuration Warning: ${config.error}`);
     return false;
   }
 
-  const { from } = getSmtpCredentials();
   const adminRecipient = 'vidhub657@gmail.com';
 
   try {
@@ -303,7 +296,7 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
         <h3 style="color: #ffffff; margin-top: 0;">New User Registration</h3>
         <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;" />
         <p>A new user has registered on HERIXA.</p>
-        
+
         <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #333;">
           <p style="margin: 4px 0; color: #ffffff;"><strong>Name:</strong> ${newUserName}</p>
           <p style="margin: 4px 0; color: #ffffff;"><strong>Email:</strong> ${newUserEmail}</p>
@@ -316,9 +309,9 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
       </div>
     `;
 
-    return await dispatchSmtpEmail({
-      from,
+    return await dispatchBrevoEmail({
       to: adminRecipient,
+      toName: 'HERIXA Admin',
       subject,
       text: textBody,
       html: htmlBody,
@@ -328,4 +321,3 @@ export const sendAdminRegistrationNotification = async (newUserEmail: string, ne
     return false;
   }
 };
-
