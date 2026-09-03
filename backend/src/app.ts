@@ -15,6 +15,9 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
 
+// Trust front reverse proxy (Render) for X-Forwarded-For header and client IP rate limiting
+app.set('trust proxy', 1);
+
 // Serve uploads folder statically using an absolute path
 const uploadsPath = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsPath)) {
