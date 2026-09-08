@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -160,14 +160,34 @@ const uploadRecognition = multer({
   storage: recognitionImageStorage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB maximum file size
+    fileSize: 15 * 1024 * 1024 // 15MB maximum file size
   }
 });
+
+const recognitionUploadMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    uploadRecognition.single('image')(req, res, (err: any) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          status: 'error',
+          message: err.message || 'Image upload error',
+          errorCode: 400,
+          errorDetails: 'INVALID_IMAGE'
+        });
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+};
 
 router.get('/', getAllMonuments);
 router.get('/featured', getFeaturedMonuments);
 router.get('/search', getAllMonuments); // Handle search before any /:id
-router.post('/recognize', recognizeMonument);
+router.post('/recognize', recognitionUploadMiddleware, recognizeMonument);
 router.post('/recognize-multiview', recognizeMonumentMultiViewRoute);
 router.get('/recognize/health', getRecognizeHealth);
 router.post('/', requireAdmin, createMonument);

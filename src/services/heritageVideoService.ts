@@ -172,13 +172,22 @@ export const heritageVideoService = {
     }
 
     const filename = videoAsset.name || fileUri.split('/').pop() || `video-${Date.now()}.mp4`;
-    let mimeType = videoAsset.type || 'video/mp4';
-    const lowerName = filename.toLowerCase();
+    const lowerFilename = filename.toLowerCase();
 
-    if (lowerName.endsWith('.mov') && (!mimeType || mimeType === 'application/octet-stream')) {
-      mimeType = 'video/quicktime';
-    } else if (lowerName.endsWith('.mp4') && (!mimeType || mimeType === 'application/octet-stream')) {
-      mimeType = 'video/mp4';
+    // Resolve MIME type — never allow null/undefined/empty which causes Android unsupportedDataFormat
+    let mimeType = videoAsset.type || '';
+    if (!mimeType || mimeType === 'null' || mimeType === 'undefined' || mimeType === 'application/octet-stream') {
+      if (lowerFilename.endsWith('.mov')) mimeType = 'video/quicktime';
+      else if (lowerFilename.endsWith('.webm')) mimeType = 'video/webm';
+      else if (lowerFilename.endsWith('.mkv')) mimeType = 'video/x-matroska';
+      else if (lowerFilename.endsWith('.avi')) mimeType = 'video/x-msvideo';
+      else if (lowerFilename.endsWith('.3gp')) mimeType = 'video/3gpp';
+      else mimeType = 'video/mp4'; // safe production default for Android
+    }
+
+    // Validate that the resolved MIME type is a video format
+    if (!mimeType.startsWith('video/')) {
+      throw new Error(`Unsupported media format: "${mimeType}". Please select a video file (MP4, MOV, WEBM, MKV, AVI).`);
     }
 
     const formData = new FormData();
@@ -187,6 +196,7 @@ export const heritageVideoService = {
       name: filename,
       type: mimeType,
     } as any);
+
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();

@@ -18,15 +18,12 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/theme';
 import ARViewport from '../components/ar/ARViewport';
 import { recognizeMonumentFromImage, ImageRecognitionResponse } from '../services/monumentService';
-import { CompositeScreenProps } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList, RecognitionResultData } from '../navigation/types';
 
-type Props = CompositeScreenProps<
-  BottomTabScreenProps<MainTabParamList, 'SmartScan'>,
-  NativeStackScreenProps<RootStackParamList>
->;
+type Props = BottomTabScreenProps<MainTabParamList, 'SmartScan'> &
+  NativeStackScreenProps<RootStackParamList>;
 
 const MEDIUM_CONFIDENCE_THRESHOLD = 0.35;
 
@@ -68,7 +65,21 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
 
       if (!result.success) {
         const errorMsg = result.reason || result.message || 'AI heritage recognition service is initializing.';
-        if (result.errorDetails === 'MODEL_UNAVAILABLE' || errorMsg.includes('unavailable') || errorMsg.includes('503')) {
+        if (result.errorDetails === 'MODEL_INITIALIZING') {
+          setScanErrorTitle('AI Initializing');
+          setScanError('HERIXA AI model is initializing. Please tap SCAN again in a few moments.');
+        } else if (result.errorDetails === 'GATEWAY_ERROR' || errorMsg.includes('gateway') || errorMsg.includes('502')) {
+          setScanErrorTitle('AI Waking Up');
+          setScanError('HERIXA AI service is waking up from cold start. Please tap SCAN again in 10 seconds.');
+        } else if (result.errorDetails === 'REQUEST_TIMEOUT' || errorMsg.includes('Timeout') || errorMsg.includes('timeout')) {
+          setScanErrorTitle('Request Timeout');
+          setScanError('The scan request timed out. Please tap SCAN again.');
+        } else if (
+          result.errorDetails === 'MODEL_UNAVAILABLE' ||
+          errorMsg.includes('unavailable') ||
+          errorMsg.includes('503') ||
+          errorMsg.includes('warming')
+        ) {
           setScanErrorTitle('AI Service Warming Up');
           setScanError('HERIXA AI service is warming up (cloud cold start). Please try scanning again in 10 seconds.');
         } else if (result.errorDetails === 'NETWORK_UNAVAILABLE' || errorMsg.includes('Connection')) {
@@ -109,6 +120,15 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
       if (error.isNetworkError || errMsg.includes('Network') || errMsg.includes('fetch failed')) {
         setScanErrorTitle('Network Error');
         setScanError('Network Connection Error: Please check your internet connection and ensure HERIXA backend is reachable.');
+      } else if (error.isTimeout || errMsg.includes('timeout') || errMsg.includes('Timeout')) {
+        setScanErrorTitle('Request Timeout');
+        setScanError('The scan request timed out. Please tap SCAN again.');
+      } else if (errMsg.includes('MODEL_INITIALIZING')) {
+        setScanErrorTitle('AI Initializing');
+        setScanError('HERIXA AI model is initializing. Please tap SCAN again in a few moments.');
+      } else if (errMsg.includes('502') || errMsg.includes('gateway')) {
+        setScanErrorTitle('AI Waking Up');
+        setScanError('HERIXA cloud AI is starting up. Please wait a moment and tap SCAN again.');
       } else if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('MODEL_UNAVAILABLE')) {
         setScanErrorTitle('AI Service Warming Up');
         setScanError('HERIXA AI service is warming up (cloud cold start). Please tap SCAN AGAIN in a few seconds.');

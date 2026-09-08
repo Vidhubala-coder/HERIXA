@@ -99,7 +99,7 @@ export const attemptRuntimeRecovery = async (): Promise<boolean> => {
 let activeHealthPromise: Promise<boolean> | null = null;
 const HEALTH_CACHE_TTL = 5000; // 5 seconds TTL to avoid rapid polling
 
-const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean> => {
+const checkAiServiceHealthInternal = async (silentMode = false, overrideTimeoutMs?: number): Promise<boolean> => {
   const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
   const aiServiceUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
   const healthUrl = `${aiServiceUrl}/health`;
@@ -110,7 +110,9 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
   
   try {
     const isRemote = aiServiceUrl.startsWith('https://');
-    const healthTimeout = isRemote ? 35000 : 8000;
+    // Remote Render free-tier cold start can take up to 50-60s; use 55s health timeout.
+    // For polling inside waitForModelReady, override with a shorter per-probe timeout.
+    const healthTimeout = overrideTimeoutMs ?? (isRemote ? 55000 : 8000);
     const res = await fetch(healthUrl, {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
@@ -187,18 +189,23 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
   }
 };
 
-export const checkAiServiceHealthOnStartup = async (maxRetries = 6, delayMs = 3000): Promise<boolean> => {
+export const checkAiServiceHealthOnStartup = async (maxRetries = 8, delayMs = 3000): Promise<boolean> => {
+  const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
+  const isRemote = rawUrl.startsWith('https://');
+  // For remote Render services, use a shorter per-probe timeout on startup so we can retry quickly
+  // The real cold-start wait is handled by waitForModelReady during request time.
+  const startupProbeTimeout = isRemote ? 15000 : 8000;
   console.log('[HERIXA-AI] SERVICE_CHECK_STARTED');
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const isReady = await checkAiServiceHealthInternal(true);
+    const isReady = await checkAiServiceHealthInternal(true, startupProbeTimeout);
     if (isReady) {
       lastCheckTime = Date.now();
       return true;
     }
     if (attempt < maxRetries) {
-      // Exponential backoff: 3s, 4.2s, 5.8s, 8.2s, 11.5s to prevent HTTP 429 rate limits during cold starts
+      // Exponential backoff: 3s, 4.2s, 5.8s, 8.2s, 11.5s, 16s, 16s
       const backoff = delayMs * Math.pow(1.4, attempt - 1);
-      await new Promise((resolve) => setTimeout(resolve, Math.min(backoff, 12000)));
+      await new Promise((resolve) => setTimeout(resolve, Math.min(backoff, 16000)));
     }
   }
 
@@ -263,18 +270,23 @@ export const isAiServiceAvailable = async (): Promise<boolean> => {
   return true;
 };
 
-// Poll health check while state is INITIALIZING or waking up
-export const waitForModelReady = async (maxWaitMs = 60000): Promise<boolean> => {
-  console.log(`[HERIXA-AI] Polling AI service readiness (max wait: ${maxWaitMs}ms)...`);
-  const pollInterval = 1000; // 1 second interval
-  let elapsed = 0;
+// Poll health check while state is INITIALIZING or waking up.
+// Uses short per-probe timeouts (10s) so that the total maxWaitMs budget
+// actually covers multiple real probe attempts rather than 1–2 long waits.
+export const waitForModelReady = async (maxWaitMs = 75000): Promise<boolean> => {
+  const rawUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
+  const isRemote = rawUrl.startsWith('https://');
+  // Per-probe timeout: 12s for remote (fast fail + retry), 5s for local
+  const perProbeTimeoutMs = isRemote ? 12000 : 5000;
+  const betweenPollMs = isRemote ? 3000 : 1000; // pause between polls
+  
+  console.log(`[HERIXA-AI] Polling AI service readiness (max wait: ${maxWaitMs}ms, probe timeout: ${perProbeTimeoutMs}ms)...`);
+  const start = Date.now();
 
-  while (elapsed < maxWaitMs) {
-    await new Promise(resolve => setTimeout(resolve, pollInterval));
-    elapsed += pollInterval;
-
-    const isHealthy = await checkAiServiceHealthInternal(true);
+  while (Date.now() - start < maxWaitMs) {
+    const isHealthy = await checkAiServiceHealthInternal(true, perProbeTimeoutMs);
     if (isHealthy && aiServiceState === 'READY') {
+      const elapsed = Date.now() - start;
       console.log(`[HERIXA-AI] Model transitioned to READY after ${elapsed}ms wait.`);
       return true;
     }
@@ -283,9 +295,14 @@ export const waitForModelReady = async (maxWaitMs = 60000): Promise<boolean> => 
       console.warn('[HERIXA-AI] Model failed to load during wait.');
       return false;
     }
+
+    const remaining = maxWaitMs - (Date.now() - start);
+    if (remaining <= 0) break;
+    await new Promise(resolve => setTimeout(resolve, Math.min(betweenPollMs, remaining)));
   }
 
-  console.warn(`[HERIXA-AI] Bounded readiness wait timed out after ${maxWaitMs}ms.`);
+  const elapsed = Date.now() - start;
+  console.warn(`[HERIXA-AI] Bounded readiness wait timed out after ${elapsed}ms.`);
   return false;
 };
 
@@ -296,19 +313,19 @@ export const callPredictionService = async (formData: any, signal?: AbortSignal)
 
   let available = await isAiServiceAvailable();
   if (!available) {
-    // If remote service is unavailable (cold start), attempt controlled polling wait up to 60s
+    // If remote service is unavailable (cold start), attempt controlled polling wait up to 75s
     if (aiServiceUrl.startsWith('https://')) {
       console.log('[HERIXA-AI] Remote AI service unavailable during initial check. Service may be warming up. Waiting for model readiness...');
-      available = await waitForModelReady(60000);
+      available = await waitForModelReady(75000);
     }
     if (!available) {
       throw new Error('MODEL_UNAVAILABLE');
     }
   }
 
-  // If status is INITIALIZING, wait/poll up to 60 seconds
+  // If status is INITIALIZING, wait/poll up to 75 seconds
   if (aiServiceState === 'INITIALIZING') {
-    const ready = await waitForModelReady(60000);
+    const ready = await waitForModelReady(75000);
     if (!ready) {
       throw new Error(aiServiceState === 'INITIALIZING' ? 'MODEL_INITIALIZING' : 'MODEL_UNAVAILABLE');
     }

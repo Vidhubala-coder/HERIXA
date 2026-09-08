@@ -97,7 +97,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const refreshUserProfile = React.useCallback(async () => {
     if (!activeUserId || !authToken) return null;
     try {
-      let p = null;
+      let p: userService.UserProfile | null = null;
       if (userRole === 'admin') {
         const res = await userService.getAdminProfileData(authToken).catch(() => null);
         if (res && res.success && res.data) p = res.data;

@@ -79,3 +79,7 @@ ai/models/integration/
 
 # Local DB data directory
 backend/data/
+
+# Huge dataset and local agent folders
+ai/dataset/
+.claude/

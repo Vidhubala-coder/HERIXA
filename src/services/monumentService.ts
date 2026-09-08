@@ -477,11 +477,14 @@ export const recognizeMonumentFromImage = async (
   options?: RequestInit & { timeout?: number; latitude?: number; longitude?: number; viewType?: string; preferredLanguage?: string | null }
 ): Promise<ImageRecognitionResponse> => {
   if (getConnectivityState() === 'unavailable') {
+    const isDevCheck = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
     return {
       success: false,
       recognized: false,
       status: 'unclear',
-      reason: 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.',
+      reason: isDevCheck
+        ? 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.'
+        : 'Connection to HERIXA server is unavailable. Please check your internet connection.',
       errorDetails: 'NETWORK_UNAVAILABLE'
     };
   }
@@ -576,12 +579,22 @@ export const recognizeMonumentFromImage = async (
     if (err.isCancelled) {
       userMessage = 'Recognition request was interrupted. Please try again.';
       errorDetails = 'REQUEST_CANCELLED';
-    } else if (err.isTimeout) {
-      userMessage = 'API Request Timeout. Connection took too long.';
+    } else if (err.responseBody?.errorDetails === 'MODEL_INITIALIZING') {
+      userMessage = err.responseBody?.message || 'HERIXA AI is preparing. Please wait a moment.';
+      status = 'uncertain';
+      errorDetails = 'MODEL_INITIALIZING';
+    } else if (err.status === 502 || err.responseBody?.errorDetails === 'BAD_GATEWAY' || err.responseBody?.errorDetails === 'CONNECTION_RESET') {
+      userMessage = err.responseBody?.message || 'AI service is waking up. Please try again in a few seconds.';
+      status = 'uncertain';
+      errorDetails = 'GATEWAY_ERROR';
+    } else if (err.isTimeout || err.status === 504 || err.responseBody?.errorDetails === 'GATEWAY_TIMEOUT') {
+      userMessage = 'Recognition request timed out. Please try again.';
       status = 'unclear';
       errorDetails = 'REQUEST_TIMEOUT';
     } else if (err.isNetworkError) {
-      userMessage = 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.';
+      userMessage = isDev
+        ? 'Connection to HERIXA server is unavailable. Please check that your phone and computer are connected to the same network.'
+        : 'Connection to HERIXA server is unavailable. Please check your internet connection and try again.';
       status = 'unclear';
       errorDetails = 'NETWORK_UNAVAILABLE';
     } else if (err.status === 429) {

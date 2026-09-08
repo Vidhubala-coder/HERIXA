@@ -218,8 +218,14 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
 
     let imageToProcess: string | undefined = undefined;
     let viewTypeToProcess: string | undefined = undefined;
+    let tempUploadedFilePath: string | null = null;
 
-    if (scanEvidence && Array.isArray(scanEvidence) && scanEvidence.length > 0 && scanEvidence[0].base64) {
+    if (req.file) {
+      tempUploadedFilePath = req.file.path;
+      const fileBuffer = fs.readFileSync(req.file.path);
+      imageToProcess = fileBuffer.toString('base64');
+      viewTypeToProcess = req.body.viewType;
+    } else if (scanEvidence && Array.isArray(scanEvidence) && scanEvidence.length > 0 && scanEvidence[0].base64) {
       imageToProcess = scanEvidence[0].base64;
       viewTypeToProcess = scanEvidence[0].viewType;
     } else {
@@ -230,7 +236,7 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
       res.status(400).json({
         success: false,
         status: 'error',
-        message: 'Missing or invalid parameter: image base64 data or scanEvidence is required',
+        message: 'Missing or invalid parameter: image base64 data, scanEvidence, or multipart file is required',
         errorCode: 400,
         errorDetails: 'INVALID_IMAGE'
       });
@@ -324,7 +330,7 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
         return;
       }
       
-      const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 60000);
+      const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 90000);
       const cleanBase64 = imageToProcess.replace(/^data:image\/\w+;base64,/, "");
       const buffer = Buffer.from(cleanBase64, 'base64');
       
@@ -630,15 +636,32 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
           responseBody = await response.json();
         } catch (e) {}
 
-        const isModelUnavailable = response.status === 503 || responseBody.error?.includes('model') || responseBody.detail?.includes('model');
-        if (isModelUnavailable) {
-          console.error('[HERIXA-AI] Recognition failed: FastAPI returned MODEL_UNAVAILABLE.');
+        if (response.status === 502) {
+          console.error('[HERIXA-AI] Recognition failed: FastAPI gateway returned 502 Bad Gateway.');
+          res.status(502).json({
+            success: false,
+            status: 'error',
+            message: 'HERIXA AI service is waking up (502 Bad Gateway). Please try again.',
+            errorCode: 502,
+            errorDetails: 'BAD_GATEWAY'
+          });
+        } else if (response.status === 503 || responseBody.error?.includes('model') || responseBody.detail?.includes('model')) {
+          console.error('[HERIXA-AI] Recognition failed: FastAPI returned 503 Service Unavailable.');
           res.status(503).json({
             success: false,
             status: 'error',
             message: 'HERIXA recognition service is temporarily unavailable. Please try again.',
             errorCode: 503,
             errorDetails: 'MODEL_UNAVAILABLE'
+          });
+        } else if (response.status === 504) {
+          console.error('[HERIXA-AI] Recognition failed: FastAPI gateway timed out (504).');
+          res.status(504).json({
+            success: false,
+            status: 'error',
+            message: 'AI recognition service timed out. Please try again.',
+            errorCode: 504,
+            errorDetails: 'GATEWAY_TIMEOUT'
           });
         } else {
           console.error(`[HERIXA-AI] Recognition failed: FastAPI returned non-200 status ${response.status}. Details: ${JSON.stringify(responseBody)}`);
@@ -653,20 +676,46 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
         return;
       }
     } catch (err: any) {
-      console.error('[HERIXA-RECOGNITION] MODEL_INFERENCE_FAILED');
-      const errDetails = err.message === 'MODEL_INITIALIZING' ? 'MODEL_INITIALIZING' : 'MODEL_UNAVAILABLE';
-      const userMsg = err.message === 'MODEL_INITIALIZING'
-        ? 'HERIXA AI is preparing. Please wait a moment.'
-        : 'HERIXA recognition service is temporarily unavailable. Please try again.';
+      console.error('[HERIXA-RECOGNITION] MODEL_INFERENCE_FAILED:', err.message || err);
+      const isTimeout = err.name === 'AbortError' || err.message?.includes('timeout') || err.message?.includes('timed out') || err.code === 'ETIMEDOUT';
+      const isConnReset = err.code === 'ECONNRESET' || err.message?.includes('ECONNRESET');
+      const isConnRefused = err.code === 'ECONNREFUSED' || err.code === 'EHOSTUNREACH' || err.code === 'ENOTFOUND';
+      const isInitializing = err.message === 'MODEL_INITIALIZING';
 
-      res.status(503).json({
+      let statusCode = 503;
+      let errDetails = 'MODEL_UNAVAILABLE';
+      let userMsg = 'HERIXA recognition service is temporarily unavailable. Please try again.';
+
+      if (isInitializing) {
+        statusCode = 503;
+        errDetails = 'MODEL_INITIALIZING';
+        userMsg = 'HERIXA AI is preparing. Please wait a moment.';
+      } else if (isTimeout) {
+        statusCode = 504;
+        errDetails = 'GATEWAY_TIMEOUT';
+        userMsg = 'AI recognition service timed out during analysis. Please try again.';
+      } else if (isConnReset) {
+        statusCode = 502;
+        errDetails = 'CONNECTION_RESET';
+        userMsg = 'Connection to AI service was reset. The service may be restarting. Please try again.';
+      } else if (isConnRefused) {
+        statusCode = 503;
+        errDetails = 'SERVICE_UNREACHABLE';
+        userMsg = 'AI recognition service is unreachable. Please verify network connectivity.';
+      }
+
+      res.status(statusCode).json({
         success: false,
         status: 'error',
         message: userMsg,
-        errorCode: 503,
+        errorCode: statusCode,
         errorDetails: errDetails
       });
       return;
+    } finally {
+      if (tempUploadedFilePath) {
+        fs.unlink(tempUploadedFilePath, () => {});
+      }
     }
     
     // Asynchronous non-blocking Scan Activity logging for AI Intelligence & Tourism Insights

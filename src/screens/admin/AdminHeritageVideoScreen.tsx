@@ -180,7 +180,7 @@ export const AdminHeritageVideoScreen: React.FC = () => {
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        mediaTypes: ['videos'],
         allowsEditing: false,
         quality: 1,
       });
@@ -191,7 +191,19 @@ export const AdminHeritageVideoScreen: React.FC = () => {
 
       const asset = result.assets[0];
       const fileName = asset.fileName || asset.uri.split('/').pop() || `video-${Date.now()}.mp4`;
-      const mimeType = asset.mimeType || (fileName.endsWith('.mov') ? 'video/quicktime' : 'video/mp4');
+
+      // Derive MIME type from multiple fields (Expo SDK 57 returns mimeType on asset)
+      let mimeType: string = asset.mimeType || '';
+      if (!mimeType || mimeType === 'application/octet-stream') {
+        const lowerName = fileName.toLowerCase();
+        if (lowerName.endsWith('.mov')) mimeType = 'video/quicktime';
+        else if (lowerName.endsWith('.webm')) mimeType = 'video/webm';
+        else if (lowerName.endsWith('.mkv')) mimeType = 'video/x-matroska';
+        else if (lowerName.endsWith('.avi')) mimeType = 'video/x-msvideo';
+        else if (lowerName.endsWith('.3gp')) mimeType = 'video/3gpp';
+        else mimeType = 'video/mp4'; // safe default for Android recordings
+      }
+
       const fileSize = asset.fileSize;
 
       if (fileSize && fileSize > 100 * 1024 * 1024) {

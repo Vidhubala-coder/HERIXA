@@ -112,6 +112,13 @@ export const getMetroIP = (): string | null => {
   return null;
 };
 
+export const PRODUCTION_API_URL = 'https://herixa-backend.onrender.com';
+
+export const isStandaloneApp = (): boolean => {
+  const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
+  return !isDev;
+};
+
 export const isStaleOrLoopback = (ipOrUrl: string | undefined | null): boolean => {
   if (!ipOrUrl) return true;
   const lower = ipOrUrl.toLowerCase();
@@ -119,7 +126,8 @@ export const isStaleOrLoopback = (ipOrUrl: string | undefined | null): boolean =
     lower.includes('localhost') ||
     lower.includes('127.0.0.1') ||
     lower.includes('10.254.129.241') ||
-    lower.includes('10.197.4.241')
+    lower.includes('10.197.4.241') ||
+    lower.includes('10.141.193.241') // current dev LAN IP — must never reach standalone APK
   );
 };
 
@@ -131,6 +139,18 @@ export const getApiUrl = (): string => {
   const currentLanIp = process.env.EXPO_PUBLIC_LAN_IP;
   const currentApiUrl = process.env.EXPO_PUBLIC_API_URL;
   const currentDevMode = process.env.EXPO_PUBLIC_ANDROID_DEV_MODE;
+  const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
+
+  // In standalone / production builds (non-dev), NEVER use localhost, 127.0.0.1, or any LAN IP.
+  // Must ALWAYS use production HTTPS URL.
+  if (!isDev) {
+    if (currentApiUrl && currentApiUrl.startsWith('https://')) {
+      resolvedApiUrl = currentApiUrl;
+      return currentApiUrl;
+    }
+    resolvedApiUrl = PRODUCTION_API_URL;
+    return PRODUCTION_API_URL;
+  }
 
   // Invalidate in-memory cache if any configuration variable changes at runtime
   if (
@@ -193,7 +213,6 @@ export const getApiUrl = (): string => {
 
   // DO NOT write finalUrl to resolvedApiUrl here! It is only set on verified reachability
   
-  const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
   if (isDev) {
     const configKey = `${Platform.OS}:${resolvedMode}:${finalUrl}`;
     if (configKey !== lastLoggedConfigKey) {
@@ -225,58 +244,67 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
 
   activeHealthCheck = (async () => {
     console.log('[HERIXA-NETWORK] Health check started');
-    const configuredUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000';
-    const portMatch = configuredUrl.match(/:(\d+)\/?$/) || configuredUrl.match(/:(\d+)/);
-    const port = portMatch ? portMatch[1] : '5000';
-
-    const devMode = process.env.EXPO_PUBLIC_ANDROID_DEV_MODE || 'auto';
-    const resolvedMode = devMode === 'auto' ? (isEmulator() ? 'emulator' : 'physical') : devMode;
+    const currentApiUrl = process.env.EXPO_PUBLIC_API_URL;
+    const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
+    const configuredUrl = currentApiUrl || (isDev ? 'http://localhost:5000' : PRODUCTION_API_URL);
 
     const candidates: string[] = [];
 
-    if (configuredUrl.startsWith('https://')) {
-      candidates.push(configuredUrl);
-    } else if (Platform.OS === 'android') {
-      if (resolvedMode === 'physical') {
-        // 1. EXPO_PUBLIC_LAN_IP
-        if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
-          candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
-        }
-        // 2. valid EXPO_PUBLIC_API_URL
-        if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
-          candidates.push(configuredUrl);
-        }
-        // 3. Metro IP
-        const metroIp = getMetroIP();
-        if (metroIp && !isStaleOrLoopback(metroIp)) {
-          candidates.push(`http://${metroIp}:${port}`);
-        }
-        // 4. Android Emulator loopback alias
-        candidates.push(`http://10.0.2.2:${port}`);
-      } else {
-        // Android Emulator mode
-        candidates.push(`http://10.0.2.2:${port}`);
-        if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
-          candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
-        }
-        const metroIp = getMetroIP();
-        if (metroIp && !isStaleOrLoopback(metroIp)) {
-          candidates.push(`http://${metroIp}:${port}`);
-        }
-        if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
-          candidates.push(configuredUrl);
-        }
-      }
+    if (!isDev) {
+      // Standalone APK strictly checks only production HTTPS URL
+      const prodUrl = (currentApiUrl && currentApiUrl.startsWith('https://')) ? currentApiUrl : PRODUCTION_API_URL;
+      candidates.push(prodUrl);
     } else {
-      // iOS / Web / Non-Android
-      candidates.push(`http://localhost:${port}`);
-      candidates.push(`http://127.0.0.1:${port}`);
-      if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
+      const portMatch = configuredUrl.match(/:(\d+)\/?$/) || configuredUrl.match(/:(\d+)/);
+      const port = portMatch ? portMatch[1] : '5000';
+
+      const devMode = process.env.EXPO_PUBLIC_ANDROID_DEV_MODE || 'auto';
+      const resolvedMode = devMode === 'auto' ? (isEmulator() ? 'emulator' : 'physical') : devMode;
+
+      if (configuredUrl.startsWith('https://')) {
         candidates.push(configuredUrl);
-      }
-      const metroIp = getMetroIP();
-      if (metroIp && !isStaleOrLoopback(metroIp)) {
-        candidates.push(`http://${metroIp}:${port}`);
+      } else if (Platform.OS === 'android') {
+        if (resolvedMode === 'physical') {
+          // 1. EXPO_PUBLIC_LAN_IP
+          if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
+            candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
+          }
+          // 2. valid EXPO_PUBLIC_API_URL
+          if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
+            candidates.push(configuredUrl);
+          }
+          // 3. Metro IP
+          const metroIp = getMetroIP();
+          if (metroIp && !isStaleOrLoopback(metroIp)) {
+            candidates.push(`http://${metroIp}:${port}`);
+          }
+          // 4. Android Emulator loopback alias
+          candidates.push(`http://10.0.2.2:${port}`);
+        } else {
+          // Android Emulator mode
+          candidates.push(`http://10.0.2.2:${port}`);
+          if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
+            candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
+          }
+          const metroIp = getMetroIP();
+          if (metroIp && !isStaleOrLoopback(metroIp)) {
+            candidates.push(`http://${metroIp}:${port}`);
+          }
+          if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
+            candidates.push(configuredUrl);
+          }
+        }
+      } else {
+        // iOS / Web / Non-Android
+        candidates.push(`http://localhost:${port}`);
+        candidates.push(`http://127.0.0.1:${port}`);
+        if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
+          candidates.push(configuredUrl);
+        }
+        const metroIp = getMetroIP();
+        if (metroIp && !isStaleOrLoopback(metroIp)) {
+          candidates.push(`http://${metroIp}:${port}`);
+        }
       }
     }
 
