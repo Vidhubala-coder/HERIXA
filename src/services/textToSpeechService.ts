@@ -1,9 +1,17 @@
-﻿import * as Speech from "expo-speech";
+import * as Speech from "expo-speech";
 import { getLanguageByCode } from "../config/languages";
 
 export const cleanTextForSpeech = (text: string): string => {
   if (!text) return "";
   let cleaned = text;
+
+  // Strip section headers like "1. Start Here", "2. Don't Miss", etc.
+  cleaned = cleaned.replace(/^\s*\d+\.\s*(Start Here|Don't Miss|Look Closely|Experience the Space|Photography Tips|Respect the Heritage|Before You Leave)\s*/gmi, "");
+  
+  // Strip title prefixes like "Start here:", "What to see:", "Photography tips:", etc.
+  cleaned = cleaned.replace(/\b(Start here|Don't miss|What to see|Look closely|Experience the space|Photography tips|Respect the heritage|Before you leave|Historical origin|Ruler \/ Dynasty|Historical significance|Architecture & History|Key Details|Key Facts|Architecture Highlights)\s*:?\s*/gmi, "");
+
+  cleaned = cleaned.replace(/^#+\s+/gm, "");
   cleaned = cleaned.replace(/[\*\_`#~]/g, "");
   cleaned = cleaned.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
   cleaned = cleaned.replace(/\((https?:\/\/[^\)]+|www\.[^\)]+)\)/gi, "");
@@ -42,16 +50,7 @@ class TextToSpeechService {
         onStopped: () => { this.currentlySpeaking = false; if (onDone) onDone(); },
         onError: (err) => {
           this.currentlySpeaking = false;
-          if (languageCode !== "en") {
-            Speech.speak(cleaned, {
-              language: "en-IN",
-              onDone: () => { this.currentlySpeaking = false; if (onDone) onDone(); },
-              onStopped: () => { this.currentlySpeaking = false; if (onDone) onDone(); },
-              onError: (fe) => { this.currentlySpeaking = false; if (onError) onError(fe); },
-            });
-          } else {
-            if (onError) onError(err);
-          }
+          if (onError) onError(err);
         },
       };
       if (voiceId) opts.voice = voiceId;
@@ -78,6 +77,8 @@ class TextToSpeechService {
     const voiceId = await this._findVoice(locale, languageCode);
     this.currentlySpeaking = true;
     if (onStart) onStart();
+
+    let consecutiveErrors = 0;
     const speakChunk = (i: number): void => {
       if (this.stopRequested || i >= chunks.length) {
         this.currentlySpeaking = false;
@@ -93,11 +94,20 @@ class TextToSpeechService {
       const opts: Speech.SpeechOptions = {
         language: locale,
         onDone: () => {
+          consecutiveErrors = 0;
           if (onChunkDone) onChunkDone(i, chunks.length);
           setTimeout(() => speakChunk(i + 1), 100);
         },
         onStopped: () => { this.currentlySpeaking = false; },
-        onError: () => { setTimeout(() => speakChunk(i + 1), 150); },
+        onError: (err) => {
+          consecutiveErrors++;
+          if (consecutiveErrors >= 2) {
+            this.currentlySpeaking = false;
+            if (onError) onError(err);
+          } else {
+            setTimeout(() => speakChunk(i + 1), 150);
+          }
+        },
       };
       if (voiceId) opts.voice = voiceId;
       Speech.speak(cleaned, opts);

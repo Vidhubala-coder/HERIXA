@@ -905,7 +905,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         <View style={styles.profileHeader}>
@@ -915,9 +915,9 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             disabled={!activeUserId}
             style={styles.avatarRing}
           >
-            {profile?.profileImageUrl && !imageError ? (
+            {(profile?.profileImageUrl || profile?.avatar) && !imageError ? (
               <Image 
-                source={{ uri: `${getProfileImageUrl(profile.profileImageUrl)}?rev=${avatarRevision}` }} 
+                source={{ uri: `${getProfileImageUrl(profile.profileImageUrl || profile.avatar)}?rev=${avatarRevision}` }} 
                 style={styles.avatarImage} 
                 onError={() => setImageError(true)}
               />

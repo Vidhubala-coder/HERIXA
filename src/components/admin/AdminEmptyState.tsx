@@ -67,16 +67,14 @@ const styles = StyleSheet.create({
   },
   btn: {
     marginTop: SPACING.sm,
-    backgroundColor: 'rgba(212,175,55,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(212,175,55,0.3)',
+    backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
   },
   btnText: {
-    color: COLORS.gold,
+    color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

@@ -1,9 +1,38 @@
 import { User } from '../models/user';
+import { HeritageStory } from '../models/HeritageStory';
 import { hashPassword, verifyPassword } from './authUtils';
 
 /**
- * Runs startup migration/normalization to ensure exactly one admin account exists.
- * Normalize email comparison by trim/lowercase.
+ * Normalizes HeritageStory scenes to keep strictly Scene 1 through Scene 9.
+ */
+export const runStoryScenesCleanup = async () => {
+  try {
+    const stories = await HeritageStory.find({});
+    for (const story of stories) {
+      if (story.scenes && story.scenes.length > 0) {
+        const filtered = story.scenes.filter(s => s.sceneNumber >= 1 && s.sceneNumber <= 9);
+        const uniqueMap = new Map<number, any>();
+        filtered.forEach(s => {
+          if (!uniqueMap.has(s.sceneNumber)) {
+            uniqueMap.set(s.sceneNumber, s);
+          }
+        });
+        const cleaned = Array.from(uniqueMap.values()).sort((a, b) => a.sceneNumber - b.sceneNumber);
+        if (cleaned.length !== story.scenes.length) {
+          story.scenes = cleaned;
+          await story.save();
+          console.log(`[MIGRATION] Cleaned scenes for story ${story._id}: preserved ${cleaned.length} scenes (Scene 1 to 9).`);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[MIGRATION] Story scenes cleanup error:', err);
+  }
+};
+
+/**
+ * Runs startup migration/normalization to ensure exactly one admin account exists
+ * and normalizes HeritageStory scenes.
  */
 export const runAdminMigration = async () => {
   const adminEmail = (process.env.ADMIN_EMAIL || 'vidhub657@gmail.com').toLowerCase().trim();
@@ -66,7 +95,11 @@ export const runAdminMigration = async () => {
     } else {
       console.log('[MIGRATION] Admin normalization completed: no unauthorized admins found.');
     }
+
+    // 3. Clean up story scenes (Scene 1-9 only)
+    await runStoryScenesCleanup();
   } catch (error) {
     console.error('[MIGRATION] Startup admin normalization failed:', error);
   }
 };
+

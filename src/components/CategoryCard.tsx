@@ -39,30 +39,31 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.lg,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 10,
+    borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
     marginRight: SPACING.sm,
     gap: SPACING.xs,
   },
   selectedCard: {
-    backgroundColor: COLORS.surfaceLight,
-    borderColor: COLORS.gold,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   unselectedCard: {
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.border,
+    backgroundColor: COLORS.surfaceIvory,
+    borderColor: COLORS.borderWarm,
   },
   icon: {
-    fontSize: 16,
+    fontSize: 15,
   },
   label: {
     ...TYPOGRAPHY.bodyMedium,
-    fontWeight: '500',
+    fontWeight: '600',
+    fontSize: 13,
   },
   selectedLabel: {
-    color: COLORS.gold,
+    color: COLORS.white,
   },
   unselectedLabel: {
     color: COLORS.textSecondary,

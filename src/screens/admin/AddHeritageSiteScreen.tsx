@@ -382,7 +382,7 @@ export const AddHeritageSiteScreen: React.FC<{ navigation: any }> = ({ navigatio
             {step < STEPS.length - 1 ? (
               <TouchableOpacity style={styles.nextBtn} onPress={() => setStep(s => s + 1)} activeOpacity={0.8}>
                 <Text style={styles.nextBtnText}>Next Step</Text>
-                <Feather name="chevron-right" size={16} color="#141412" />
+                <Feather name="chevron-right" size={16} color="#FFFFFF" />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
@@ -392,10 +392,10 @@ export const AddHeritageSiteScreen: React.FC<{ navigation: any }> = ({ navigatio
                 activeOpacity={0.8}
               >
                 {isSaving ? (
-                  <ActivityIndicator size="small" color="#141412" />
+                  <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <>
-                    <Feather name="check" size={16} color="#141412" />
+                    <Feather name="check" size={16} color="#FFFFFF" />
                     <Text style={styles.saveBtnText}>Save Heritage Site</Text>
                   </>
                 )}
@@ -432,39 +432,44 @@ const Field: React.FC<{
 );
 
 const styles = StyleSheet.create({
-  container: { padding: SPACING.md, paddingBottom: 60 },
+  container: { padding: SPACING.md, paddingBottom: 60, backgroundColor: '#FAFAFA' },
   stepsBar: { marginBottom: SPACING.md },
   stepsBarContent: { flexDirection: 'row', gap: SPACING.xs },
   stepTab: {
     paddingHorizontal: 12, paddingVertical: 7,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: '#E2E8F0',
   },
   stepTabActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
-    borderColor: 'rgba(212, 175, 55, 0.25)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
+    borderColor: 'rgba(30, 58, 138, 0.2)',
   },
-  stepTabCompleted: { borderColor: 'rgba(212, 175, 55, 0.3)' },
+  stepTabCompleted: { borderColor: 'rgba(30, 58, 138, 0.3)' },
   stepTabText: { color: COLORS.textSecondary, fontSize: 11, fontWeight: '600' },
-  stepTabTextActive: { color: COLORS.gold, fontWeight: '700' },
-  stepTabTextCompleted: { color: COLORS.gold },
+  stepTabTextActive: { color: COLORS.primary, fontWeight: '700' },
+  stepTabTextCompleted: { color: COLORS.primary },
 
   card: {
-    backgroundColor: '#181816',
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   stepHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.md },
   iconChip: {
     width: 32,
     height: 32,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: 'rgba(30, 58, 138, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -475,8 +480,8 @@ const styles = StyleSheet.create({
   fieldContainer: {},
   fieldLabel: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 6 },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#F9F8F3',
+    borderWidth: 1, borderColor: '#E2E8F0',
     borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: 14, paddingVertical: 11,
     color: COLORS.textPrimary, fontSize: 13,
@@ -489,8 +494,8 @@ const styles = StyleSheet.create({
 
   imagePickerBox: {
     height: 160, borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.15)',
-    borderStyle: 'dashed', backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderWidth: 1.5, borderColor: '#CBD5E1',
+    borderStyle: 'dashed', backgroundColor: '#F8FAFC',
     justifyContent: 'center', alignItems: 'center', overflow: 'hidden',
   },
   previewCoverImage: { width: '100%', height: '100%', resizeMode: 'cover' },
@@ -498,56 +503,56 @@ const styles = StyleSheet.create({
   imagePlaceholderText: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600', marginTop: 8 },
   imagePlaceholderSub: { color: COLORS.textSecondary, fontSize: 11, marginTop: 2 },
   changeImgBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-end', marginTop: 6 },
-  changeImgText: { color: COLORS.gold, fontSize: 12, fontWeight: '600' },
+  changeImgText: { color: COLORS.primary, fontSize: 12, fontWeight: '600' },
 
   statusButtons: { flexDirection: 'row', gap: SPACING.xs },
   statusBtn: {
     flex: 1, paddingVertical: 10, borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
-    alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1, borderColor: '#E2E8F0',
+    alignItems: 'center', backgroundColor: '#F8FAFC',
   },
-  statusBtnActive: { backgroundColor: COLORS.gold, borderColor: COLORS.gold },
+  statusBtnActive: { backgroundColor: COLORS.primary, borderColor: COLORS.primary },
   statusBtnText: { color: COLORS.textSecondary, fontSize: 11, fontWeight: '700' },
-  statusBtnTextActive: { color: '#141412' },
+  statusBtnTextActive: { color: '#FFFFFF' },
 
   summaryBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#F8FAFC',
     borderRadius: BORDER_RADIUS.md,
     padding: SPACING.md, marginTop: SPACING.sm,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1, borderColor: '#E2E8F0',
   },
-  summaryTitle: { color: COLORS.gold, fontSize: 13, fontWeight: '700', marginBottom: 6 },
+  summaryTitle: { color: COLORS.primary, fontSize: 13, fontWeight: '700', marginBottom: 6 },
   summaryItem: { color: COLORS.textSecondary, fontSize: 12, marginBottom: 2 },
   loadingProgressBox: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 10, paddingHorizontal: 12,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
     borderRadius: BORDER_RADIUS.md, marginVertical: SPACING.sm,
   },
-  loadingProgressText: { color: COLORS.gold, fontSize: 12, fontWeight: '600' },
+  loadingProgressText: { color: COLORS.primary, fontSize: 12, fontWeight: '600' },
 
   stepControls: {
     flexDirection: 'row', justifyContent: 'space-between',
     marginTop: SPACING.lg, paddingTop: SPACING.md,
-    borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.06)',
+    borderTopWidth: 1, borderTopColor: '#F1F5F9',
   },
   prevBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, paddingVertical: 10, borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1, borderColor: '#E2E8F0', backgroundColor: '#F8FAFC',
   },
   prevBtnText: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
   nextBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 20, paddingVertical: 10, borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.gold, marginLeft: 'auto',
+    backgroundColor: COLORS.primary, marginLeft: 'auto',
   },
-  nextBtnText: { color: '#141412', fontSize: 13, fontWeight: '800' },
+  nextBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   saveBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 20, paddingVertical: 10, borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.gold, marginLeft: 'auto',
+    backgroundColor: COLORS.primary, marginLeft: 'auto',
   },
-  saveBtnText: { color: '#141412', fontSize: 13, fontWeight: '800' },
+  saveBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
   disabledBtn: { opacity: 0.7 },
 });

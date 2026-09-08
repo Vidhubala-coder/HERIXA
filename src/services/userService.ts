@@ -287,7 +287,17 @@ export const deleteProfilePhoto = async (
 };
 
 export const getProfileImageUrl = (imagePath: string | null | undefined): string | null => {
-  if (!imagePath) return null;
+  if (!imagePath || typeof imagePath !== 'string') return null;
+  const trimmed = imagePath.trim();
+  if (!trimmed) return null;
+
+  // Rejection check: return null if not an HTTP(S) URL and does not contain slash path separator
+  const isUrl = trimmed.startsWith('http://') || trimmed.startsWith('https://');
+  const isPath = trimmed.includes('/') || trimmed.includes('\\');
+  if (!isUrl && !isPath) {
+    return null;
+  }
+
   const apiURL = getApiUrl();
   let baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
 
@@ -296,7 +306,7 @@ export const getProfileImageUrl = (imagePath: string | null | undefined): string
   const isLocalHostBase = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') || baseUrl.includes('10.0.2.2');
 
   // Normalize path separators (convert Windows backslashes to forward slashes)
-  let normalizedPath = imagePath.replace(/\\/g, '/');
+  let normalizedPath = trimmed.replace(/\\/g, '/');
 
   // Replace localhost or 127.0.0.1 domain with the configured API URL base domain
   if (normalizedPath.includes('localhost') || normalizedPath.includes('127.0.0.1')) {

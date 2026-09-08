@@ -53,17 +53,20 @@ const startListening = () => {
 };
 
 const startServer = async () => {
-  // 1. Connect to MongoDB
-  await connectDatabase();
-
-  // 2. Start HTTP listener immediately so cloud host (Render) port detection passes in <1s
+  // 1. Start HTTP listener immediately so cloud host (Render) & local clients reach port 5000 right away
   startListening();
 
-  // 3. Run background initializations without blocking port binding or deployment startup
-  runAdminMigration().catch((err) => {
-    console.error('[HERIXA-ADMIN] Startup admin migration error:', err);
+  // 2. Connect to MongoDB Atlas (with automatic retry)
+  connectDatabase().then(() => {
+    // 3. Run admin migration after database connection succeeds
+    runAdminMigration().catch((err) => {
+      console.error('[HERIXA-ADMIN] Startup admin migration error:', err);
+    });
+  }).catch((err) => {
+    console.error('[HERIXA-BACKEND] Non-fatal database initialization error:', err);
   });
 
+  // 4. Run non-blocking background initializations
   verifySmtpConnection().catch((err) => {
     console.error('[HERIXA-EMAIL] Startup SMTP verification error:', err);
   });

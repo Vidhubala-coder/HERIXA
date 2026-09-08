@@ -12,6 +12,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { useFavorites } from '../../context/FavoritesContext';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { HerixaLogo } from '../HerixaLogo';
 import { AdminSection } from './AdminLayout';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -45,6 +46,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: 'notifications', icon: 'bell', label: 'Notifications' },
       { key: 'visuals', icon: 'image', label: 'Heritage Visuals' },
+      { key: 'protocol', icon: 'compass', label: 'Heritage Protocols' },
+      { key: 'video', icon: 'video', label: 'AI Heritage Stories' },
       { key: 'logs', icon: 'file-text', label: 'Audit Logs' },
       { key: 'settings', icon: 'settings', label: 'Settings' },
     ],
@@ -110,11 +113,11 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
         {/* Drawer Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>HERIXA</Text>
-            <Text style={styles.headerSubtitle}>Heritage Administration</Text>
+            <HerixaLogo size={32} />
+            <Text style={styles.headerSubtitle}>HERIXA Command Center</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
-            <Feather name="x" size={20} color={COLORS.textSecondary} />
+            <Feather name="x" size={18} color={COLORS.textSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -138,7 +141,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
                     <Feather
                       name={item.icon}
                       size={18}
-                      color={isActive ? COLORS.gold : COLORS.textSecondary}
+                      color={isActive ? COLORS.primary : COLORS.textSecondary}
                     />
                     <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
                       {item.label}
@@ -154,7 +157,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
 
         {/* Drawer Footer / Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
-          <Feather name="log-out" size={18} color={COLORS.danger} />
+          <Feather name="log-out" size={16} color="#DC2626" />
           <Text style={styles.logoutLabel}>Logout</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -164,8 +167,12 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
   },
   drawer: {
     position: 'absolute',
@@ -173,9 +180,9 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: DRAWER_WIDTH,
-    backgroundColor: '#141412',
+    backgroundColor: '#FFFFFF',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderRightColor: '#E2E8F0',
     paddingVertical: SPACING.md,
   },
   header: {
@@ -185,33 +192,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
   },
-  headerTitle: {
-    color: COLORS.gold,
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: 2,
-  },
   headerSubtitle: {
-    color: COLORS.textSecondary,
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.5,
+    color: COLORS.gold,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
-    marginTop: 1,
+    marginTop: 2,
   },
   closeBtn: {
     width: 32,
     height: 32,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: '#E2E8F0',
     marginVertical: SPACING.sm,
     marginHorizontal: SPACING.sm,
   },
@@ -222,13 +223,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   groupTitle: {
-    color: COLORS.textSecondary,
+    color: '#94A3B8',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1.2,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
-    opacity: 0.5,
+    textTransform: 'uppercase',
   },
   navItem: {
     flexDirection: 'row',
@@ -240,9 +241,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   navItemActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
+    borderColor: 'rgba(30, 58, 138, 0.15)',
   },
   navLabel: {
     color: COLORS.textSecondary,
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.md,
   },
   navLabelActive: {
-    color: COLORS.gold,
+    color: COLORS.primary,
     fontWeight: '700',
   },
   activeIndicator: {
@@ -259,10 +260,10 @@ const styles = StyleSheet.create({
     left: 0,
     top: 8,
     bottom: 8,
-    width: 3,
-    backgroundColor: COLORS.gold,
-    borderTopRightRadius: 2,
-    borderBottomRightRadius: 2,
+    width: 3.5,
+    backgroundColor: COLORS.primary,
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
   },
   logoutBtn: {
     flexDirection: 'row',
@@ -271,10 +272,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: SPACING.xs,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 90, 91, 0.08)',
+    backgroundColor: 'rgba(220, 38, 38, 0.06)',
   },
   logoutLabel: {
-    color: COLORS.danger,
+    color: '#DC2626',
     fontSize: 14,
     fontWeight: '600',
     marginLeft: SPACING.md,

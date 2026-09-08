@@ -7,7 +7,6 @@ import {
   StatusBar,
   ActivityIndicator,
   RefreshControl,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CompositeNavigationProp, useFocusEffect } from '@react-navigation/native';
@@ -64,7 +63,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
       setIsLoading(true);
     }
     setError(null);
-    setSavedMonuments([]); // Reset previous user's favorite monuments immediately
 
     if (getConnectivityState() === 'unavailable') {
       loadLocalFallback();
@@ -83,14 +81,8 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
       }
     } catch (err: any) {
       if (userIdForRequest !== activeUserId) return;
-      console.warn('FavoritesScreen: Failed to fetch populated favorites. Falling back to local data matching.', err);
-      
-      if (err.status && err.status >= 400 && err.status !== 503) {
-        setError('Unable to load your saved heritage sites. Please try again.');
-      } else {
-        setError(null);
-      }
-
+      console.warn('FavoritesScreen: Falling back to local data matching.', err);
+      setError(null);
       loadLocalFallback();
     } finally {
       if (userIdForRequest === activeUserId) {
@@ -100,7 +92,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
     }
   };
 
-  // Sync savedMonuments list dynamically when global favorites context is modified
   useEffect(() => {
     setSavedMonuments((prev) => {
       if (!activeUserId || !authToken) {
@@ -121,7 +112,6 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
     });
   }, [favorites, activeUserId, authToken]);
 
-  // Refresh saved collection when focus returns to the screen
   useFocusEffect(
     useCallback(() => {
       fetchPopulatedFavorites(true);
@@ -137,7 +127,7 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
       }
       await fetchPopulatedFavorites(false);
     } catch (err) {
-      console.warn('[SAVED HERITAGE] Failed refreshing favorites on pull-down', err);
+      console.warn('[SAVED HERITAGE] Failed refreshing favorites', err);
     } finally {
       setIsRefreshing(false);
     }
@@ -157,34 +147,36 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Saved Heritage</Text>
-        <Text style={styles.subtitle}>Your personalized preservation museum</Text>
+        <Text style={styles.title}>Your Heritage Collection</Text>
+        <Text style={styles.subtitle}>Saved archaeological monuments and landmarks</Text>
       </View>
 
-      {/* Loading & Favorites List */}
+      {/* Favorites List */}
       {isLoading || contextLoading ? (
         <View style={styles.centeredContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading saved collection...</Text>
         </View>
       ) : error ? (
         <View style={styles.centeredContainer}>
-          <Feather name="alert-circle" size={48} color={COLORS.danger} style={styles.errorIcon} />
+          <Feather name="alert-circle" size={44} color={COLORS.danger} style={styles.errorIcon} />
           <Text style={styles.errorText}>{error}</Text>
           <PrimaryButton title="Retry" onPress={handleRetry} style={styles.retryButton} />
         </View>
       ) : savedMonuments.length === 0 ? (
-        <EmptyState
-          title="Your heritage collection is empty."
-          description="Save monuments while browsing to build your personal collection and explore them later."
-          icon="bookmark"
-          actionLabel="Explore Monuments"
-          onActionPress={handleNavigateToExplore}
-        />
+        <View style={styles.emptyWrapper}>
+          <EmptyState
+            title="Your heritage journey starts here."
+            description="Save monuments you want to explore later."
+            icon="bookmark"
+            actionLabel="Explore Heritage"
+            onActionPress={handleNavigateToExplore}
+          />
+        </View>
       ) : (
         <FlatList
           data={savedMonuments}
@@ -195,8 +187,8 @@ export const FavoritesScreen: React.FC<FavoritesScreenProps> = ({ navigation }) 
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={handleRefresh}
-              tintColor={COLORS.gold}
-              colors={[COLORS.gold]}
+              tintColor={COLORS.primary}
+              colors={[COLORS.primary]}
             />
           }
           renderItem={({ item }) => (
@@ -218,18 +210,19 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.borderLight,
   },
   title: {
     color: COLORS.textPrimary,
-    ...TYPOGRAPHY.h2,
-    fontWeight: '700',
+    ...TYPOGRAPHY.h1,
+    fontWeight: '800',
   },
   subtitle: {
-    color: COLORS.gold,
-    ...TYPOGRAPHY.bodySmall,
+    color: COLORS.textSecondary,
+    ...TYPOGRAPHY.bodyMedium,
     marginTop: 2,
   },
   centeredContainer: {
@@ -237,6 +230,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.xl,
+  },
+  emptyWrapper: {
+    flex: 1,
+    justifyContent: 'center',
   },
   loadingText: {
     color: COLORS.textSecondary,
@@ -260,3 +257,5 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
 });
+
+export default FavoritesScreen;

@@ -18,19 +18,19 @@ type StatusType =
   | 'inactive';
 
 const STATUS_CONFIG: Record<StatusType, { bg: string; text: string; label: string }> = {
-  online:    { bg: 'rgba(63,108,81,0.18)',  text: '#5FA87A', label: 'ONLINE' },
-  offline:   { bg: 'rgba(158,42,43,0.18)',  text: '#D45A5B', label: 'OFFLINE' },
-  warning:   { bg: 'rgba(197,160,89,0.18)', text: '#C5A059', label: 'WARNING' },
-  verified:  { bg: 'rgba(63,108,81,0.18)',  text: '#5FA87A', label: 'VERIFIED' },
-  pending:   { bg: 'rgba(197,160,89,0.18)', text: '#C5A059', label: 'PENDING' },
-  rejected:  { bg: 'rgba(158,42,43,0.18)',  text: '#D45A5B', label: 'REJECTED' },
-  published: { bg: 'rgba(63,108,81,0.18)',  text: '#5FA87A', label: 'PUBLISHED' },
-  draft:     { bg: 'rgba(161,158,149,0.15)',text: '#A19E95', label: 'DRAFT' },
-  archived:  { bg: 'rgba(161,158,149,0.15)',text: '#A19E95', label: 'ARCHIVED' },
-  admin:     { bg: 'rgba(212,175,55,0.15)', text: COLORS.gold, label: 'ADMIN' },
-  user:      { bg: 'rgba(161,158,149,0.15)',text: '#A19E95', label: 'USER' },
-  active:    { bg: 'rgba(63,108,81,0.18)',  text: '#5FA87A', label: 'ACTIVE' },
-  inactive:  { bg: 'rgba(161,158,149,0.15)',text: '#A19E95', label: 'INACTIVE' },
+  online:    { bg: 'rgba(22, 163, 74, 0.1)',  text: '#16A34A', label: 'ONLINE' },
+  offline:   { bg: 'rgba(220, 38, 38, 0.1)',  text: '#DC2626', label: 'OFFLINE' },
+  warning:   { bg: 'rgba(217, 119, 6, 0.1)', text: '#D97706', label: 'WARNING' },
+  verified:  { bg: 'rgba(22, 163, 74, 0.1)',  text: '#16A34A', label: 'VERIFIED' },
+  pending:   { bg: 'rgba(217, 119, 6, 0.1)', text: '#D97706', label: 'PENDING' },
+  rejected:  { bg: 'rgba(220, 38, 38, 0.1)',  text: '#DC2626', label: 'REJECTED' },
+  published: { bg: 'rgba(22, 163, 74, 0.1)',  text: '#16A34A', label: 'PUBLISHED' },
+  draft:     { bg: 'rgba(100, 116, 139, 0.1)',text: '#64748B', label: 'DRAFT' },
+  archived:  { bg: 'rgba(100, 116, 139, 0.1)',text: '#64748B', label: 'ARCHIVED' },
+  admin:     { bg: 'rgba(30, 58, 138, 0.1)', text: '#1E3A8A', label: 'ADMIN' },
+  user:      { bg: 'rgba(100, 116, 139, 0.1)',text: '#64748B', label: 'USER' },
+  active:    { bg: 'rgba(22, 163, 74, 0.1)',  text: '#16A34A', label: 'ACTIVE' },
+  inactive:  { bg: 'rgba(100, 116, 139, 0.1)',text: '#64748B', label: 'INACTIVE' },
 };
 
 interface StatusBadgeProps {

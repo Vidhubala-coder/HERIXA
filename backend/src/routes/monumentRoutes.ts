@@ -30,6 +30,8 @@ import {
 } from '../controllers/monumentController';
 import { requireAdmin } from '../middleware/auth';
 import { deleteMonumentAdmin } from '../controllers/adminController';
+import { getPublicProtocol } from '../controllers/protocolController';
+import { getPublicStory } from '../controllers/heritageStoryController';
 
 const router = Router();
 
@@ -281,6 +283,10 @@ router.get('/:monumentId/visuals', async (req: any, res: any, next: any) => {
     next(err);
   }
 });
+
+// Public Protocol and Heritage Story endpoints
+router.get('/:id/protocol', getPublicProtocol);
+router.get('/:id/heritage-story', getPublicStory);
 
 router.get('/:id', getMonumentById);
 router.get('/:id/ar', getMonumentARConfig);

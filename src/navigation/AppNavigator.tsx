@@ -65,7 +65,7 @@ const TabNavigator = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: COLORS.gold,
+        tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabBarLabel,
@@ -92,7 +92,7 @@ const TabNavigator = () => {
         name="SmartScan"
         component={SmartScanScreen}
         options={{
-          tabBarLabel: 'SCAN',
+          tabBarLabel: 'SmartScan',
           tabBarButton: (props) => {
             const { delayLongPress, ...restProps } = props as any;
             return (
@@ -102,9 +102,9 @@ const TabNavigator = () => {
                 activeOpacity={0.85}
               >
                 <View style={styles.centerScanButton}>
-                  <Feather name="camera" size={24} color={COLORS.background} />
+                  <Feather name="aperture" size={22} color={COLORS.white} />
                 </View>
-                <Text style={styles.centerScanLabel}>SCAN</Text>
+                <Text style={styles.centerScanLabel}>SmartScan</Text>
               </TouchableOpacity>
             );
           },
@@ -390,36 +390,44 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderTopColor: COLORS.border,
     borderTopWidth: 1,
-    height: 60,
+    height: 64,
     paddingBottom: 8,
     paddingTop: 8,
+    elevation: 8,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
   },
   tabBarLabel: {
     fontSize: 10,
     fontWeight: '600',
+    letterSpacing: 0.2,
   },
   centerScanButtonWrapper: {
-    top: -16,
+    top: -14,
     justifyContent: 'center',
     alignItems: 'center',
   },
   centerScanButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: COLORS.gold,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.primary,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.gold,
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   centerScanLabel: {
-    color: COLORS.gold,
+    color: COLORS.primary,
     fontSize: 9,
-    fontWeight: '800',
+    fontWeight: '700',
     marginTop: 2,
   },
 });

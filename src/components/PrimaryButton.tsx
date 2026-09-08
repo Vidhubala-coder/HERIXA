@@ -70,50 +70,57 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 const styles = StyleSheet.create({
   baseButton: {
     height: 48,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    borderWidth: 1,
+    paddingHorizontal: SPACING.xl,
+    borderWidth: 1.5,
     borderColor: 'transparent',
   },
   solid: {
-    backgroundColor: COLORS.gold,
-    borderColor: COLORS.gold,
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   outline: {
-    backgroundColor: 'transparent',
-    borderColor: COLORS.gold,
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.primary,
   },
   ghost: {
     backgroundColor: 'transparent',
+    borderColor: 'transparent',
   },
   danger: {
     backgroundColor: COLORS.danger,
     borderColor: COLORS.danger,
   },
   disabled: {
-    backgroundColor: COLORS.surfaceLight,
-    borderColor: 'transparent',
+    backgroundColor: COLORS.surfaceIvory,
+    borderColor: COLORS.border,
     opacity: 0.5,
   },
   baseText: {
     ...TYPOGRAPHY.button,
+    fontWeight: '700',
   },
   textSolid: {
-    color: COLORS.background,
+    color: COLORS.white,
   },
   textOutline: {
-    color: COLORS.gold,
+    color: COLORS.primary,
   },
   textGhost: {
     color: COLORS.textSecondary,
   },
   textDanger: {
-    color: COLORS.textPrimary,
+    color: COLORS.white,
   },
   textDisabled: {
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
   },
 });

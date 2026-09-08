@@ -24,6 +24,7 @@ import { askHeritageAssistant, ChatTurn, MonumentChatContext } from '../services
 import { getConnectivityState } from '../services/api';
 import { getCurrentMonumentContext, subscribeToCurrentMonumentContext } from '../services/currentContextService';
 import { useFavorites } from '../context/FavoritesContext';
+import { navigationRef } from '../navigation/AppNavigator';
 
 interface Message {
   id: string;
@@ -41,10 +42,7 @@ const STARTER_QUESTIONS = [
 
 export const FloatingAssistant: React.FC = () => {
   const { userRole } = useFavorites();
-
-  if (userRole === 'admin') {
-    return null;
-  }
+  const [currentRoute, setCurrentRoute] = useState<string | null>(null);
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const ICON_SIZE = 56;
@@ -72,6 +70,30 @@ export const FloatingAssistant: React.FC = () => {
 
   const flatListRef = useRef<FlatList>(null);
   const isSendingRef = useRef(false);
+
+  // 1. Navigation Route Tracking Effect
+  useEffect(() => {
+    const updateRoute = () => {
+      try {
+        if (navigationRef.isReady()) {
+          const route = navigationRef.getCurrentRoute();
+          setCurrentRoute(route?.name || null);
+        }
+      } catch (err) {
+        // Navigation not ready yet
+      }
+    };
+
+    updateRoute();
+
+    const unsubscribe = navigationRef.addListener('state', () => {
+      updateRoute();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   // 1. Subscribe to active monument details context
   useEffect(() => {
@@ -133,10 +155,10 @@ export const FloatingAssistant: React.FC = () => {
   // 5. PanResponder configuration
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Only intercept movement gesture if dragged past threshold (3 pixels)
-        return Math.abs(gestureState.dx) > 3 || Math.abs(gestureState.dy) > 3;
+        // Only intercept movement gesture if dragged past threshold (5 pixels)
+        return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
       },
       onPanResponderGrant: () => {
         pan.setOffset({
@@ -187,6 +209,13 @@ export const FloatingAssistant: React.FC = () => {
       },
     })
   ).current;
+
+  // Render condition check AFTER all hooks have executed unconditionally
+  const shouldRender = userRole !== 'admin' && currentRoute === 'Home';
+
+  if (!shouldRender) {
+    return null;
+  }
 
   // 6. Chat Handlers
   const handleSend = async (textToSend: string) => {

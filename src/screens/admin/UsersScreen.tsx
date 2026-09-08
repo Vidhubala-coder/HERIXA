@@ -72,7 +72,7 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View style={styles.userCard}>
         <View style={styles.userCardHeader}>
           <View style={[styles.avatar, isDeleted && styles.avatarDeleted]}>
-            <Text style={styles.avatarText}>{(item.name || '?')[0].toUpperCase()}</Text>
+            <Text style={[styles.avatarText, isDeleted && { color: '#DC2626' }]}>{(item.name || '?')[0].toUpperCase()}</Text>
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName} numberOfLines={1}>{item.name}</Text>
@@ -92,8 +92,8 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             onPress={() => navigation.navigate('AdminUserDetail', { userId: item._id })}
             activeOpacity={0.7}
           >
-            <Feather name="eye" size={13} color={COLORS.gold} />
-            <Text style={styles.actionBtnText}>View Details</Text>
+            <Feather name="eye" size={13} color={COLORS.primary} />
+            <Text style={[styles.actionBtnText, { color: COLORS.primary }]}>View Details</Text>
           </TouchableOpacity>
 
           {!isDeleted && (
@@ -102,8 +102,8 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               onPress={() => setDeleteTarget(item)}
               activeOpacity={0.7}
             >
-              <Feather name="trash-2" size={13} color="#D45A5B" />
-              <Text style={[styles.actionBtnText, { color: '#D45A5B' }]}>Delete Account</Text>
+              <Feather name="trash-2" size={13} color="#DC2626" />
+              <Text style={[styles.actionBtnText, { color: '#DC2626' }]}>Delete Account</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -116,10 +116,10 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View style={styles.container}>
         {/* KPI Header */}
         <View style={styles.kpiRow}>
-          <KpiCard icon="users" label="Total Users" value={stats?.totalUsers ?? '—'} accentColor={COLORS.gold} />
-          <KpiCard icon="check-circle" label="Active Users" value={stats?.verifiedUsers ?? '—'} accentColor="#5FA87A" />
-          <KpiCard icon="user-plus" label="New (7d)" value={stats?.newUsers ?? '—'} accentColor="#C5A059" />
-          <KpiCard icon="user-x" label="Deleted" value={stats?.deletedAccounts ?? 0} accentColor="#D45A5B" />
+          <KpiCard icon="users" label="Total Users" value={stats?.totalUsers ?? '—'} accentColor={COLORS.primary} />
+          <KpiCard icon="check-circle" label="Active Users" value={stats?.verifiedUsers ?? '—'} accentColor="#16A34A" />
+          <KpiCard icon="user-plus" label="New (7d)" value={stats?.newUsers ?? '—'} accentColor={COLORS.gold} />
+          <KpiCard icon="user-x" label="Deleted" value={stats?.deletedAccounts ?? 0} accentColor="#DC2626" />
         </View>
 
         {/* Search */}
@@ -142,14 +142,14 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         {isLoading ? (
-          <View style={styles.loader}><ActivityIndicator size="large" color={COLORS.gold} /></View>
+          <View style={styles.loader}><ActivityIndicator size="large" color={COLORS.primary} /></View>
         ) : (
           <FlatList
             data={users}
             keyExtractor={item => item._id}
             renderItem={renderUser}
             contentContainerStyle={styles.list}
-            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={async () => { setIsRefreshing(true); await loadData(1); setIsRefreshing(false); }} tintColor={COLORS.gold} />}
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={async () => { setIsRefreshing(true); await loadData(1); setIsRefreshing(false); }} tintColor={COLORS.primary} />}
             ListEmptyComponent={<AdminEmptyState icon="users" title="No Users Found" message="No users match your search." />}
             onEndReached={() => { if (page < totalPages) loadData(page + 1); }}
             onEndReachedThreshold={0.3}
@@ -165,7 +165,7 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Feather name="alert-triangle" size={32} color="#D45A5B" style={{ alignSelf: 'center', marginBottom: 12 }} />
+              <Feather name="alert-triangle" size={32} color="#DC2626" style={{ alignSelf: 'center', marginBottom: 12 }} />
               <Text style={styles.modalTitle}>Delete User Account?</Text>
               <Text style={styles.modalSub}>{deleteTarget?.email}</Text>
               <Text style={styles.modalBody}>
@@ -200,15 +200,15 @@ export const UsersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#FAFAFA' },
   kpiRow: { flexDirection: 'row', gap: SPACING.xs, padding: SPACING.md, paddingBottom: 0 },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E2E8F0',
     margin: SPACING.md,
     paddingHorizontal: SPACING.sm,
     gap: SPACING.sm,
@@ -217,12 +217,17 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: SPACING.md, gap: SPACING.sm },
   userCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E2E8F0',
     padding: SPACING.md,
     gap: SPACING.sm,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   userCardHeader: {
     flexDirection: 'row',
@@ -231,17 +236,17 @@ const styles = StyleSheet.create({
   },
   avatar: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: 'rgba(212,175,55,0.12)',
-    borderWidth: 1.5, borderColor: 'rgba(212,175,55,0.2)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
+    borderWidth: 1.5, borderColor: 'rgba(30, 58, 138, 0.2)',
     justifyContent: 'center', alignItems: 'center',
   },
   avatarDeleted: {
-    backgroundColor: 'rgba(212,90,91,0.12)',
-    borderColor: 'rgba(212,90,91,0.3)',
+    backgroundColor: 'rgba(220, 38, 38, 0.08)',
+    borderColor: 'rgba(220, 38, 38, 0.2)',
   },
-  avatarText: { color: COLORS.gold, fontSize: 16, fontWeight: '700' },
+  avatarText: { color: COLORS.primary, fontSize: 16, fontWeight: '700' },
   userInfo: { flex: 1, gap: 2 },
-  userName: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '600' },
+  userName: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700' },
   userEmail: { color: COLORS.textSecondary, fontSize: 12 },
   userDate: { color: COLORS.textSecondary, fontSize: 11 },
   actionRow: {
@@ -250,27 +255,27 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingTop: SPACING.xs,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#F1F5F9',
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingVertical: 6,
     borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surfaceLight,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
   },
   actionBtnDanger: {
-    borderColor: 'rgba(212,90,91,0.3)',
-    backgroundColor: 'rgba(212,90,91,0.08)',
+    borderColor: 'rgba(220, 38, 38, 0.2)',
+    backgroundColor: 'rgba(220, 38, 38, 0.06)',
   },
-  actionBtnText: { color: COLORS.gold, fontSize: 11, fontWeight: '600' },
+  actionBtnText: { color: COLORS.primary, fontSize: 11, fontWeight: '600' },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.lg,
@@ -278,19 +283,24 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E2E8F0',
     padding: SPACING.xl,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   modalTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700', textAlign: 'center' },
   modalSub: { color: COLORS.gold, fontSize: 14, fontWeight: '600', textAlign: 'center', marginTop: 4 },
   modalBody: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 18, textAlign: 'center', marginVertical: SPACING.md },
   modalActions: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm },
   modalBtn: { flex: 1, height: 44, borderRadius: BORDER_RADIUS.md, justifyContent: 'center', alignItems: 'center' },
-  modalBtnCancel: { borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.surfaceLight },
+  modalBtnCancel: { borderWidth: 1, borderColor: '#E2E8F0', backgroundColor: '#F8FAFC' },
   modalBtnCancelText: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' },
-  modalBtnDanger: { backgroundColor: '#D45A5B' },
+  modalBtnDanger: { backgroundColor: '#DC2626' },
   modalBtnDangerText: { color: '#FFF', fontSize: 13, fontWeight: '700' },
 });

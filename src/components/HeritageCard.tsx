@@ -98,9 +98,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     overflow: 'hidden',
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
   },
   cardHorizontal: {
-    width: 220,
+    width: 240,
     marginRight: SPACING.md,
   },
   cardVertical: {
@@ -109,23 +114,23 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: 'relative',
-    backgroundColor: COLORS.surfaceLight,
+    backgroundColor: COLORS.surfaceIvory,
   },
   image: {
     resizeMode: 'cover',
   },
   imageHorizontal: {
-    height: 130,
+    height: 140,
     width: '100%',
   },
   imageVertical: {
-    height: 180,
+    height: 190,
     width: '100%',
   },
   imagePlaceholder: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceLight,
+    backgroundColor: COLORS.surfaceIvory,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -145,20 +150,25 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(18, 18, 18, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
   },
   favoriteButton: {
     position: 'absolute',
     top: SPACING.sm,
     right: SPACING.sm,
-    backgroundColor: 'rgba(18, 18, 18, 0.75)',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   categoryBadge: {
     position: 'absolute',
@@ -166,14 +176,15 @@ const styles = StyleSheet.create({
     left: SPACING.sm,
     backgroundColor: COLORS.gold,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: BORDER_RADIUS.sm,
   },
   categoryText: {
-    color: COLORS.background,
+    color: COLORS.white,
     ...TYPOGRAPHY.caption,
     fontWeight: '700',
     fontSize: 9,
+    letterSpacing: 0.5,
   },
   detailsContainer: {
     padding: SPACING.md,
@@ -181,7 +192,7 @@ const styles = StyleSheet.create({
   name: {
     color: COLORS.textPrimary,
     ...TYPOGRAPHY.h3,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 4,
   },
   locationContainer: {
@@ -193,17 +204,18 @@ const styles = StyleSheet.create({
   location: {
     color: COLORS.textSecondary,
     ...TYPOGRAPHY.bodySmall,
+    fontWeight: '500',
   },
   metaContainer: {
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: COLORS.borderLight,
     paddingTop: SPACING.sm,
     marginTop: SPACING.xs,
   },
   metaText: {
     color: COLORS.textSecondary,
     ...TYPOGRAPHY.caption,
-    fontStyle: 'italic',
+    fontWeight: '500',
   },
 });
 

@@ -29,6 +29,9 @@ export type AdminSection =
   | 'tourism'
   | 'notifications'
   | 'visuals'
+  | 'protocol'
+  | 'video'
+  | 'HeritageContent'
   | 'logs'
   | 'settings'
   | 'profile';
@@ -68,6 +71,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       tourism: 'TourismInsights',
       notifications: 'AdminNotifications',
       visuals: 'HeritageVisuals',
+      protocol: 'AdminHeritageProtocol',
+      video: 'AdminHeritageVideo',
+      HeritageContent: 'AdminHeritageVideo',
       logs: 'AuditLogs',
       settings: 'AdminSettings',
       profile: 'AdminProfile',
@@ -80,7 +86,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAFAFA" />
       <View style={styles.container}>
         {IS_WIDE ? (
           // Wide layout: Sidebar + Content
@@ -125,7 +131,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#FAFAFA',
   },
   container: {
     flex: 1,
@@ -139,6 +145,6 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#FAFAFA',
   },
 });

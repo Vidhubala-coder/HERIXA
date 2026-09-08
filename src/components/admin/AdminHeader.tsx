@@ -37,13 +37,13 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         style={styles.menuBtn}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Feather name="menu" size={20} color={COLORS.textPrimary} />
+        <Feather name="menu" size={18} color={COLORS.primary} />
       </TouchableOpacity>
 
       <View style={styles.titleContainer}>
         <Text style={styles.brand} numberOfLines={1}>HERIXA ADMIN</Text>
         <Text style={styles.subtitle} numberOfLines={1}>
-          {subtitle || title || 'Heritage Administration'}
+          {subtitle || title || 'HERIXA Command Center'}
         </Text>
       </View>
 
@@ -76,7 +76,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             <Text style={styles.profileName} numberOfLines={1}>
               {userName}
             </Text>
-            <Text style={styles.profileRole}>Admin</Text>
+            <Text style={styles.profileRole}>HERIXA Administrator</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -87,9 +87,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 const styles = StyleSheet.create({
   header: {
     height: 60,
-    backgroundColor: '#141412',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
@@ -101,15 +101,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(30, 58, 138, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(30, 58, 138, 0.12)',
   },
   titleContainer: {
     flex: 1,
   },
   brand: {
-    color: COLORS.gold,
+    color: COLORS.primary,
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 1.5,
@@ -131,9 +131,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
     position: 'relative',
   },
   notifBadge: {
@@ -151,16 +151,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 20,
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    backgroundColor: 'rgba(30, 58, 138, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: 'rgba(30, 58, 138, 0.15)',
     gap: 8,
   },
   avatar: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: COLORS.gold,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -169,10 +169,10 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: COLORS.gold,
+    borderColor: COLORS.primary,
   },
   avatarText: {
-    color: '#141412',
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '800',
   },
@@ -184,11 +184,11 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: 12,
     fontWeight: '700',
-    maxWidth: 90,
+    maxWidth: 110,
   },
   profileRole: {
     color: COLORS.gold,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '600',
   },
 });

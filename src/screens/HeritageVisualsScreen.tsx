@@ -154,11 +154,15 @@ export const HeritageVisualsScreen: React.FC<Props> = ({ route, navigation }) =>
       ? getImageUrl(allVisibleImages[0].uri)
       : null;
 
-  // Featured images first
+  // Featured images first, then by order, then by stable ID tie-breaker
   const sortedImages = [...filteredImages].sort((a, b) => {
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
-    return (a.order || 0) - (b.order || 0);
+    const orderDiff = (a.order ?? 0) - (b.order ?? 0);
+    if (orderDiff !== 0) return orderDiff;
+    const keyA = String(a._id || a.id || a.uri || '');
+    const keyB = String(b._id || b.id || b.uri || '');
+    return keyA.localeCompare(keyB);
   });
 
   const openViewer = (index: number) => {

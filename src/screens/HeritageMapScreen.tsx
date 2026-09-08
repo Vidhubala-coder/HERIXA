@@ -169,7 +169,7 @@ export const HeritageMapScreen: React.FC<{ navigation: any }> = ({ navigation })
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Screen Header */}
       <View style={styles.header}>
@@ -180,7 +180,7 @@ export const HeritageMapScreen: React.FC<{ navigation: any }> = ({ navigation })
         <View style={styles.headerRight}>
           <Text style={styles.badgeText}>{validMonuments.length} MAPPED</Text>
           <TouchableOpacity style={styles.refreshBtn} onPress={handleRefresh} activeOpacity={0.8}>
-            <Feather name="refresh-cw" size={14} color={COLORS.gold} />
+            <Feather name="refresh-cw" size={14} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -197,7 +197,7 @@ export const HeritageMapScreen: React.FC<{ navigation: any }> = ({ navigation })
       {/* Floating empty state overlay if valid monuments is 0 */}
       {validMonuments.length === 0 && !isLoading && !errorMsg && (
         <View style={styles.emptyOverlayBanner}>
-          <Feather name="info" size={14} color={COLORS.gold} />
+          <Feather name="info" size={14} color={COLORS.primary} />
           <Text style={styles.emptyOverlayText}>No Heritage Sites Available</Text>
         </View>
       )}
@@ -205,12 +205,12 @@ export const HeritageMapScreen: React.FC<{ navigation: any }> = ({ navigation })
       {/* Map Body */}
       {isLoading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loaderText}>Loading Heritage Map...</Text>
         </View>
       ) : errorMsg ? (
         <View style={styles.errorContainer}>
-          <Feather name="wifi-off" size={40} color={COLORS.gold} style={{ marginBottom: SPACING.md }} />
+          <Feather name="wifi-off" size={40} color={COLORS.primary} style={{ marginBottom: SPACING.md }} />
           <Text style={styles.errorTitle}>Heritage Map Unavailable</Text>
           <Text style={styles.errorText}>{errorMsg}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={handleRefresh} activeOpacity={0.8}>
@@ -290,42 +290,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.borderLight,
     backgroundColor: COLORS.surface,
   },
   headerTitle: { color: COLORS.textPrimary, ...TYPOGRAPHY.h3, fontWeight: '800', letterSpacing: 1.2 },
   headerSubtitle: { color: COLORS.textSecondary, ...TYPOGRAPHY.caption, marginTop: 2 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   badgeText: {
-    backgroundColor: 'rgba(212,175,55,0.12)',
-    color: COLORS.gold,
+    backgroundColor: COLORS.primaryLight,
+    color: COLORS.primary,
     fontSize: 10,
     fontWeight: '800',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(212,175,55,0.25)',
+    borderColor: COLORS.border,
   },
   refreshBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: COLORS.surfaceLight,
+    backgroundColor: COLORS.surfaceIvory,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderWarm,
     justifyContent: 'center',
     alignItems: 'center',
   },
   devPill: {
-    backgroundColor: '#1A1A18',
+    backgroundColor: COLORS.surfaceIvory,
     paddingVertical: 3,
     paddingHorizontal: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(212,175,55,0.2)',
+    borderBottomColor: COLORS.borderWarm,
   },
   devPillText: {
-    color: COLORS.gold,
+    color: COLORS.primary,
     fontSize: 9,
     fontWeight: '700',
     textAlign: 'center',
@@ -335,8 +335,8 @@ const styles = StyleSheet.create({
     top: 75,
     alignSelf: 'center',
     zIndex: 100,
-    backgroundColor: 'rgba(26, 26, 24, 0.92)',
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: BORDER_RADIUS.md,
     paddingHorizontal: SPACING.md,
@@ -344,9 +344,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   emptyOverlayText: {
-    color: COLORS.gold,
+    color: COLORS.primary,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -357,6 +362,6 @@ const styles = StyleSheet.create({
   errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.xl, gap: SPACING.xs },
   errorTitle: { color: COLORS.textPrimary, ...TYPOGRAPHY.h3, fontWeight: '700', marginTop: SPACING.xs },
   errorText: { color: COLORS.textSecondary, ...TYPOGRAPHY.bodyMedium, textAlign: 'center', lineHeight: 20, marginBottom: SPACING.md },
-  retryBtn: { backgroundColor: COLORS.gold, paddingVertical: SPACING.sm + 2, paddingHorizontal: SPACING.xl, borderRadius: BORDER_RADIUS.md },
-  retryBtnText: { color: COLORS.background, ...TYPOGRAPHY.button, fontWeight: '800' },
+  retryBtn: { backgroundColor: COLORS.primary, paddingVertical: SPACING.sm + 2, paddingHorizontal: SPACING.xl, borderRadius: BORDER_RADIUS.lg },
+  retryBtnText: { color: COLORS.white, ...TYPOGRAPHY.button, fontWeight: '800' },
 });

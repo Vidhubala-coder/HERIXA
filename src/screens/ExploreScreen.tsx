@@ -23,8 +23,9 @@ import { HeritageCard } from '../components/HeritageCard';
 import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { getMonuments, ApiMonument } from '../services/monumentService';
-import { getConnectivityState } from '../services/api';
+import { getConnectivityState, getApiUrl } from '../services/api';
 import { useFavorites } from '../context/FavoritesContext';
+import { HerixaLogo } from '../components/HerixaLogo';
 
 type ExploreScreenRouteProp = RouteProp<MainTabParamList, 'Explore'>;
 type ExploreScreenNavigationProp = CompositeNavigationProp<
@@ -47,32 +48,33 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({ route, navigation 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Sync category if parameters change dynamically
   useEffect(() => {
     if (route.params?.category && route.params.category !== selectedCategory) {
       setSelectedCategory(route.params.category);
     }
   }, [route.params?.category]);
 
-  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => {
       clearTimeout(handler);
     };
   }, [searchQuery]);
 
-  // Fetch monuments based on search and category filters
   const loadLocalFallback = () => {
     try {
       let result = MONUMENTS;
       
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory !== 'All') {
+        const cat = selectedCategory.toLowerCase();
         result = result.filter(
-          (m) => m.category.toLowerCase() === selectedCategory.toLowerCase()
+          (m) =>
+            m.category.toLowerCase().includes(cat) ||
+            m.dynasty.toLowerCase().includes(cat) ||
+            m.name.toLowerCase().includes(cat)
         );
       }
 
@@ -115,13 +117,18 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({ route, navigation 
     }
 
     try {
+      const categoryFilter = (selectedCategory && selectedCategory !== 'All') ? selectedCategory : undefined;
       const response = await getMonuments({
         search: debouncedSearchQuery,
-        category: selectedCategory || undefined,
+        category: categoryFilter,
       });
       setMonuments(response.data);
     } catch (err: any) {
-      console.warn('ExploreScreen: API call failed. Falling back to local data search.', err);
+      console.log('[Explore] API request failed');
+      console.log(`[Explore] Base URL: ${getApiUrl()}`);
+      console.log(`[Explore] Error type: ${err.isTimeout ? 'timeout' : err.isNetworkError ? 'network' : 'http'}`);
+      console.log('[Explore] Falling back to local dataset');
+      console.warn('ExploreScreen: API call failed. Using local dataset fallback.', err?.message || err);
       loadLocalFallback();
     } finally {
       setIsLoading(false);
@@ -137,11 +144,11 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({ route, navigation 
     }
   }, [debouncedSearchQuery, selectedCategory]);
 
-  const categories = ['Temples', 'Sculptures', 'Forts', 'Artifacts'];
+  const categories = ['All', 'Temples', 'Palaces', 'Historical Sites', 'Chola Heritage', 'South Indian Heritage'];
 
   const handleCategoryPress = (category: string) => {
-    if (selectedCategory === category) {
-      setSelectedCategory(null); // Deselect
+    if (selectedCategory === category || category === 'All') {
+      setSelectedCategory(null);
     } else {
       setSelectedCategory(category);
     }
@@ -159,24 +166,25 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({ route, navigation 
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       
-      {/* Title */}
+      {/* 1. Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Discovery Portal</Text>
-        <Text style={styles.subtitle}>Search and filter archaeological monuments</Text>
+        <HerixaLogo size={32} showText={true} style={{ marginBottom: SPACING.xs }} />
+        <Text style={styles.title}>Explore India's Heritage</Text>
+        <Text style={styles.subtitle}>Discover monuments, architecture and stories from India's rich cultural past.</Text>
       </View>
 
-      {/* Search Bar */}
+      {/* 2. Search Bar */}
       <View style={styles.searchContainer}>
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Search monuments, locations, dynasties..."
+          placeholder="Search monuments, cities or dynasties"
         />
       </View>
 
-      {/* Categories Filter Bar */}
+      {/* 3. Category Filter Chips */}
       <View style={styles.filterBar}>
         <FlatList
           data={categories}
@@ -184,25 +192,30 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({ route, navigation 
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item}
           contentContainerStyle={styles.categoriesList}
-          renderItem={({ item }) => (
-            <CategoryCard
-              label={item}
-              icon={
-                item === 'Temples' ? '🏛️' :
-                item === 'Sculptures' ? '🗿' :
-                item === 'Forts' ? '🏰' : '🏺'
-              }
-              isSelected={selectedCategory === item}
-              onPress={() => handleCategoryPress(item)}
-            />
-          )}
+          renderItem={({ item }) => {
+            const isSelected = (!selectedCategory && item === 'All') || selectedCategory === item;
+            return (
+              <CategoryCard
+                label={item}
+                icon={
+                  item === 'All' ? '🏛️' :
+                  item === 'Temples' ? '🛕' :
+                  item === 'Palaces' ? '🏰' :
+                  item === 'Historical Sites' ? '🗿' :
+                  item === 'Chola Heritage' ? '👑' : '🚩'
+                }
+                isSelected={isSelected}
+                onPress={() => handleCategoryPress(item)}
+              />
+            );
+          }}
         />
       </View>
 
-      {/* Main Grid / List of Monuments */}
+      {/* 4. Monument Cards */}
       {isLoading ? (
         <View style={styles.centeredContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Searching heritage sites...</Text>
         </View>
       ) : error ? (
@@ -215,9 +228,9 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({ route, navigation 
         <View style={styles.emptyContainer}>
           <EmptyState
             title="No heritage sites found."
-            description="We couldn't find any results matching your filters. Try search keywords or check other categories."
+            description="We couldn't find any results matching your search or filters. Try adjusting your query."
             icon="search"
-            actionLabel="Reset Search Filters"
+            actionLabel="Reset Filters"
             onActionPress={handleClearFilters}
           />
         </View>
@@ -247,17 +260,18 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
-    paddingBottom: SPACING.sm,
+    paddingBottom: SPACING.xs,
   },
   title: {
     color: COLORS.textPrimary,
     ...TYPOGRAPHY.h1,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   subtitle: {
     color: COLORS.textSecondary,
     ...TYPOGRAPHY.bodyMedium,
-    marginTop: 2,
+    marginTop: 4,
+    lineHeight: 20,
   },
   searchContainer: {
     paddingHorizontal: SPACING.lg,
@@ -271,7 +285,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xl,
+    paddingBottom: SPACING.xxl,
   },
   emptyContainer: {
     flex: 1,
@@ -298,8 +312,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retryButton: {
-    width: 120,
+    width: 140,
     marginTop: SPACING.sm,
   },
 });
+
 export default ExploreScreen;

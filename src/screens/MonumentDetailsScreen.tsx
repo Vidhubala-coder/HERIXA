@@ -29,6 +29,9 @@ import { getMonumentById, ApiMonument, getImageUrl, ApiMonumentImage, getWikimed
 import { setCurrentMonumentContext } from '../services/currentContextService';
 import { SafeImage } from '../components/SafeImage';
 import { VoiceAssistant } from '../components/VoiceAssistant';
+import { HowToExperienceSection } from '../components/HowToExperienceSection';
+import { HeritageStorySection } from '../components/HeritageStorySection';
+import { HeritageHistoryVoiceCard } from '../components/HeritageHistoryVoiceCard';
 
 type MonumentDetailsScreenRouteProp = RouteProp<RootStackParamList, 'MonumentDetails'>;
 type MonumentDetailsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MonumentDetails'>;
@@ -1198,6 +1201,15 @@ export const MonumentDetailsScreen: React.FC<MonumentDetailsScreenProps> = ({ ro
             </CollapsibleCard>
           )}
 
+          {/* 🎙️ Voice Experience A: Heritage History */}
+          <HeritageHistoryVoiceCard monumentId={monument._id || monument.id} monumentName={monument.name} dynasty={monument.dynasty} />
+
+          {/* 🎧 Voice Experience B: How to Experience */}
+          <HowToExperienceSection monumentId={monument._id || monument.id} monumentSlug={monument.slug} monumentName={monument.name} />
+
+          {/* 🎬 Visual Experience C: Heritage Video */}
+          <HeritageStorySection monumentId={monument._id || monument.id} monumentSlug={monument.slug} monumentName={monument.name} />
+
           {/* 18. Visitor Information */}
           {hasVisitor && (
             <CollapsibleCard title="Visitor Information" icon="map">
@@ -1559,11 +1571,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(18, 18, 18, 0.65)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: COLORS.border,
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   imageBadge: {
     position: 'absolute',
@@ -1575,9 +1592,10 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.sm,
   },
   imageBadgeText: {
-    color: COLORS.background,
+    color: COLORS.white,
     ...TYPOGRAPHY.caption,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   infoContainer: {
     paddingHorizontal: SPACING.lg,
@@ -1586,7 +1604,7 @@ const styles = StyleSheet.create({
   title: {
     color: COLORS.textPrimary,
     ...TYPOGRAPHY.h1,
-    fontWeight: '700',
+    fontWeight: '800',
     lineHeight: 34,
   },
   locationContainer: {
@@ -1597,16 +1615,16 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   locationText: {
-    color: COLORS.goldMuted,
+    color: COLORS.textSecondary,
     ...TYPOGRAPHY.bodyMedium,
     fontWeight: '500',
   },
   metaBox: {
     flexDirection: 'row',
-    backgroundColor: COLORS.surface,
-    borderColor: COLORS.border,
+    backgroundColor: COLORS.surfaceIvory,
+    borderColor: COLORS.borderWarm,
     borderWidth: 1,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     padding: SPACING.md,
     marginBottom: SPACING.md,
   },
@@ -1615,7 +1633,7 @@ const styles = StyleSheet.create({
   },
   metaDivider: {
     width: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.borderWarm,
     marginHorizontal: SPACING.md,
   },
   metaLabel: {
@@ -1628,7 +1646,7 @@ const styles = StyleSheet.create({
   metaValue: {
     color: COLORS.textPrimary,
     ...TYPOGRAPHY.bodyMedium,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   gpsContainer: {
     flexDirection: 'row',

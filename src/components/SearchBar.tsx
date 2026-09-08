@@ -28,7 +28,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           placeholder={placeholder}
           placeholderTextColor={COLORS.textSecondary}
           style={styles.input}
-          keyboardAppearance="dark"
+          keyboardAppearance="light"
         />
         {value.length > 0 && (
           <TouchableOpacity onPress={() => onChangeText('')} style={styles.clearIcon}>
@@ -38,7 +38,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       </View>
       {showFilterButton && onFilterPress && (
         <TouchableOpacity onPress={onFilterPress} style={styles.filterButton} activeOpacity={0.8}>
-          <Feather name="sliders" size={20} color={COLORS.gold} />
+          <Feather name="sliders" size={20} color={COLORS.primary} />
         </TouchableOpacity>
       )}
     </View>
@@ -56,12 +56,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.surfaceIvory,
+    borderRadius: BORDER_RADIUS.lg,
     paddingHorizontal: SPACING.md,
     height: 48,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderWarm,
   },
   searchIcon: {
     marginRight: SPACING.sm,
@@ -78,10 +78,10 @@ const styles = StyleSheet.create({
   filterButton: {
     width: 48,
     height: 48,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: COLORS.surfaceIvory,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: COLORS.borderWarm,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -36,8 +36,9 @@ export type MainTabParamList = {
   Home: undefined;
   Explore: { category?: string } | undefined;
   SmartScan: undefined;
-  HeritageMap: undefined;
+  Favorites: undefined;
   Profile: undefined;
+  HeritageMap?: undefined;
 };
 
 export type AdminPortalParamList = {
@@ -58,6 +59,8 @@ export type AdminPortalParamList = {
   AuditLogs: undefined;
   AdminSettings: undefined;
   AdminProfile: undefined;
+  AdminHeritageProtocol: { monumentId?: string } | undefined;
+  AdminHeritageVideo: { monumentId?: string } | undefined;
 };
 
 export interface RecognitionResultData {

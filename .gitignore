@@ -59,6 +59,8 @@ env/
 
 # Uploads
 /uploads/
+backend/uploads/
+backend/uploads/videos/
 backend/uploads/avatars/
 backend/uploads/profiles/
 backend/uploads/monuments/debug_scans/
@@ -70,9 +72,10 @@ backend/uploads/monuments/debug_scans/
 scratch/
 *.log
 
-# Local AI tool
-.claude/
 # AI generated results and model artifacts
 ai/results/
 ai/models/phase3g/
 ai/models/integration/
+
+# Local DB data directory
+backend/data/

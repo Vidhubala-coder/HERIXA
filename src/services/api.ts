@@ -236,35 +236,48 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
 
     if (configuredUrl.startsWith('https://')) {
       candidates.push(configuredUrl);
-    } else if (Platform.OS === 'android' && resolvedMode === 'physical') {
-      // 1. EXPO_PUBLIC_LAN_IP
-      if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
-        candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
+    } else if (Platform.OS === 'android') {
+      if (resolvedMode === 'physical') {
+        // 1. EXPO_PUBLIC_LAN_IP
+        if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
+          candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
+        }
+        // 2. valid EXPO_PUBLIC_API_URL
+        if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
+          candidates.push(configuredUrl);
+        }
+        // 3. Metro IP
+        const metroIp = getMetroIP();
+        if (metroIp && !isStaleOrLoopback(metroIp)) {
+          candidates.push(`http://${metroIp}:${port}`);
+        }
+        // 4. Android Emulator loopback alias
+        candidates.push(`http://10.0.2.2:${port}`);
+      } else {
+        // Android Emulator mode
+        candidates.push(`http://10.0.2.2:${port}`);
+        if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
+          candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
+        }
+        const metroIp = getMetroIP();
+        if (metroIp && !isStaleOrLoopback(metroIp)) {
+          candidates.push(`http://${metroIp}:${port}`);
+        }
+        if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
+          candidates.push(configuredUrl);
+        }
       }
-      // 2. valid EXPO_PUBLIC_API_URL
+    } else {
+      // iOS / Web / Non-Android
+      candidates.push(`http://localhost:${port}`);
+      candidates.push(`http://127.0.0.1:${port}`);
       if (configuredUrl && !isStaleOrLoopback(configuredUrl)) {
         candidates.push(configuredUrl);
       }
-      // 3. Metro IP
       const metroIp = getMetroIP();
       if (metroIp && !isStaleOrLoopback(metroIp)) {
         candidates.push(`http://${metroIp}:${port}`);
       }
-    } else {
-      // Emulator / other platforms
-      candidates.push(`http://localhost:${port}`);
-      candidates.push(`http://127.0.0.1:${port}`);
-
-      if (process.env.EXPO_PUBLIC_LAN_IP && process.env.EXPO_PUBLIC_LAN_IP.trim() !== '' && !isStaleOrLoopback(process.env.EXPO_PUBLIC_LAN_IP)) {
-        candidates.push(`http://${process.env.EXPO_PUBLIC_LAN_IP.trim()}:${port}`);
-      }
-
-      const metroIp = getMetroIP();
-      if (metroIp && !isStaleOrLoopback(metroIp)) {
-        candidates.push(`http://${metroIp}:${port}`);
-      }
-
-      candidates.push(`http://10.0.2.2:${port}`);
     }
 
     const uniqueCandidates = Array.from(new Set(candidates));
@@ -276,7 +289,9 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
     for (const url of uniqueCandidates) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout per candidate ping for cold starts / network latency
+        const isLoopback = url.includes('localhost') || url.includes('127.0.0.1');
+        const pingTimeoutMs = (Platform.OS === 'android' && isLoopback) ? 1500 : 8000;
+        const timeoutId = setTimeout(() => controller.abort(), pingTimeoutMs);
 
         const response = await fetch(`${url}/api/health`, {
           method: 'GET',
@@ -286,11 +301,11 @@ export const checkConnectivity = async (force?: boolean): Promise<boolean> => {
 
         clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data && (data.success || data.status === 'ok' || data.message?.includes('running'))) {
+        if (response.status === 200 || response.status === 503) {
+          const data = await response.json().catch(() => ({}));
+          if (data && (data.status === 'ok' || data.status === 'degraded' || data.success !== undefined || data.message?.includes('running'))) {
             foundUrl = url;
-            lastStatus = '200';
+            lastStatus = String(response.status);
             break;
           }
         } else {

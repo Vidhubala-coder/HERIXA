@@ -9,6 +9,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { useFavorites } from '../../context/FavoritesContext';
 import { COLORS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { HerixaLogo, HerixaSymbol } from '../HerixaLogo';
 import { AdminSection } from './AdminLayout';
 
 interface NavItem {
@@ -39,6 +40,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: 'notifications', icon: 'bell', label: 'Notifications' },
       { key: 'visuals', icon: 'image', label: 'Heritage Visuals' },
+      { key: 'protocol', icon: 'compass', label: 'Heritage Protocols' },
+      { key: 'video', icon: 'video', label: 'AI Heritage Stories' },
       { key: 'logs', icon: 'file-text', label: 'Audit Logs' },
       { key: 'settings', icon: 'settings', label: 'Settings' },
     ],
@@ -81,15 +84,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Brand Header */}
       <View style={styles.logoRow}>
         {expanded ? (
-          <View style={styles.logoTextContainer}>
-            <Text style={styles.logoTitle}>HERIXA</Text>
-            <Text style={styles.logoSubtitle}>Heritage Administration</Text>
+          <View style={styles.logoWrap}>
+            <HerixaLogo size={32} />
+            <Text style={styles.commandTag}>COMMAND CENTER</Text>
           </View>
         ) : (
-          <Text style={styles.logoIcon}>H</Text>
+          <HerixaSymbol size={28} />
         )}
         <TouchableOpacity onPress={onToggle} style={styles.toggleBtn} activeOpacity={0.7}>
-          <Feather name={expanded ? 'chevron-left' : 'chevron-right'} size={18} color={COLORS.gold} />
+          <Feather name={expanded ? 'chevron-left' : 'chevron-right'} size={16} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
@@ -117,7 +120,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   <Feather
                     name={item.icon}
                     size={18}
-                    color={isActive ? COLORS.gold : COLORS.textSecondary}
+                    color={isActive ? COLORS.primary : COLORS.textSecondary}
                   />
                   {expanded && (
                     <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
@@ -135,7 +138,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Logout Footer */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
-        <Feather name="log-out" size={18} color={COLORS.danger} />
+        <Feather name="log-out" size={16} color="#DC2626" />
         {expanded && <Text style={styles.logoutLabel}>Logout</Text>}
       </TouchableOpacity>
     </View>
@@ -144,9 +147,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
 const styles = StyleSheet.create({
   sidebar: {
-    backgroundColor: '#141412',
+    backgroundColor: '#FFFFFF',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.08)',
+    borderRightColor: '#E2E8F0',
     paddingVertical: SPACING.md,
     justifyContent: 'space-between',
   },
@@ -154,46 +157,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    height: 44,
+    paddingHorizontal: SPACING.sm,
+    height: 46,
   },
-  logoTextContainer: {
-    justifyContent: 'center',
+  logoWrap: {
+    gap: 2,
   },
-  logoTitle: {
-    color: COLORS.gold,
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: 2,
-  },
-  logoSubtitle: {
-    color: COLORS.textSecondary,
+  commandTag: {
     fontSize: 9,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginTop: 1,
-  },
-  logoIcon: {
+    fontWeight: '700',
     color: COLORS.gold,
-    fontSize: 20,
-    fontWeight: '800',
-    paddingLeft: SPACING.xs,
+    letterSpacing: 1.2,
+    marginTop: -2,
   },
   toggleBtn: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    backgroundColor: 'rgba(30, 58, 138, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: 'rgba(30, 58, 138, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    marginVertical: SPACING.sm,
+    backgroundColor: '#E2E8F0',
+    marginVertical: SPACING.xs,
     marginHorizontal: SPACING.sm,
   },
   navList: {
@@ -203,30 +193,30 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
   },
   groupContainer: {
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   groupTitle: {
-    color: COLORS.textSecondary,
+    color: '#94A3B8',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1.2,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    opacity: 0.5,
+    paddingVertical: 6,
+    textTransform: 'uppercase',
   },
   navItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingVertical: 11,
+    paddingVertical: 10,
     marginHorizontal: SPACING.xs,
     borderRadius: BORDER_RADIUS.md,
     position: 'relative',
   },
   navItemActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.25)',
+    borderColor: 'rgba(30, 58, 138, 0.15)',
   },
   navLabel: {
     color: COLORS.textSecondary,
@@ -235,30 +225,30 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.sm,
   },
   navLabelActive: {
-    color: COLORS.gold,
+    color: COLORS.primary,
     fontWeight: '700',
   },
   activeIndicator: {
     position: 'absolute',
     left: 0,
-    top: 8,
-    bottom: 8,
-    width: 3,
-    backgroundColor: COLORS.gold,
-    borderTopRightRadius: 2,
-    borderBottomRightRadius: 2,
+    top: 6,
+    bottom: 6,
+    width: 3.5,
+    backgroundColor: COLORS.primary,
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
   },
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
-    paddingVertical: 11,
+    paddingVertical: 10,
     marginHorizontal: SPACING.xs,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 90, 91, 0.08)',
+    backgroundColor: 'rgba(220, 38, 38, 0.06)',
   },
   logoutLabel: {
-    color: COLORS.danger,
+    color: '#DC2626',
     fontSize: 13,
     fontWeight: '600',
     marginLeft: SPACING.sm,

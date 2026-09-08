@@ -19,7 +19,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
   value,
   trend,
   trendUp,
-  accentColor = COLORS.gold,
+  accentColor = COLORS.primary,
   onPress,
 }) => {
   return (
@@ -32,20 +32,20 @@ export const KpiCard: React.FC<KpiCardProps> = ({
         <View
           style={[
             styles.iconWrap,
-            { borderColor: `${accentColor}30`, backgroundColor: `${accentColor}12` },
+            { borderColor: `${accentColor}25`, backgroundColor: `${accentColor}10` },
           ]}
         >
           <Feather name={icon} size={18} color={accentColor} />
         </View>
 
         {trend !== undefined && (
-          <View style={[styles.trendBadge, { backgroundColor: trendUp ? 'rgba(95, 168, 122, 0.12)' : 'rgba(212, 90, 91, 0.12)' }]}>
+          <View style={[styles.trendBadge, { backgroundColor: trendUp ? 'rgba(22, 163, 74, 0.1)' : 'rgba(220, 38, 38, 0.1)' }]}>
             <Feather
               name={trendUp ? 'arrow-up-right' : 'arrow-down-right'}
               size={11}
-              color={trendUp ? '#5FA87A' : COLORS.danger}
+              color={trendUp ? '#16A34A' : '#DC2626'}
             />
-            <Text style={[styles.trendText, { color: trendUp ? '#5FA87A' : COLORS.danger }]}>
+            <Text style={[styles.trendText, { color: trendUp ? '#16A34A' : '#DC2626' }]}>
               {trend}
             </Text>
           </View>
@@ -54,7 +54,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 
       <View style={styles.metricContainer}>
         <Text style={styles.label}>{label}</Text>
-        <Text style={[styles.value, { color: accentColor }]}>{value}</Text>
+        <Text style={styles.value}>{value}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -62,14 +62,19 @@ export const KpiCard: React.FC<KpiCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#181816',
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
     padding: SPACING.md,
     minWidth: 150,
     flex: 1,
     gap: SPACING.sm,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   topRow: {
     flexDirection: 'row',
@@ -102,10 +107,12 @@ const styles = StyleSheet.create({
   label: {
     color: COLORS.textSecondary,
     fontSize: 11,
-    fontWeight: '500',
-    letterSpacing: 0.3,
+    fontWeight: '600',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
   value: {
+    color: COLORS.textPrimary,
     fontSize: 24,
     fontWeight: '800',
     letterSpacing: -0.5,

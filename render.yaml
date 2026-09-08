@@ -40,6 +40,14 @@ services:
       - key: TRIPOD_API_KEY
         sync: false
       - key: CLIENT_URL
-        value: http://localhost:8081
+        value: https://herixa-backend.onrender.com
       - key: ALLOWED_ORIGINS
-        value: http://localhost:8081
+        value: https://herixa-backend.onrender.com
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false

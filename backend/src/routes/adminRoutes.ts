@@ -170,7 +170,9 @@ router.post('/monuments/:monumentId/visuals', uploadVisuals.any(), async (req: a
     }
 
     const newVisuals: any[] = [];
+    let currentCount = monument.heritagePreviewImages.length;
     for (const f of files) {
+      currentCount++;
       const uri = `/uploads/monuments/visuals/${f.filename}`;
       const newVisual = {
         _id: new mongoose.Types.ObjectId().toString(),
@@ -181,6 +183,8 @@ router.post('/monuments/:monumentId/visuals', uploadVisuals.any(), async (req: a
         description: req.body.caption || req.body.description || '',
         caption: req.body.caption || req.body.description || '',
         category: 'Gallery',
+        order: currentCount,
+        displayOrder: currentCount,
         enabled: true,
         visible: true,
         createdAt: new Date(),

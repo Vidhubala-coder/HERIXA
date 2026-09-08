@@ -476,7 +476,14 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     }
 
     if (name !== undefined) user.name = name.trim();
-    if (avatar !== undefined) user.avatar = avatar.trim();
+    if (avatar !== undefined && avatar !== null) {
+      const trimmedAvatar = avatar.trim();
+      const isUrlOrPath = trimmedAvatar.startsWith('http://') || trimmedAvatar.startsWith('https://') || trimmedAvatar.startsWith('/');
+      user.avatar = trimmedAvatar;
+      if (isUrlOrPath || trimmedAvatar === '') {
+        user.profileImageUrl = trimmedAvatar || undefined;
+      }
+    }
 
     if (preferredLanguage !== undefined) {
       if (preferredLanguage === null || preferredLanguage === '' || preferredLanguage === 'none') {
@@ -623,23 +630,13 @@ export const uploadProfilePhoto = async (req: Request, res: Response, next: Next
       return;
     }
 
-    const oldImageRelativePath = user.profileImageUrl;
-    const relativeUrl = `/uploads/profiles/${req.file.filename}`;
+    const { uploadImageToStorage } = require('../services/storageService');
+    const storageRes = await uploadImageToStorage(newFilePath, req.file.filename, 'herixa/profiles');
+    const avatarUrl = storageRes.url;
 
-    user.profileImageUrl = relativeUrl;
+    user.avatar = avatarUrl;
+    user.profileImageUrl = avatarUrl;
     await user.save();
-
-    // Storage cleanup: delete old image file AFTER database update succeeds
-    if (oldImageRelativePath) {
-      const oldFilePath = path.join(__dirname, '../../', oldImageRelativePath);
-      fs.unlink(oldFilePath, (err) => {
-        if (err) {
-          console.warn('[HERIXA-STORAGE] Failed to delete old profile photo:', err.message);
-        } else {
-          console.log('[HERIXA-STORAGE] Deleted old profile photo:', oldFilePath);
-        }
-      });
-    }
 
     res.status(200).json({
       success: true,
@@ -662,6 +659,7 @@ export const deleteProfilePhoto = async (req: Request, res: Response, next: Next
 
     const oldImageRelativePath = user.profileImageUrl;
 
+    user.avatar = undefined;
     user.profileImageUrl = undefined;
     await user.save();
 

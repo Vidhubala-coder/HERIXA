@@ -323,10 +323,11 @@ export const getAiAnalytics = async (req: Request, res: Response, next: NextFunc
       { $match: { accountStatus: { $ne: 'DELETED' } } },
       { $group: { _id: null, total: { $sum: '$scanCount' } } }
     ]);
-    const totalScans = userScanSumResult[0]?.total || 0;
+    const userScanSum = userScanSumResult[0]?.total || 0;
 
     const validUserDocs = await User.find({ accountStatus: { $ne: 'DELETED' } }, '_id').lean();
     const validUserIds = validUserDocs.map(u => u._id);
+    const scanUserQuery = { $or: [{ userId: { $in: validUserIds } }, { userId: null }, { userId: { $exists: false } }] };
 
     const hScans = await History.countDocuments({
       userId: { $in: validUserIds },
@@ -334,9 +335,11 @@ export const getAiAnalytics = async (req: Request, res: Response, next: NextFunc
       monumentId: { $ne: null }
     });
     const sScans = await ScanActivity.countDocuments({
-      userId: { $in: validUserIds },
+      ...scanUserQuery,
       recognized: true
     });
+    const totalScansFromActivity = await ScanActivity.countDocuments(scanUserQuery);
+    const totalScans = Math.max(userScanSum, totalScansFromActivity);
     const successfulScans = totalScans > 0 ? totalScans : Math.max(hScans, sScans);
     const unrecognizedScans = Math.max(0, totalScans - successfulScans);
 
@@ -347,7 +350,7 @@ export const getAiAnalytics = async (req: Request, res: Response, next: NextFunc
     // Average Confidence from AuditLog / ScanActivity for valid users
     const validScanLogs = await AuditLog.find({
       action: 'SCAN_PERFORMED',
-      userId: { $in: validUserIds }
+      $or: [{ userId: { $in: validUserIds } }, { userId: null }]
     }).lean();
 
     let avgConfidence = 94; // Baseline for identified scans
@@ -402,7 +405,7 @@ export const getAiAnalytics = async (req: Request, res: Response, next: NextFunc
             actionType: 'recognition'
           });
           const sCount = await ScanActivity.countDocuments({
-            userId: { $in: validUserIds },
+            ...scanUserQuery,
             monumentId: monDoc._id,
             recognized: true
           });
@@ -440,7 +443,7 @@ export const getAiAnalytics = async (req: Request, res: Response, next: NextFunc
         createdAt: { $gte: dStart, $lte: dEnd }
       });
       const sDayScans = await ScanActivity.countDocuments({
-        userId: { $in: validUserIds },
+        ...scanUserQuery,
         createdAt: { $gte: dStart, $lte: dEnd }
       });
       const dayScans = Math.max(hDayScans, sDayScans);
@@ -831,7 +834,10 @@ export const uploadAdminAvatar = async (req: Request, res: Response, next: NextF
       return;
     }
 
-    const avatarUrl = `/uploads/avatars/${file.filename}`;
+    const { uploadImageToStorage } = require('../services/storageService');
+    const storageRes = await uploadImageToStorage(file.path, file.filename);
+    const avatarUrl = storageRes.url;
+
     const user = await User.findById(adminUser._id);
     if (!user) {
       res.status(404).json({ success: false, message: 'Admin user not found.' });

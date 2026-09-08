@@ -11,6 +11,8 @@ import userRoutes from './routes/userRoutes';
 import assistantRoutes from './routes/assistantRoutes';
 import historyRoutes from './routes/historyRoutes';
 import adminRoutes from './routes/adminRoutes';
+import protocolRoutes from './routes/protocolRoutes';
+import { storyPublicRouter, storyAdminRouter } from './routes/heritageStoryRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -83,19 +85,39 @@ import { getAiServiceState, checkAiServiceHealth } from './services/aiService';
 
 // 5. Mount API Routes
 app.get('/api/health', (req, res) => {
-  console.log('[HERIXA-NETWORK] Health request received');
-  res.status(200).json({ status: 'ok' });
-  console.log('[HERIXA-NETWORK] Health response sent');
+  const isDbConnected = mongoose.connection.readyState === 1;
+  const status = isDbConnected ? 'ok' : 'degraded';
+  const statusCode = isDbConnected ? 200 : 503;
+
+  console.log(`[HERIXA-NETWORK] Health check requested — Status: ${status} (DB: ${isDbConnected ? 'connected' : 'disconnected'})`);
+  res.status(statusCode).json({
+    status,
+    success: isDbConnected,
+    database: isDbConnected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  const isDbConnected = mongoose.connection.readyState === 1;
+  const status = isDbConnected ? 'ok' : 'degraded';
+  const statusCode = isDbConnected ? 200 : 503;
+
+  res.status(statusCode).json({
+    status,
+    success: isDbConnected,
+    database: isDbConnected ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.use('/api/monuments', monumentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/assistant', assistantRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api', protocolRoutes);
+app.use('/api', storyPublicRouter);
+app.use('/api/admin', storyAdminRouter);
 app.use('/api/admin', adminRoutes);
 
 // 6. Handle Route Not Found

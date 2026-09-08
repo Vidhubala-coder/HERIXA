@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { COLORS, SPACING, TYPOGRAPHY } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
+import { HerixaSymbol } from '../components/HerixaLogo';
 
 type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -76,15 +77,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
           },
         ]}
       >
-        {/* App Logo */}
+        {/* Official HERIXA Emblem */}
         <View style={styles.logoContainer}>
-          <View style={styles.logoRing}>
-            <Feather name="aperture" size={48} color={COLORS.gold} />
-          </View>
+          <HerixaSymbol size={72} />
         </View>
 
         {/* Brand Name */}
-        <Text style={styles.brandTitle}>ARCHAEOLOGICAL PORTAL</Text>
         <Text style={styles.appName}>HERIXA</Text>
         
         {/* Divider */}

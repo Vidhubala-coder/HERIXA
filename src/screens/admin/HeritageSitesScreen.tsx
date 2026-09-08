@@ -104,7 +104,7 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
               {[item.district, item.state].filter(Boolean).join(', ') || item.location || '—'}
             </Text>
             <View style={styles.badgeRow}>
-              <StatusBadge status="active" label={`${visualCount} Heritage Images`} dot />
+              <StatusBadge status="active" label={`${visualCount} Visuals`} dot />
               <StatusBadge status={(item as any).status === 'draft' ? 'draft' : 'published'} dot />
             </View>
           </View>
@@ -117,8 +117,8 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
             onPress={() => navigation.navigate('HeritageDetail', { monumentId: item._id || item.id })}
             activeOpacity={0.7}
           >
-            <Feather name="eye" size={13} color={COLORS.gold} />
-            <Text style={styles.actionBtnText}>View</Text>
+            <Feather name="eye" size={13} color={COLORS.primary} />
+            <Text style={[styles.actionBtnText, { color: COLORS.primary }]}>View</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -135,8 +135,8 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
             onPress={() => setDeleteTarget(item)}
             activeOpacity={0.7}
           >
-            <Feather name="trash-2" size={13} color="#D45A5B" />
-            <Text style={[styles.actionBtnText, { color: '#D45A5B' }]}>Delete</Text>
+            <Feather name="trash-2" size={13} color="#DC2626" />
+            <Text style={[styles.actionBtnText, { color: '#DC2626' }]}>Delete</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -176,7 +176,7 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
 
         {isLoading ? (
           <View style={styles.loader}>
-            <ActivityIndicator size="large" color={COLORS.gold} />
+            <ActivityIndicator size="large" color={COLORS.primary} />
           </View>
         ) : (
           <FlatList
@@ -184,7 +184,7 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
             keyExtractor={item => item._id || item.id || String(Math.random())}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
-            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={COLORS.gold} />}
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={COLORS.primary} />}
             ListEmptyComponent={
               <AdminEmptyState
                 icon="map-pin"
@@ -207,7 +207,7 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
           onPress={() => navigation.navigate('AddHeritageSite')}
           activeOpacity={0.85}
         >
-          <Feather name="plus" size={24} color={COLORS.background} />
+          <Feather name="plus" size={22} color="#FFFFFF" />
         </TouchableOpacity>
 
         {/* Delete Confirmation Modal */}
@@ -219,7 +219,7 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Feather name="alert-triangle" size={32} color="#D45A5B" style={{ alignSelf: 'center', marginBottom: 12 }} />
+              <Feather name="alert-triangle" size={32} color="#DC2626" style={{ alignSelf: 'center', marginBottom: 12 }} />
               <Text style={styles.modalTitle}>Delete Heritage Site?</Text>
               <Text style={styles.modalSub}>{deleteTarget?.name}</Text>
               <Text style={styles.modalBody}>
@@ -254,14 +254,14 @@ export const HeritageSitesScreen: React.FC<{ navigation: any }> = ({ navigation 
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#FAFAFA' },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E2E8F0',
     margin: SPACING.md,
     marginBottom: SPACING.sm,
     paddingHorizontal: SPACING.sm,
@@ -285,24 +285,29 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
   },
   filterChipActive: {
-    backgroundColor: 'rgba(212,175,55,0.1)',
-    borderColor: 'rgba(212,175,55,0.3)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
+    borderColor: 'rgba(30, 58, 138, 0.2)',
   },
   filterText: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '500' },
-  filterTextActive: { color: COLORS.gold, fontWeight: '600' },
+  filterTextActive: { color: COLORS.primary, fontWeight: '700' },
   list: { padding: SPACING.md, gap: SPACING.sm },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   siteCard: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E2E8F0',
     padding: SPACING.sm,
     gap: SPACING.sm,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   siteCardHeader: {
     flexDirection: 'row',
@@ -313,14 +318,14 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.surfaceLight,
+    backgroundColor: '#F8FAFC',
   },
   siteImageFallback: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   siteInfo: { flex: 1, gap: 3 },
-  siteName: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '600' },
+  siteName: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700' },
   siteLocation: { color: COLORS.textSecondary, fontSize: 12 },
   sitePeriod: { color: COLORS.textSecondary, fontSize: 11 },
   badgeRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap', marginTop: 4 },
@@ -330,24 +335,24 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     paddingTop: SPACING.xs,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: '#F1F5F9',
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingVertical: 6,
     borderRadius: BORDER_RADIUS.sm,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surfaceLight,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
   },
   actionBtnDanger: {
-    borderColor: 'rgba(212,90,91,0.3)',
-    backgroundColor: 'rgba(212,90,91,0.08)',
+    borderColor: 'rgba(220, 38, 38, 0.2)',
+    backgroundColor: 'rgba(220, 38, 38, 0.06)',
   },
-  actionBtnText: { color: COLORS.gold, fontSize: 11, fontWeight: '600' },
+  actionBtnText: { color: COLORS.primary, fontSize: 11, fontWeight: '600' },
   fab: {
     position: 'absolute',
     right: SPACING.lg,
@@ -355,14 +360,18 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: COLORS.gold,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
+    elevation: 6,
+    shadowColor: '#1E3A8A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: SPACING.lg,
@@ -370,19 +379,24 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: COLORS.surface,
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.xl,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: '#E2E8F0',
     padding: SPACING.xl,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   modalTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700', textAlign: 'center' },
   modalSub: { color: COLORS.gold, fontSize: 14, fontWeight: '600', textAlign: 'center', marginTop: 4 },
   modalBody: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 18, textAlign: 'center', marginVertical: SPACING.md },
   modalActions: { flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.sm },
   modalBtn: { flex: 1, height: 44, borderRadius: BORDER_RADIUS.md, justifyContent: 'center', alignItems: 'center' },
-  modalBtnCancel: { borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.surfaceLight },
+  modalBtnCancel: { borderWidth: 1, borderColor: '#E2E8F0', backgroundColor: '#F8FAFC' },
   modalBtnCancelText: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' },
-  modalBtnDanger: { backgroundColor: '#D45A5B' },
+  modalBtnDanger: { backgroundColor: '#DC2626' },
   modalBtnDangerText: { color: '#FFF', fontSize: 13, fontWeight: '700' },
 });

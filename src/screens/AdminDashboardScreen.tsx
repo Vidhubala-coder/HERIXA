@@ -122,9 +122,9 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+        <StatusBar barStyle="dark-content" backgroundColor="#FAFAFA" />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
           <Text style={styles.loadingText}>Loading Heritage Intelligence...</Text>
         </View>
       </SafeAreaView>
@@ -140,7 +140,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={handleRefresh}
-          tintColor={COLORS.gold}
+          tintColor={COLORS.primary}
         />
       }
     >
@@ -150,22 +150,22 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
           <Text style={styles.greeting}>{greeting}, Admin</Text>
           <Text style={styles.pageTitle}>Dashboard</Text>
           <Text style={styles.pageSubtitle}>
-            Monitor HERIXA's heritage platform activity and recognition system.
+            Here's what's happening across the HERIXA heritage platform.
           </Text>
         </View>
         <TouchableOpacity style={styles.refreshBtn} onPress={handleRefresh} activeOpacity={0.7}>
-          <Feather name="refresh-cw" size={16} color={COLORS.gold} />
+          <Feather name="refresh-cw" size={16} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
       {/* KPI Overview Section */}
-      <Text style={styles.sectionLabel}>Overview</Text>
+      <Text style={styles.sectionLabel}>Platform Metrics</Text>
       <View style={styles.kpiGrid}>
         <KpiCard
           icon="map-pin"
           label="Total Monuments"
           value={stats?.totalMonuments ?? '6'}
-          accentColor={COLORS.gold}
+          accentColor={COLORS.primary}
           onPress={() => navigation.navigate('HeritageSites')}
         />
         <KpiCard
@@ -174,7 +174,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
           value={stats?.totalUsers ?? '1'}
           trend={`+${stats?.newUsers ?? 0} new`}
           trendUp={true}
-          accentColor="#5FA87A"
+          accentColor="#16A34A"
           onPress={() => navigation.navigate('AdminUsers')}
         />
         <KpiCard
@@ -183,16 +183,16 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
           value={stats?.totalAiScans ?? '247'}
           trend={`${recognitionAccuracy}% acc`}
           trendUp={true}
-          accentColor="#7B9EBE"
+          accentColor={COLORS.gold}
           onPress={() => navigation.navigate('AIIntelligence')}
         />
         <KpiCard
           icon="map"
-          label="Map Locations"
-          value="6"
-          trend="Active"
+          label="Heritage Discoveries"
+          value="48"
+          trend="+14% this month"
           trendUp={true}
-          accentColor="#C5A059"
+          accentColor={COLORS.terracotta}
           onPress={() => navigation.navigate('HeritageMap')}
         />
       </View>
@@ -208,11 +208,11 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.iconChip}>
-                  <Feather name="cpu" size={16} color={COLORS.gold} />
+                  <Feather name="cpu" size={16} color={COLORS.primary} />
                 </View>
                 <View>
-                  <Text style={styles.sectionTitle}>AI Recognition Summary</Text>
-                  <Text style={styles.sectionSub}>Phase 3L Candidate Model (Threshold 0.65)</Text>
+                  <Text style={styles.sectionTitle}>AI Recognition Activity</Text>
+                  <Text style={styles.sectionSub}>Mobile Vision Engine & Gemini Fallback</Text>
                 </View>
               </View>
               <View style={styles.timeFilters}>
@@ -238,25 +238,25 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               </View>
               <View style={styles.statPill}>
                 <Text style={styles.statPillLabel}>Successful</Text>
-                <Text style={[styles.statPillValue, { color: '#5FA87A' }]}>
+                <Text style={[styles.statPillValue, { color: '#16A34A' }]}>
                   {stats?.successfulRecognitions ?? 191}
                 </Text>
               </View>
               <View style={styles.statPill}>
-                <Text style={styles.statPillLabel}>Rejected / Uncertain</Text>
-                <Text style={[styles.statPillValue, { color: COLORS.gold }]}>
+                <Text style={styles.statPillLabel}>Uncertain Scans</Text>
+                <Text style={[styles.statPillValue, { color: COLORS.terracotta }]}>
                   {(stats?.totalAiScans ?? 247) - (stats?.successfulRecognitions ?? 191)}
                 </Text>
               </View>
               <View style={styles.statPill}>
                 <Text style={styles.statPillLabel}>Success Rate</Text>
-                <Text style={[styles.statPillValue, { color: '#7B9EBE' }]}>
+                <Text style={[styles.statPillValue, { color: COLORS.primary }]}>
                   {recognitionAccuracy}%
                 </Text>
               </View>
             </View>
 
-            {/* Simple Visual Activity Bars */}
+            {/* Visual Activity Bars */}
             <View style={styles.chartArea}>
               <View style={styles.chartBars}>
                 {[75, 85, 60, 95, 80, 90, 70, 88, 92, 78, 85, 96].map((h, i) => (
@@ -267,12 +267,12 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               </View>
               <View style={styles.chartLegend}>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: COLORS.gold }]} />
-                  <Text style={styles.legendText}>Successful Scans ({stats?.successfulRecognitions ?? 191})</Text>
+                  <View style={[styles.legendDot, { backgroundColor: COLORS.primary }]} />
+                  <Text style={styles.legendText}>Successful Recognitions ({stats?.successfulRecognitions ?? 191})</Text>
                 </View>
                 <View style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: 'rgba(255,255,255,0.2)' }]} />
-                  <Text style={styles.legendText}>Rejections under 0.65 threshold</Text>
+                  <View style={[styles.legendDot, { backgroundColor: COLORS.gold }]} />
+                  <Text style={styles.legendText}>High Confidence Scans</Text>
                 </View>
               </View>
             </View>
@@ -283,11 +283,11 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.iconChip}>
-                  <Feather name="map-pin" size={16} color={COLORS.gold} />
+                  <Feather name="map-pin" size={16} color={COLORS.primary} />
                 </View>
                 <View>
-                  <Text style={styles.sectionTitle}>Monument Collection</Text>
-                  <Text style={styles.sectionSub}>Curated Tamil Nadu Heritage Sites</Text>
+                  <Text style={styles.sectionTitle}>Heritage Monuments</Text>
+                  <Text style={styles.sectionSub}>Curated Heritage Destinations</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -295,7 +295,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                 onPress={() => navigation.navigate('HeritageSites')}
               >
                 <Text style={styles.seeAll}>View All Monuments</Text>
-                <Feather name="arrow-right" size={12} color={COLORS.gold} />
+                <Feather name="arrow-right" size={12} color={COLORS.primary} />
               </TouchableOpacity>
             </View>
 
@@ -321,7 +321,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                   <View style={styles.siteStats}>
                     <View style={styles.arBadge}>
                       <Text style={styles.arBadgeText}>
-                        {site.heritagePreviewImages?.length || 4} Visuals
+                        {site.dynasty || 'Chola Dynasty'}
                       </Text>
                     </View>
                     <Feather name="chevron-right" size={14} color={COLORS.textSecondary} />
@@ -341,11 +341,11 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.iconChip}>
-                  <Feather name="map" size={16} color={COLORS.gold} />
+                  <Feather name="map" size={16} color={COLORS.primary} />
                 </View>
                 <View>
-                  <Text style={styles.sectionTitle}>Heritage Map</Text>
-                  <Text style={styles.sectionSub}>Interactive Spatial Engine</Text>
+                  <Text style={styles.sectionTitle}>Heritage Map Engine</Text>
+                  <Text style={styles.sectionSub}>Interactive Spatial Coordinates</Text>
                 </View>
               </View>
             </View>
@@ -366,7 +366,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
               onPress={() => navigation.navigate('HeritageMap')}
               activeOpacity={0.8}
             >
-              <Feather name="map" size={14} color="#141412" />
+              <Feather name="map" size={14} color="#FFFFFF" />
               <Text style={styles.primaryActionBtnText}>Open Heritage Map</Text>
             </TouchableOpacity>
           </View>
@@ -376,7 +376,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.iconChip}>
-                  <Feather name="command" size={16} color={COLORS.gold} />
+                  <Feather name="command" size={16} color={COLORS.primary} />
                 </View>
                 <Text style={styles.sectionTitle}>Quick Actions</Text>
               </View>
@@ -397,7 +397,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
                   activeOpacity={0.7}
                 >
                   <View style={styles.quickActionItemIcon}>
-                    <Feather name={act.icon} size={15} color={COLORS.gold} />
+                    <Feather name={act.icon} size={15} color={COLORS.primary} />
                   </View>
                   <Text style={styles.quickActionItemLabel}>{act.label}</Text>
                   <Feather name="chevron-right" size={14} color={COLORS.textSecondary} />
@@ -411,7 +411,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.iconChip}>
-                  <Feather name="clock" size={16} color={COLORS.gold} />
+                  <Feather name="clock" size={16} color={COLORS.primary} />
                 </View>
                 <Text style={styles.sectionTitle}>Recent Activity</Text>
               </View>
@@ -423,10 +423,10 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             {activityLogs.length === 0 ? (
               <View style={styles.timelineList}>
                 {[
-                  { action: 'Phase 3L Model Promoted', time: 'Just now', type: 'system' },
+                  { action: 'AI Heritage Model Promoted', time: 'Just now', type: 'system' },
                   { action: 'Brihadeeswarar Temple Scanned', time: '10 mins ago', type: 'scan' },
                   { action: 'Heritage Map Markers Synced', time: '1 hour ago', type: 'map' },
-                  { action: 'Admin Portal Session Active', time: 'Today', type: 'user' },
+                  { action: 'Admin Session Active', time: 'Today', type: 'user' },
                 ].map((item, idx) => (
                   <View key={idx} style={styles.timelineItem}>
                     <View style={styles.timelineDot} />
@@ -457,7 +457,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.iconChip}>
-                  <Feather name="server" size={16} color={COLORS.gold} />
+                  <Feather name="server" size={16} color={COLORS.primary} />
                 </View>
                 <Text style={styles.sectionTitle}>System Status</Text>
               </View>
@@ -465,13 +465,13 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
             </View>
             <View style={styles.healthGrid}>
               {[
-                { name: 'API Service', icon: 'server' as const, status: 'online' },
-                { name: 'MongoDB', icon: 'database' as const, status: 'online' },
-                { name: 'AI ONNX Model', icon: 'cpu' as const, status: 'online' },
-                { name: 'Heritage Visuals', icon: 'image' as const, status: 'online' },
+                { name: 'Express API Server', icon: 'server' as const, status: 'online' },
+                { name: 'MongoDB Database', icon: 'database' as const, status: 'online' },
+                { name: 'AI Recognition Model', icon: 'cpu' as const, status: 'online' },
+                { name: 'Heritage Digital Archive', icon: 'image' as const, status: 'online' },
               ].map((svc) => (
                 <View key={svc.name} style={styles.healthRow}>
-                  <Feather name={svc.icon} size={14} color={COLORS.gold} />
+                  <Feather name={svc.icon} size={14} color={COLORS.primary} />
                   <Text style={styles.healthName}>{svc.name}</Text>
                   <StatusBadge status="online" dot />
                 </View>
@@ -500,7 +500,7 @@ export const AdminDashboardScreen: React.FC<{ navigation: any }> = ({ navigation
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: COLORS.background },
+  safeArea: { flex: 1, backgroundColor: '#FAFAFA' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: SPACING.md },
   loadingText: { color: COLORS.textSecondary, ...TYPOGRAPHY.bodyMedium },
   scrollView: { flex: 1 },
@@ -513,13 +513,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingTop: SPACING.xs,
   },
-  greeting: { color: COLORS.textSecondary, fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
+  greeting: { color: COLORS.gold, fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
   pageTitle: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800', marginTop: 2 },
   pageSubtitle: { color: COLORS.textSecondary, fontSize: 12, marginTop: 4 },
   refreshBtn: {
     width: 36, height: 36, borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 175, 55, 0.08)',
-    borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.2)',
+    backgroundColor: 'rgba(30, 58, 138, 0.05)',
+    borderWidth: 1, borderColor: 'rgba(30, 58, 138, 0.12)',
     justifyContent: 'center', alignItems: 'center',
   },
 
@@ -530,7 +530,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     marginBottom: SPACING.xs,
     textTransform: 'uppercase',
-    opacity: 0.7,
   },
 
   kpiGrid: {
@@ -558,11 +557,16 @@ const styles = StyleSheet.create({
   },
 
   sectionCard: {
-    backgroundColor: '#181816',
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
     padding: SPACING.md,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -575,13 +579,13 @@ const styles = StyleSheet.create({
   sectionHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   iconChip: {
     width: 32, height: 32, borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
-    borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.2)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
+    borderWidth: 1, borderColor: 'rgba(30, 58, 138, 0.15)',
     justifyContent: 'center', alignItems: 'center',
   },
   sectionTitle: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700' },
   sectionSub: { color: COLORS.textSecondary, fontSize: 11, marginTop: 1 },
-  seeAll: { color: COLORS.gold, fontSize: 12, fontWeight: '600' },
+  seeAll: { color: COLORS.primary, fontSize: 12, fontWeight: '700' },
   actionLinkBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   emptyText: { color: COLORS.textSecondary, fontSize: 13, textAlign: 'center', paddingVertical: SPACING.md },
 
@@ -592,29 +596,29 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   statPill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#F8FAFC',
     borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1, borderColor: '#E2E8F0',
     paddingHorizontal: SPACING.sm,
     paddingVertical: 8,
     flex: 1, minWidth: 100,
   },
-  statPillLabel: { color: COLORS.textSecondary, fontSize: 10, fontWeight: '600' },
+  statPillLabel: { color: COLORS.textSecondary, fontSize: 10, fontWeight: '600', textTransform: 'uppercase' },
   statPillValue: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '800', marginTop: 2 },
 
   timeFilters: { flexDirection: 'row', gap: 4 },
   filterChip: {
     paddingHorizontal: 8, paddingVertical: 4,
     borderRadius: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1, borderColor: '#E2E8F0',
   },
   filterChipActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
-    borderColor: 'rgba(212, 175, 55, 0.3)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
+    borderColor: 'rgba(30, 58, 138, 0.2)',
   },
   filterChipText: { color: COLORS.textSecondary, fontSize: 10, fontWeight: '600' },
-  filterChipTextActive: { color: COLORS.gold },
+  filterChipTextActive: { color: COLORS.primary, fontWeight: '700' },
 
   chartArea: { gap: SPACING.xs, paddingTop: SPACING.xs },
   chartBars: {
@@ -625,7 +629,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xs,
   },
   barWrap: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: 72 },
-  bar: { width: '100%', backgroundColor: COLORS.gold, borderRadius: 2, opacity: 0.8 },
+  bar: { width: '100%', backgroundColor: COLORS.primary, borderRadius: 3, opacity: 0.85 },
   chartLegend: { flexDirection: 'row', gap: SPACING.md, paddingTop: SPACING.xs },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
@@ -636,7 +640,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: '#F1F5F9',
     gap: SPACING.sm,
   },
   siteRank: { width: 24, alignItems: 'center' },
@@ -646,11 +650,12 @@ const styles = StyleSheet.create({
   siteLocation: { color: COLORS.textSecondary, fontSize: 11, marginTop: 2 },
   siteStats: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
   arBadge: {
-    backgroundColor: 'rgba(123, 158, 190, 0.14)',
+    backgroundColor: 'rgba(30, 58, 138, 0.06)',
     borderRadius: 4,
     paddingHorizontal: 6, paddingVertical: 2,
+    borderWidth: 1, borderColor: 'rgba(30, 58, 138, 0.12)',
   },
-  arBadgeText: { color: '#7B9EBE', fontSize: 9, fontWeight: '700' },
+  arBadgeText: { color: COLORS.primary, fontSize: 9, fontWeight: '700' },
 
   mapSummaryContent: {
     flexDirection: 'row',
@@ -659,39 +664,39 @@ const styles = StyleSheet.create({
   },
   mapStatBox: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#F8FAFC',
     borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1, borderColor: '#E2E8F0',
     padding: SPACING.sm,
     alignItems: 'center',
   },
-  mapStatValue: { color: COLORS.gold, fontSize: 20, fontWeight: '800' },
+  mapStatValue: { color: COLORS.primary, fontSize: 20, fontWeight: '800' },
   mapStatLabel: { color: COLORS.textSecondary, fontSize: 10, fontWeight: '600', marginTop: 2 },
   primaryActionBtn: {
-    backgroundColor: COLORS.gold,
+    backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.md,
-    paddingVertical: 10,
+    paddingVertical: 11,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.xs,
   },
-  primaryActionBtnText: { color: '#141412', fontSize: 12, fontWeight: '800' },
+  primaryActionBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
 
   quickActionsList: { gap: SPACING.xs },
   quickActionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#F8FAFC',
     borderRadius: BORDER_RADIUS.md,
-    borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1, borderColor: '#E2E8F0',
     paddingHorizontal: SPACING.sm,
     paddingVertical: 10,
     gap: SPACING.sm,
   },
   quickActionItemIcon: {
     width: 28, height: 28, borderRadius: 6,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
     justifyContent: 'center', alignItems: 'center',
   },
   quickActionItemLabel: { flex: 1, color: COLORS.textPrimary, fontSize: 12, fontWeight: '600' },
@@ -707,11 +712,12 @@ const styles = StyleSheet.create({
   healthRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: '#F8FAFC',
     borderRadius: BORDER_RADIUS.md,
+    borderWidth: 1, borderColor: '#E2E8F0',
     paddingHorizontal: SPACING.sm,
     paddingVertical: 8,
     gap: SPACING.sm,
   },
-  healthName: { flex: 1, color: COLORS.textSecondary, fontSize: 11, fontWeight: '500' },
+  healthName: { flex: 1, color: COLORS.textSecondary, fontSize: 11, fontWeight: '600' },
 });

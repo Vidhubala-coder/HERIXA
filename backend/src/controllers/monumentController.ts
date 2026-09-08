@@ -214,7 +214,7 @@ const isBase64ValidImage = (base64Str: string): boolean => {
 export const recognizeMonument = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { image, scanEvidence, latitude, longitude } = req.body;
-    res.setTimeout(35000); // 35 seconds timeout to allow Render Free-Tier AI cold start
+    res.setTimeout(120000); // 120 seconds timeout to accommodate remote Render Free-Tier cold starts
 
     let imageToProcess: string | undefined = undefined;
     let viewTypeToProcess: string | undefined = undefined;
@@ -237,12 +237,12 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
       return;
     }
 
-    // Size limit check (approx 5MB base64 limit is ~7MB string size)
-    if (imageToProcess.length > 7 * 1024 * 1024) {
+    // Size limit check (approx 15MB base64 limit is ~20MB string size)
+    if (imageToProcess.length > 20 * 1024 * 1024) {
       res.status(400).json({
         success: false,
         status: 'error',
-        message: 'Image size exceeds maximum limit of 5MB.',
+        message: 'Image size exceeds maximum limit of 15MB.',
         errorCode: 413,
         errorDetails: 'IMAGE_TOO_LARGE'
       });
@@ -305,11 +305,14 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
     try {
       console.log('[HERIXA-RECOGNITION] Request started');
       const tHealthStart = Date.now();
-      const isAvailable = await isAiServiceAvailable();
+      let isAvailable = await isAiServiceAvailable();
       const tHealthDuration = Date.now() - tHealthStart;
       console.log(`[HERIXA-TIMING] [Stage 1: FastAPI Health Check] Duration: ${tHealthDuration}ms, isAvailable: ${isAvailable}`);
 
-      if (!isAvailable) {
+      const rawAiUrl = (process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001').trim();
+      const isRemoteAi = rawAiUrl.startsWith('https://');
+
+      if (!isAvailable && !isRemoteAi) {
         console.log('[HERIXA-RECOGNITION] Custom EfficientNet-B0 FastAPI recognition service offline.');
         res.status(503).json({
           success: false,
@@ -321,7 +324,7 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
         return;
       }
       
-      const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 6000);
+      const timeoutMs = Number(process.env.AI_SERVICE_TIMEOUT_MS || 60000);
       const cleanBase64 = imageToProcess.replace(/^data:image\/\w+;base64,/, "");
       const buffer = Buffer.from(cleanBase64, 'base64');
       
@@ -464,15 +467,20 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
             console.log(`[HERIXA-DEBUG-SCAN] resolvedUserId: ${resolvedUserId}`);
 
             if (resolvedUserId && mongoose.Types.ObjectId.isValid(resolvedUserId)) {
-              const scanEvidenceId = req.body.scanEvidence?.[0]?.capturedAt || req.body.scanEvidence?.[0]?.id || imageToProcess.substring(0, 80);
-              const dedupeKey = `${resolvedUserId}:${scanEvidenceId}`;
+              const scanEvidenceId = req.body.scanId || req.body.scanEvidence?.[0]?.capturedAt || req.body.scanEvidence?.[0]?.id || imageToProcess.substring(0, 80);
+              const dedupeKey = `scan:${resolvedUserId}:${scanEvidenceId}`;
 
+              // 1. Persistent MongoDB deduplication check
+              const existingPersistentScan = await ScanActivity.findOne({ scanId: dedupeKey });
+              
+              // 2. In-memory window check
               const now = Date.now();
               const lastTimestamp = processedScansMap.get(dedupeKey);
               let isDuplicateRetry = false;
-              if (lastTimestamp && (now - lastTimestamp < 3000)) {
+
+              if (existingPersistentScan || (lastTimestamp && (now - lastTimestamp < 3000))) {
                 isDuplicateRetry = true;
-                console.log(`[HERIXA-SCAN-COUNTER] Duplicate retry request detected for scan key: ${dedupeKey}. Skipping double increment.`);
+                console.log(`[HERIXA-SCAN-COUNTER] Persistent/In-memory duplicate scan attempt detected for scan key: ${dedupeKey}. Skipping double increment.`);
               } else {
                 processedScansMap.set(dedupeKey, now);
               }
@@ -491,6 +499,22 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
                     query: matchedMonument ? matchedMonument.name : (predictedClass || 'Unrecognized Scan')
                   });
                   await historyEntry.save();
+
+                  // Save persistent ScanActivity record with dedupe scanId
+                  try {
+                    await ScanActivity.create({
+                      scanId: dedupeKey,
+                      userId: updatedUser._id,
+                      monumentId: matchedMonument ? matchedMonument._id : undefined,
+                      monumentName: matchedMonument ? matchedMonument.name : (predictedClass || 'Unrecognized Scan'),
+                      confidence: fastApiResult ? fastApiResult.confidence : 0,
+                      recognized: Boolean(recognized),
+                      devicePlatform: String(req.headers['user-agent'] || 'unknown'),
+                      language: String(req.headers['accept-language'] || 'en'),
+                    });
+                  } catch (scanActErr: any) {
+                    console.warn('[ScanActivity Creation Warning]', scanActErr.message || scanActErr);
+                  }
 
                   await logEvent('SCAN_PERFORMED', updatedUser._id, matchedMonument ? matchedMonument._id : undefined, 'USER', {
                     monumentName: matchedMonument ? matchedMonument.name : (predictedClass || 'Unrecognized Scan'),
@@ -696,6 +720,7 @@ export const recognizeMonument = async (req: Request, res: Response, next: NextF
       recommendedNextView: recognized ? null : 'Capture the main Vimana tower or entrance from a clearer angle.',
       data: matchedMonument || undefined,
       monument: matchedMonument ? matchedMonument.name : null,
+      message: friendlyMessage,
       source: 'fastapi',
       accepted: recognized,
       errorDetails: recognized ? undefined : 'UNCERTAIN_RECOGNITION'

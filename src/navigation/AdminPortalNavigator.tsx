@@ -19,6 +19,8 @@ import { AuditLogsScreen } from '../screens/admin/AuditLogsScreen';
 import { AdminSettingsScreen } from '../screens/admin/AdminSettingsScreen';
 import { AdminProfileScreen } from '../screens/admin/AdminProfileScreen';
 import { HeritageVisualsAdminScreen } from '../screens/admin/HeritageVisualsAdminScreen';
+import { AdminHeritageProtocolScreen } from '../screens/admin/AdminHeritageProtocolScreen';
+import { AdminHeritageVideoScreen } from '../screens/admin/AdminHeritageVideoScreen';
 
 const AdminStack = createNativeStackNavigator<AdminPortalParamList>();
 
@@ -111,6 +113,16 @@ export const AdminPortalNavigator: React.FC = () => {
       <AdminStack.Screen
         name="AdminProfile"
         component={AdminProfileScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <AdminStack.Screen
+        name="AdminHeritageProtocol"
+        component={AdminHeritageProtocolScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <AdminStack.Screen
+        name="AdminHeritageVideo"
+        component={AdminHeritageVideoScreen}
         options={{ animation: 'slide_from_right' }}
       />
     </AdminStack.Navigator>

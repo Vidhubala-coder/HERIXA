@@ -83,10 +83,10 @@ export const ARViewport: React.FC<ARViewportProps> = ({
   // 5. First Open / Permission Undetermined Screen
   return (
     <View style={styles.permissionContainer}>
-      <Feather name="camera" size={54} color={COLORS.gold} style={styles.cameraIcon} />
+      <Feather name="camera" size={54} color={COLORS.primary} style={styles.cameraIcon} />
       <Text style={styles.permissionTitle}>Camera Access Required</Text>
       <Text style={styles.permissionDescription}>
-        HERIXA needs camera access to use the AR scanner.
+        HERIXA needs camera access to scan and identify heritage monuments.
       </Text>
       
       <TouchableOpacity style={styles.primaryButton} onPress={onRequestPermission} activeOpacity={0.8}>

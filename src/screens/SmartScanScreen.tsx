@@ -28,9 +28,7 @@ type Props = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-// Calibration Thresholds (Calibrated scores between 0.0 and 1.0)
-const HIGH_CONFIDENCE_THRESHOLD = 0.80; // >= 80% confidence is highly reliable
-const MEDIUM_CONFIDENCE_THRESHOLD = 0.35; // 35% - 79% is a possible/tentative match
+const MEDIUM_CONFIDENCE_THRESHOLD = 0.35;
 
 export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -40,30 +38,18 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
   const [scanError, setScanError] = useState<string | null>(null);
   const cameraRef = useRef<any>(null);
 
-  // Auto-request permission on mount
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
       requestPermission();
     }
   }, [permission]);
 
-  // Handle open settings
-  const handleOpenSettings = async () => {
-    try {
-      await Linking.openSettings();
-    } catch (e) {
-      console.warn('Cannot open settings:', e);
-    }
-  };
-
-  // Image preprocessing and analysis pipeline
   const processAndRecognize = async (imageUri: string) => {
     setIsAnalyzing(true);
     setScanError(null);
-    setStatusMessage('Compressing scan data...');
+    setStatusMessage('Compressing image data...');
 
     try {
-      // 1. Resize to 1024px width and compress to 80% JPEG to optimize payload size
       const manipulated = await ImageManipulator.manipulateAsync(
         imageUri,
         [{ resize: { width: 1024 } }],
@@ -71,23 +57,28 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
       );
 
       if (!manipulated.base64) {
-        throw new Error('Image compression did not generate base64 data.');
+        throw new Error('Image processing failed.');
       }
 
-      setStatusMessage('HERIXA AI identifying monument...');
+      setStatusMessage('Analyzing Heritage...');
 
-      // 2. Execute recognition API
       const result: ImageRecognitionResponse = await recognizeMonumentFromImage(manipulated.base64);
 
       if (!result.success) {
-        throw new Error(result.reason || 'AI recognition failed');
+        const errorMsg = result.reason || result.message || 'AI heritage recognition service is initializing.';
+        if (result.errorDetails === 'MODEL_UNAVAILABLE' || errorMsg.includes('unavailable') || errorMsg.includes('503')) {
+          setScanError('HERIXA AI service is warming up (cloud cold start). Please try scanning again in 10 seconds.');
+        } else if (result.errorDetails === 'NETWORK_UNAVAILABLE' || errorMsg.includes('Connection')) {
+          setScanError('Unable to connect to HERIXA server. Please check your internet connection and try again.');
+        } else {
+          setScanError(errorMsg);
+        }
+        return;
       }
 
-      // 3. Evaluate results against calibrated confidence thresholds
       const confidence = result.confidence ?? 0;
 
       if (result.recognized && confidence >= MEDIUM_CONFIDENCE_THRESHOLD && result.monumentId) {
-        // Successful or tentative match
         const matchData: RecognitionResultData = {
           monumentId: result.monumentId,
           monumentName: result.monumentName || 'Unknown Monument',
@@ -99,42 +90,47 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
 
         navigation.navigate('RecognitionResult', { result: matchData });
       } else {
-        // Low confidence / unrecognized
-        setScanError(
-          result.reason ||
-          'Unable to confidently identify this monument. Please scan the main structure from a clearer angle.'
-        );
+        if (result.status === 'unclear' || result.reason === 'IMAGE_QUALITY') {
+          setScanError('The captured image was unclear or blurry. Please hold steady and capture the monument clearly.');
+        } else {
+          setScanError('Unable to identify monument with high confidence. Please ensure the main temple structure is clearly visible in the frame.');
+        }
       }
     } catch (error: any) {
-      console.error('[SMART_SCAN] Error processing image:', error);
-      setScanError(error.message || 'An error occurred during scanning. Please try again.');
+      console.error('[AI_SCAN] Error identifying monument:', error);
+      const errMsg = error.message || '';
+      if (error.isNetworkError || errMsg.includes('Network') || errMsg.includes('fetch failed')) {
+        setScanError('Network Connection Error: Please check your internet connection and ensure HERIXA backend is reachable.');
+      } else if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('MODEL_UNAVAILABLE')) {
+        setScanError('HERIXA AI service is warming up (cloud cold start). Please tap SCAN AGAIN in a few seconds.');
+      } else {
+        setScanError(errMsg || 'An error occurred during recognition. Please try again.');
+      }
     } finally {
       setIsAnalyzing(false);
       setStatusMessage('');
     }
   };
 
-  // Triggered by Capture button
   const handleCapture = async () => {
     if (!cameraRef.current) {
-      setScanError('Camera initialization in progress.');
+      setScanError('Camera initializing. Please try again.');
       return;
     }
 
     try {
-      setStatusMessage('Capturing...');
+      setStatusMessage('Analyzing Heritage...');
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.85 });
       if (photo && photo.uri) {
         await processAndRecognize(photo.uri);
       } else {
-        throw new Error('Failed to capture picture.');
+        throw new Error('Failed to capture photo.');
       }
     } catch (e: any) {
-      setScanError(e.message || 'Failed to capture image.');
+      setScanError(e.message || 'Failed to capture photo.');
     }
   };
 
-  // Triggered by Gallery button
   const handlePickFromGallery = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -157,19 +153,13 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // Safe camera permission check for try again button
-  const handleTryPermissionAgain = async () => {
-    await requestPermission();
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* Reusable Camera Wrapper */}
       <ARViewport
         permission={permission}
-        onRequestPermission={handleTryPermissionAgain}
+        onRequestPermission={async () => { await requestPermission(); }}
         isPreviewMode={isPreviewMode}
         onEnterPreviewMode={() => setIsPreviewMode(true)}
         cameraRef={cameraRef}
@@ -182,48 +172,51 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
               onPress={() => navigation.goBack()}
               activeOpacity={0.8}
             >
-              <Feather name="arrow-left" size={24} color={COLORS.textPrimary} />
+              <Feather name="arrow-left" size={22} color={COLORS.white} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>HERIXA SMART SCAN</Text>
-            <View style={{ width: 40 }} />
+
+            <View style={styles.headerCenter}>
+              <Text style={styles.headerTitle}>AI Heritage Scan</Text>
+              <Text style={styles.headerSubtitle}>Identify a heritage monument using AI</Text>
+            </View>
+
+            <View style={styles.statusBadge}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>AI Ready</Text>
+            </View>
           </View>
 
-          {/* Scanner Guidance Frame */}
+          {/* Clean Frame Viewfinder (NO AR reticles or scanning lines) */}
           {!isAnalyzing && !scanError && (
-            <View style={styles.scannerOverlay}>
-              <View style={styles.guidanceFrame}>
-                <View style={[styles.corner, styles.topLeft]} />
-                <View style={[styles.corner, styles.topRight]} />
-                <View style={[styles.corner, styles.bottomLeft]} />
-                <View style={[styles.corner, styles.bottomRight]} />
-              </View>
-              <View style={styles.guidanceTextContainer}>
-                <Text style={styles.guidanceText}>Align the monument inside the frame</Text>
+            <View style={styles.viewfinderContainer}>
+              <View style={styles.cleanFrame}>
+                <Text style={styles.guidanceHint}>Point your camera at a heritage monument</Text>
               </View>
             </View>
           )}
 
-          {/* Loading Indicator Modal */}
+          {/* Loading Indicator Overlay */}
           {isAnalyzing && (
             <View style={styles.overlayModal}>
               <View style={styles.loaderBox}>
-                <ActivityIndicator size="large" color={COLORS.gold} />
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={styles.loaderTitle}>Analyzing Heritage...</Text>
                 <Text style={styles.loaderText}>{statusMessage}</Text>
               </View>
             </View>
           )}
 
-          {/* Error / Failure Modal overlay */}
+          {/* Error Overlay */}
           {scanError && (
             <View style={styles.overlayModal}>
               <View style={styles.errorBox}>
-                <Feather name="alert-circle" size={48} color={COLORS.danger} style={styles.errorIcon} />
-                <Text style={styles.errorTitle}>Scan Unsuccessful</Text>
+                <Feather name="alert-circle" size={44} color={COLORS.danger} style={{ marginBottom: 12 }} />
+                <Text style={styles.errorTitle}>Recognition Unsuccessful</Text>
                 <Text style={styles.errorDescription}>{scanError}</Text>
                 <TouchableOpacity
                   style={styles.retryButton}
                   onPress={() => setScanError(null)}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                 >
                   <Text style={styles.retryButtonText}>SCAN AGAIN</Text>
                 </TouchableOpacity>
@@ -231,27 +224,26 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           )}
 
-          {/* Bottom Control Bar */}
+          {/* Controls Bar */}
           {!isAnalyzing && !scanError && (
             <View style={styles.controlsBar}>
               <TouchableOpacity
                 style={styles.galleryButton}
                 onPress={handlePickFromGallery}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
-                <Ionicons name="images-outline" size={26} color={COLORS.textPrimary} />
-                <Text style={styles.controlText}>GALLERY</Text>
+                <Ionicons name="images-outline" size={22} color={COLORS.white} />
+                <Text style={styles.galleryText}>Upload Image</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.captureButton}
+                style={styles.scanActionButton}
                 onPress={handleCapture}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
-                <View style={styles.captureInnerButton} />
+                <Feather name="aperture" size={22} color={COLORS.white} style={{ marginRight: 8 }} />
+                <Text style={styles.scanActionText}>Scan Monument</Text>
               </TouchableOpacity>
-
-              <View style={{ width: 60, alignItems: 'center' }} />
             </View>
           )}
         </SafeAreaView>
@@ -261,7 +253,8 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const { width } = Dimensions.get('window');
-const frameSize = width * 0.7;
+const frameWidth = width * 0.82;
+const frameHeight = width * 1.05;
 
 const styles = StyleSheet.create({
   container: {
@@ -273,178 +266,192 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   header: {
-    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: {
-    color: COLORS.textPrimary,
-    ...TYPOGRAPHY.bodyMedium,
-    fontWeight: '700',
-    letterSpacing: 1.5,
+  headerCenter: {
+    alignItems: 'center',
   },
-  scannerOverlay: {
+  headerTitle: {
+    color: COLORS.white,
+    ...TYPOGRAPHY.h3,
+    fontWeight: '800',
+  },
+  headerSubtitle: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    ...TYPOGRAPHY.caption,
+    fontSize: 10,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#16A34A',
+    marginRight: 6,
+  },
+  statusText: {
+    color: COLORS.textPrimary,
+    ...TYPOGRAPHY.caption,
+    fontWeight: '700',
+    fontSize: 10,
+  },
+  viewfinderContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  guidanceFrame: {
-    width: frameSize,
-    height: frameSize,
-    position: 'relative',
+  cleanFrame: {
+    width: frameWidth,
+    height: frameHeight,
+    borderRadius: BORDER_RADIUS.xl,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.85)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: SPACING.lg,
+    backgroundColor: 'rgba(15, 23, 42, 0.1)',
   },
-  corner: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    borderColor: COLORS.gold,
-  },
-  topLeft: {
-    top: 0,
-    left: 0,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderTopLeftRadius: BORDER_RADIUS.sm,
-  },
-  topRight: {
-    top: 0,
-    right: 0,
-    borderTopWidth: 4,
-    borderRightWidth: 4,
-    borderTopRightRadius: BORDER_RADIUS.sm,
-  },
-  bottomLeft: {
-    bottom: 0,
-    left: 0,
-    borderBottomWidth: 4,
-    borderLeftWidth: 4,
-    borderBottomLeftRadius: BORDER_RADIUS.sm,
-  },
-  bottomRight: {
-    bottom: 0,
-    right: 0,
-    borderBottomWidth: 4,
-    borderRightWidth: 4,
-    borderBottomRightRadius: BORDER_RADIUS.sm,
-  },
-  guidanceTextContainer: {
-    marginTop: SPACING.lg,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 8,
-    borderRadius: BORDER_RADIUS.sm,
-  },
-  guidanceText: {
-    color: COLORS.textPrimary,
+  guidanceHint: {
+    color: COLORS.white,
     ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 8,
+    borderRadius: BORDER_RADIUS.full,
   },
   overlayModal: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
     zIndex: 100,
   },
   loaderBox: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.white,
     padding: SPACING.xl,
-    borderRadius: BORDER_RADIUS.md,
-    borderColor: COLORS.gold,
-    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.xl,
     alignItems: 'center',
     width: '100%',
+    shadowColor: COLORS.shadowColor,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 5,
+  },
+  loaderTitle: {
+    color: COLORS.textPrimary,
+    ...TYPOGRAPHY.h3,
+    fontWeight: '800',
+    marginTop: SPACING.md,
   },
   loaderText: {
-    color: COLORS.textPrimary,
+    color: COLORS.textSecondary,
     ...TYPOGRAPHY.bodyMedium,
-    marginTop: SPACING.md,
+    marginTop: 4,
     textAlign: 'center',
   },
   errorBox: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: COLORS.white,
     padding: SPACING.xl,
-    borderRadius: BORDER_RADIUS.md,
-    borderColor: COLORS.border,
-    borderWidth: 1,
+    borderRadius: BORDER_RADIUS.xl,
     alignItems: 'center',
     width: '100%',
-  },
-  errorIcon: {
-    marginBottom: SPACING.md,
   },
   errorTitle: {
     color: COLORS.textPrimary,
     ...TYPOGRAPHY.h3,
-    fontWeight: '700',
-    marginBottom: SPACING.sm,
+    fontWeight: '800',
+    marginBottom: SPACING.xs,
   },
   errorDescription: {
     color: COLORS.textSecondary,
     ...TYPOGRAPHY.bodySmall,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   retryButton: {
-    backgroundColor: COLORS.gold,
-    height: 48,
-    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: COLORS.primary,
+    height: 46,
+    borderRadius: BORDER_RADIUS.lg,
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   retryButtonText: {
-    color: COLORS.background,
+    color: COLORS.white,
     ...TYPOGRAPHY.button,
     fontWeight: '700',
   },
   controlsBar: {
-    height: 100,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingBottom: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    gap: SPACING.md,
+    backgroundColor: 'rgba(15, 23, 42, 0.8)',
   },
   galleryButton: {
+    height: 48,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    flexDirection: 'row',
     alignItems: 'center',
-    width: 60,
+    justifyContent: 'center',
+    gap: SPACING.xs,
   },
-  controlText: {
-    color: COLORS.textPrimary,
-    ...TYPOGRAPHY.caption,
-    fontSize: 9,
-    fontWeight: '700',
-    marginTop: 4,
+  galleryText: {
+    color: COLORS.white,
+    ...TYPOGRAPHY.button,
+    fontWeight: '600',
   },
-  captureButton: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 4,
-    borderColor: '#FFF',
+  scanActionButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: COLORS.primary,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  captureInnerButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.gold,
+  scanActionText: {
+    color: COLORS.white,
+    ...TYPOGRAPHY.button,
+    fontWeight: '800',
   },
 });
+
 export default SmartScanScreen;

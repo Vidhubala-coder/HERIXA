@@ -38,7 +38,12 @@ export const recordSuccess = () => {
   }
 };
 
-export const recordFailure = () => {
+export const recordFailure = (isTemporaryGateway = false) => {
+  // Temporary 502/503/504/timeout gateway status during cold start does NOT permanently trip circuit breaker
+  if (isTemporaryGateway) {
+    console.warn(`[HERIXA-CIRCUIT] Temporary gateway status during cold start recorded (failureCount: ${failureCount}). Circuit breaker state preserved as ${circuitState}.`);
+    return;
+  }
   failureCount++;
   if (circuitState === 'CLOSED' && failureCount >= FAILURE_THRESHOLD) {
     console.warn(`[HERIXA-CIRCUIT] Circuit Breaker: CLOSED -> OPEN (Threshold exceeded)`);
@@ -104,10 +109,12 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
   }
   
   try {
+    const isRemote = aiServiceUrl.startsWith('https://');
+    const healthTimeout = isRemote ? 35000 : 8000;
     const res = await fetch(healthUrl, {
       method: 'GET',
       headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(8000) // Increased to 8s for cloud cold starts
+      signal: AbortSignal.timeout(healthTimeout)
     });
 
     if (res.ok) {
@@ -123,6 +130,7 @@ const checkAiServiceHealthInternal = async (silentMode = false): Promise<boolean
         }
         aiServiceState = 'READY';
         lastFailureReason = null;
+        recordSuccess();
         return true;
       } else if (status === 'INITIALIZING') {
         aiServiceState = 'INITIALIZING';
@@ -240,7 +248,7 @@ export const isAiServiceAvailable = async (): Promise<boolean> => {
   if (aiServiceState !== 'READY' && aiServiceState !== 'INITIALIZING') {
     const isHealthy = await checkAiServiceHealth();
     if (!isHealthy) {
-      // Attempt recovery once if unavailable
+      // Attempt recovery once if unavailable locally
       if (aiServiceState === 'UNAVAILABLE') {
         const recovered = await attemptRuntimeRecovery();
         if (recovered) {
@@ -255,35 +263,29 @@ export const isAiServiceAvailable = async (): Promise<boolean> => {
   return true;
 };
 
-// Poll health check while state is INITIALIZING
-export const waitForModelReady = async (): Promise<boolean> => {
-  if ((aiServiceState as any) !== 'INITIALIZING') {
-    return (aiServiceState as any) === 'READY';
-  }
-
-  console.log('[HERIXA-AI] Model is INITIALIZING. Polling readiness with bounded wait...');
-  const pollInterval = 500; // 500ms
-  const maxWait = 5000;     // 5 seconds max wait
+// Poll health check while state is INITIALIZING or waking up
+export const waitForModelReady = async (maxWaitMs = 30000): Promise<boolean> => {
+  console.log(`[HERIXA-AI] Polling AI service readiness (max wait: ${maxWaitMs}ms)...`);
+  const pollInterval = 1000; // 1 second interval
   let elapsed = 0;
 
-  while (elapsed < maxWait) {
+  while (elapsed < maxWaitMs) {
     await new Promise(resolve => setTimeout(resolve, pollInterval));
     elapsed += pollInterval;
 
-    // Run health check
-    const isHealthy = await checkAiServiceHealth();
-    if (isHealthy && (aiServiceState as any) === 'READY') {
+    const isHealthy = await checkAiServiceHealthInternal(true);
+    if (isHealthy && aiServiceState === 'READY') {
       console.log(`[HERIXA-AI] Model transitioned to READY after ${elapsed}ms wait.`);
       return true;
     }
     
-    if ((aiServiceState as any) === 'FAILED') {
+    if (aiServiceState === 'FAILED') {
       console.warn('[HERIXA-AI] Model failed to load during wait.');
       return false;
     }
   }
 
-  console.warn(`[HERIXA-AI] Bounded readiness wait timed out after ${maxWait}ms.`);
+  console.warn(`[HERIXA-AI] Bounded readiness wait timed out after ${maxWaitMs}ms.`);
   return false;
 };
 
@@ -292,14 +294,21 @@ export const callPredictionService = async (formData: any, signal?: AbortSignal)
   const aiServiceUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
   const predictUrl = `${aiServiceUrl}/predict`;
 
-  const available = await isAiServiceAvailable();
+  let available = await isAiServiceAvailable();
   if (!available) {
-    throw new Error('MODEL_UNAVAILABLE');
+    // If remote service is unavailable (cold start), attempt controlled polling wait up to 30s
+    if (aiServiceUrl.startsWith('https://')) {
+      console.log('[HERIXA-AI] Remote AI service unavailable during initial check. Service may be warming up. Waiting for model readiness...');
+      available = await waitForModelReady(30000);
+    }
+    if (!available) {
+      throw new Error('MODEL_UNAVAILABLE');
+    }
   }
 
-  // If status is INITIALIZING, wait/poll
+  // If status is INITIALIZING, wait/poll up to 30 seconds
   if (aiServiceState === 'INITIALIZING') {
-    const ready = await waitForModelReady();
+    const ready = await waitForModelReady(30000);
     if (!ready) {
       throw new Error(aiServiceState === 'INITIALIZING' ? 'MODEL_INITIALIZING' : 'MODEL_UNAVAILABLE');
     }
@@ -312,6 +321,8 @@ export const callPredictionService = async (formData: any, signal?: AbortSignal)
     attempt++;
     if (attempt > 1) {
       console.log(`[HERIXA-RECOGNITION] Retrying prediction request, attempt ${attempt}...`);
+      // Sensible backoff delay before retry
+      await new Promise(res => setTimeout(res, 3000));
     }
 
     try {
@@ -324,29 +335,30 @@ export const callPredictionService = async (formData: any, signal?: AbortSignal)
 
       if (response.ok) {
         recordSuccess();
+        aiServiceState = 'READY';
         console.log('[HERIXA-RECOGNITION] MODEL_INFERENCE_COMPLETED');
         return response;
       }
 
-      // If HTTP status is 502, 503, or 504, these are temporary/availability errors
+      // If HTTP status is 502, 503, or 504, these are temporary/availability errors during cold start
       const isTemporaryStatus = response.status === 502 || response.status === 503 || response.status === 504;
       if (isTemporaryStatus && attempt < maxAttempts) {
-        console.warn(`[HERIXA-RECOGNITION] FastAPI returned temporary status ${response.status}. Retrying...`);
-        recordFailure();
+        console.warn(`[HERIXA-RECOGNITION] FastAPI returned temporary status ${response.status}. Retrying after backoff...`);
+        recordFailure(true);
         continue;
       }
 
-      recordFailure();
+      recordFailure(isTemporaryStatus);
       return response;
     } catch (err: any) {
       const isTimeout = err.name === 'AbortError' || err.message?.includes('timeout') || err.message?.includes('timed out');
       const isConnectionError = err.code === 'ECONNREFUSED' || String(err).includes('ECONNREFUSED') || 
                                 err.code === 'EHOSTUNREACH' || err.code === 'ETIMEDOUT' || err.code === 'ENOTFOUND';
 
-      recordFailure();
+      recordFailure(true);
 
       if ((isTimeout || isConnectionError) && attempt < maxAttempts) {
-        console.warn(`[HERIXA-RECOGNITION] Temporary connection error (${err.message || err}). Retrying...`);
+        console.warn(`[HERIXA-RECOGNITION] Temporary connection error (${err.message || err}). Retrying after backoff...`);
         continue;
       }
 

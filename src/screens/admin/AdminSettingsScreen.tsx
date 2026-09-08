@@ -274,14 +274,14 @@ const SettingToggle = ({
     <Switch
       value={value}
       onValueChange={onChange}
-      trackColor={{ false: 'rgba(255, 255, 255, 0.1)', true: 'rgba(212, 175, 55, 0.4)' }}
-      thumbColor={value ? COLORS.gold : '#A0A09C'}
+      trackColor={{ false: '#E2E8F0', true: 'rgba(30, 58, 138, 0.3)' }}
+      thumbColor={value ? COLORS.primary : '#94A3B8'}
     />
   </View>
 );
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
+  scroll: { flex: 1, backgroundColor: '#FAFAFA' },
   content: { padding: SPACING.md, gap: SPACING.md },
   tabsScrollWrap: { height: 40 },
   tabsList: { gap: SPACING.xs, paddingRight: SPACING.md },
@@ -292,32 +292,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
   },
   tabPillActive: {
-    backgroundColor: 'rgba(212, 175, 55, 0.12)',
-    borderColor: 'rgba(212, 175, 55, 0.25)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
+    borderColor: 'rgba(30, 58, 138, 0.2)',
   },
   tabPillText: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600' },
-  tabPillTextActive: { color: COLORS.gold, fontWeight: '700' },
+  tabPillTextActive: { color: COLORS.primary, fontWeight: '700' },
   sectionCard: {
-    backgroundColor: '#181816',
+    backgroundColor: '#FFFFFF',
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#E2E8F0',
     padding: SPACING.md,
     gap: SPACING.md,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.xs },
   iconChip: {
     width: 32,
     height: 32,
     borderRadius: BORDER_RADIUS.md,
-    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    backgroundColor: 'rgba(30, 58, 138, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: 'rgba(30, 58, 138, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -328,7 +333,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: SPACING.xs,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    borderBottomColor: '#F1F5F9',
   },
   toggleTextCol: { flex: 1, paddingRight: SPACING.md },
   toggleLabel: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
@@ -338,21 +343,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.04)',
+    borderBottomColor: '#F1F5F9',
   },
   infoLabel: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '500' },
-  infoVal: { color: COLORS.gold, fontSize: 12, fontWeight: '700' },
+  infoVal: { color: COLORS.primary, fontSize: 12, fontWeight: '700' },
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.xs,
-    backgroundColor: 'rgba(212, 90, 91, 0.1)',
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: 'rgba(212, 90, 91, 0.25)',
+    borderColor: 'rgba(220, 38, 38, 0.2)',
     borderRadius: BORDER_RADIUS.md,
     paddingVertical: 12,
     marginTop: SPACING.xs,
   },
-  logoutBtnText: { color: COLORS.danger, fontSize: 13, fontWeight: '700' },
+  logoutBtnText: { color: '#DC2626', fontSize: 13, fontWeight: '700' },
 });

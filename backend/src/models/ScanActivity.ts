@@ -1,6 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IScanActivity extends Document {
+  scanId?: string;
   userId?: Types.ObjectId;
   monumentId?: Types.ObjectId;
   monumentName?: string;
@@ -13,6 +14,7 @@ export interface IScanActivity extends Document {
 }
 
 const ScanActivitySchema = new Schema<IScanActivity>({
+  scanId: { type: String, unique: true, sparse: true, index: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   monumentId: { type: Schema.Types.ObjectId, ref: 'Monument', index: true },
   monumentName: { type: String, trim: true },
