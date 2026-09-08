@@ -5,10 +5,14 @@ node_modules
 ai
 backend
 scratch
+reports
 android/.gradle
-android/app/build
-android/build
 android/.cxx
+android/build
+android/app/build
+android/app/.cxx
+android/**/.cxx
+android/**/build
 *.onnx
 *.pt
 *.pth
@@ -16,4 +20,5 @@ android/.cxx
 *.mp4
 .venv
 venv
+
 

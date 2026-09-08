@@ -264,7 +264,7 @@ export const isAiServiceAvailable = async (): Promise<boolean> => {
 };
 
 // Poll health check while state is INITIALIZING or waking up
-export const waitForModelReady = async (maxWaitMs = 30000): Promise<boolean> => {
+export const waitForModelReady = async (maxWaitMs = 60000): Promise<boolean> => {
   console.log(`[HERIXA-AI] Polling AI service readiness (max wait: ${maxWaitMs}ms)...`);
   const pollInterval = 1000; // 1 second interval
   let elapsed = 0;
@@ -296,19 +296,19 @@ export const callPredictionService = async (formData: any, signal?: AbortSignal)
 
   let available = await isAiServiceAvailable();
   if (!available) {
-    // If remote service is unavailable (cold start), attempt controlled polling wait up to 30s
+    // If remote service is unavailable (cold start), attempt controlled polling wait up to 60s
     if (aiServiceUrl.startsWith('https://')) {
       console.log('[HERIXA-AI] Remote AI service unavailable during initial check. Service may be warming up. Waiting for model readiness...');
-      available = await waitForModelReady(30000);
+      available = await waitForModelReady(60000);
     }
     if (!available) {
       throw new Error('MODEL_UNAVAILABLE');
     }
   }
 
-  // If status is INITIALIZING, wait/poll up to 30 seconds
+  // If status is INITIALIZING, wait/poll up to 60 seconds
   if (aiServiceState === 'INITIALIZING') {
-    const ready = await waitForModelReady(30000);
+    const ready = await waitForModelReady(60000);
     if (!ready) {
       throw new Error(aiServiceState === 'INITIALIZING' ? 'MODEL_INITIALIZING' : 'MODEL_UNAVAILABLE');
     }

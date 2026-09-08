@@ -36,6 +36,7 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [scanError, setScanError] = useState<string | null>(null);
+  const [scanErrorTitle, setScanErrorTitle] = useState<string>('Recognition Unsuccessful');
   const cameraRef = useRef<any>(null);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
   const processAndRecognize = async (imageUri: string) => {
     setIsAnalyzing(true);
     setScanError(null);
+    setScanErrorTitle('Recognition Unsuccessful');
     setStatusMessage('Compressing image data...');
 
     try {
@@ -67,10 +69,13 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
       if (!result.success) {
         const errorMsg = result.reason || result.message || 'AI heritage recognition service is initializing.';
         if (result.errorDetails === 'MODEL_UNAVAILABLE' || errorMsg.includes('unavailable') || errorMsg.includes('503')) {
+          setScanErrorTitle('AI Service Warming Up');
           setScanError('HERIXA AI service is warming up (cloud cold start). Please try scanning again in 10 seconds.');
         } else if (result.errorDetails === 'NETWORK_UNAVAILABLE' || errorMsg.includes('Connection')) {
+          setScanErrorTitle('Network Error');
           setScanError('Unable to connect to HERIXA server. Please check your internet connection and try again.');
         } else {
+          setScanErrorTitle('Recognition Unsuccessful');
           setScanError(errorMsg);
         }
         return;
@@ -91,8 +96,10 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate('RecognitionResult', { result: matchData });
       } else {
         if (result.status === 'unclear' || result.reason === 'IMAGE_QUALITY') {
+          setScanErrorTitle('Image Unclear');
           setScanError('The captured image was unclear or blurry. Please hold steady and capture the monument clearly.');
         } else {
+          setScanErrorTitle('Recognition Unsuccessful');
           setScanError('Unable to identify monument with high confidence. Please ensure the main temple structure is clearly visible in the frame.');
         }
       }
@@ -100,10 +107,13 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
       console.error('[AI_SCAN] Error identifying monument:', error);
       const errMsg = error.message || '';
       if (error.isNetworkError || errMsg.includes('Network') || errMsg.includes('fetch failed')) {
+        setScanErrorTitle('Network Error');
         setScanError('Network Connection Error: Please check your internet connection and ensure HERIXA backend is reachable.');
       } else if (errMsg.includes('503') || errMsg.includes('unavailable') || errMsg.includes('MODEL_UNAVAILABLE')) {
+        setScanErrorTitle('AI Service Warming Up');
         setScanError('HERIXA AI service is warming up (cloud cold start). Please tap SCAN AGAIN in a few seconds.');
       } else {
+        setScanErrorTitle('Recognition Unsuccessful');
         setScanError(errMsg || 'An error occurred during recognition. Please try again.');
       }
     } finally {
@@ -211,7 +221,7 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.overlayModal}>
               <View style={styles.errorBox}>
                 <Feather name="alert-circle" size={44} color={COLORS.danger} style={{ marginBottom: 12 }} />
-                <Text style={styles.errorTitle}>Recognition Unsuccessful</Text>
+                <Text style={styles.errorTitle}>{scanErrorTitle}</Text>
                 <Text style={styles.errorDescription}>{scanError}</Text>
                 <TouchableOpacity
                   style={styles.retryButton}
