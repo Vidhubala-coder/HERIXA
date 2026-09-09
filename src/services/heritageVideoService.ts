@@ -5,14 +5,32 @@ export const getVideoUrl = (url?: string): string => {
   const trimmed = url.trim();
   if (!trimmed) return '';
 
+  const apiURL = getApiUrl();
+  const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
+
+  // Rewrite any localhost, 127.0.0.1, or local LAN IP to the active API baseUrl
+  if (
+    trimmed.startsWith('http://localhost') ||
+    trimmed.startsWith('http://127.0.0.1') ||
+    trimmed.startsWith('http://10.') ||
+    trimmed.startsWith('http://192.168.')
+  ) {
+    try {
+      const parsed = new URL(trimmed);
+      return `${baseUrl}${parsed.pathname}${parsed.search}`;
+    } catch (_) {
+      const pathMatch = trimmed.match(/https?:\/\/[^\/]+(\/.*)?$/);
+      if (pathMatch && pathMatch[1]) {
+        return `${baseUrl}${pathMatch[1]}`;
+      }
+    }
+  }
+
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
 
-  const apiURL = getApiUrl();
-  const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
   const formattedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-
   return `${baseUrl}${formattedPath}`;
 };
 

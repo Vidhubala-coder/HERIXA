@@ -66,7 +66,7 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
     return false;
   };
 
-  const hasValidVideo = story && story.status === 'PUBLISHED' && isUrlValidMedia(story.videoUrl);
+  const hasValidVideo = story && (story.status === 'PUBLISHED' || !!story.videoUrl) && isUrlValidMedia(story.videoUrl);
 
   const renderVideoHtml = (rawVideoUrl: string, posterUrl?: string) => {
     const videoUrl = getVideoUrl(rawVideoUrl);
@@ -83,28 +83,50 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
         </style>
       </head>
       <body>
-        <video id="v" controls playsinline poster="${poster}">
-          <source src="${videoUrl}" type="video/mp4">
+        <video id="v" controls playsinline preload="metadata" poster="${poster}">
+          <source id="v-src" src="${videoUrl}" type="video/mp4">
           Your browser does not support HTML5 video.
         </video>
         <script>
           const v = document.getElementById('v');
-          v.onerror = function() {
+          const src = document.getElementById('v-src');
+          function notifyError(msg) {
             if (window.ReactNativeWebView) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VIDEO_ERROR' }));
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VIDEO_ERROR', detail: msg }));
             }
-          };
+          }
+          if (src) {
+            src.addEventListener('error', function() {
+              const code = v && v.error ? (v.error.message || 'Error code: ' + v.error.code) : 'Failed to load video resource.';
+              notifyError(code);
+            });
+          }
+          if (v) {
+            v.addEventListener('error', function() {
+              const code = v.error ? (v.error.message || 'Error code: ' + v.error.code) : 'Video playback failed.';
+              notifyError(code);
+            });
+          }
         </script>
       </body>
       </html>
     `;
   };
 
-
   const [videoError, setVideoError] = useState<boolean>(false);
+  const [videoErrorDetail, setVideoErrorDetail] = useState<string>('');
 
   const handleRetryVideo = () => {
     setVideoError(false);
+    setVideoErrorDetail('');
+    loadPublicStory(activeLanguage);
+  };
+
+  const handleOpenModal = () => {
+    setModalVisible(true);
+    setVideoError(false);
+    setVideoErrorDetail('');
+    loadPublicStory(activeLanguage);
   };
 
   return (
@@ -113,7 +135,7 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
       <TouchableOpacity
         style={styles.heroCard}
         activeOpacity={0.9}
-        onPress={() => setModalVisible(true)}
+        onPress={handleOpenModal}
       >
         <View style={styles.heroHeaderRow}>
           <View style={styles.badgeRow}>
@@ -188,14 +210,15 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
                 <ActivityIndicator size="large" color={COLORS.gold} />
                 <Text style={styles.loadingText}>Loading Heritage Story...</Text>
               </View>
-            ) : story && story.status === 'PUBLISHED' ? (
+            ) : story && (story.status === 'PUBLISHED' || !!story.videoUrl) ? (
               <View style={{ gap: SPACING.lg }}>
                 {/* Video Player or Video Error State or No Video State */}
                 {hasValidVideo ? (
                   videoError ? (
                     <View style={styles.errorVideoCard}>
                       <Feather name="alert-triangle" size={32} color={COLORS.gold} />
-                      <Text style={styles.errorVideoTitle}>Unable to play this heritage video. Please try again.</Text>
+                      <Text style={styles.errorVideoTitle}>Unable to play this heritage video.</Text>
+                      {videoErrorDetail ? <Text style={styles.errorVideoDetail}>{videoErrorDetail}</Text> : null}
                       <TouchableOpacity style={styles.retryBtn} onPress={handleRetryVideo}>
                         <Feather name="refresh-cw" size={16} color="#FFF" />
                         <Text style={styles.retryBtnText}>Retry Playback</Text>
@@ -207,13 +230,20 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
                         originWhitelist={['*']}
                         source={{ html: renderVideoHtml(story.videoUrl!, story.thumbnailUrl) }}
                         style={styles.webViewPlayer}
-                        allowsInlineMediaPlayback
+                        allowsInlineMediaPlayback={true}
                         mediaPlaybackRequiresUserAction={false}
+                        domStorageEnabled={true}
+                        javaScriptEnabled={true}
+                        allowsFullscreenVideo={true}
+                        mixedContentMode="always"
                         onMessage={(event) => {
                           try {
                             const data = JSON.parse(event.nativeEvent.data);
                             if (data.type === 'VIDEO_ERROR') {
                               setVideoError(true);
+                              if (data.detail) {
+                                setVideoErrorDetail(data.detail);
+                              }
                             }
                           } catch (e) {}
                         }}
@@ -715,6 +745,12 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZE.sm,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  errorVideoDetail: {
+    color: COLORS.textSecondary,
+    fontSize: FONT_SIZE.xs,
+    textAlign: 'center',
+    paddingHorizontal: SPACING.sm,
   },
   retryBtn: {
     flexDirection: 'row',

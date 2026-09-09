@@ -18,6 +18,7 @@ const adminRouter = Router();
 
 // Public routes (Zero Gemini, Read-only published stories)
 publicRouter.get('/monuments/:monumentId/heritage-story', getPublicStory);
+publicRouter.get('/monuments/:id/heritage-story', getPublicStory);
 
 // Admin routes (Protected by Admin authentication & authorization)
 adminRouter.get('/monuments/:monumentId/heritage-story', requireAdmin as any, getAdminStory);

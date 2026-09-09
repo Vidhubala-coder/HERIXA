@@ -307,6 +307,7 @@ router.get('/:monumentId/visuals', async (req: any, res: any, next: any) => {
 // Public Protocol and Heritage Story endpoints
 router.get('/:id/protocol', getPublicProtocol);
 router.get('/:id/heritage-story', getPublicStory);
+router.get('/:monumentId/heritage-story', getPublicStory);
 
 router.get('/:id', getMonumentById);
 router.get('/:id/ar', getMonumentARConfig);

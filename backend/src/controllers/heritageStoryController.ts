@@ -78,18 +78,21 @@ export function handleVideoMulterUpload(req: Request, res: Response, next: any) 
 
 
 
-async function findMonumentByIdOrSlug(idOrSlug: string) {
-  if (Types.ObjectId.isValid(idOrSlug)) {
-    const m = await Monument.findById(idOrSlug);
+async function findMonumentByIdOrSlug(idOrSlug?: string) {
+  if (!idOrSlug) return null;
+  const clean = String(idOrSlug).trim();
+  if (!clean) return null;
+  if (Types.ObjectId.isValid(clean)) {
+    const m = await Monument.findById(clean);
     if (m) return m;
   }
-  return await Monument.findOne({ slug: idOrSlug });
+  return await Monument.findOne({ slug: clean });
 }
 
 // PUBLIC API: Get Published Story for a Monument (Zero Gemini Execution)
 export async function getPublicStory(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
     const requestedLang = (req.query.language as StoryLanguage) || 'en';
 
     const monument = await findMonumentByIdOrSlug(monumentId);
@@ -98,20 +101,26 @@ export async function getPublicStory(req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Attempt to retrieve requested language PUBLISHED story
+    // Attempt to retrieve requested language story (published or with valid video)
     let story = await HeritageStory.findOne({
       monumentId: monument._id,
       language: requestedLang,
-      status: 'PUBLISHED'
+      $or: [
+        { status: 'PUBLISHED' },
+        { videoUrl: { $exists: true, $nin: [null, ''] } }
+      ]
     });
 
     let isFallback = false;
     if (!story && requestedLang !== 'en') {
-      // Fallback to English published story
+      // Fallback to English story
       story = await HeritageStory.findOne({
         monumentId: monument._id,
         language: 'en',
-        status: 'PUBLISHED'
+        $or: [
+          { status: 'PUBLISHED' },
+          { videoUrl: { $exists: true, $nin: [null, ''] } }
+        ]
       });
       if (story) isFallback = true;
     }
@@ -130,6 +139,25 @@ export async function getPublicStory(req: Request, res: Response): Promise<void>
       .filter(sc => sc.sceneNumber >= 1 && sc.sceneNumber <= 9)
       .sort((a, b) => a.sceneNumber - b.sceneNumber);
 
+    // Sanitize videoUrl: Ensure full public HTTPS URL with no loopback or relative path
+    let sanitizedVideoUrl = story.videoUrl;
+    if (sanitizedVideoUrl && typeof sanitizedVideoUrl === 'string') {
+      const trimmed = sanitizedVideoUrl.trim();
+      const prodBase = process.env.BASE_URL || 'https://herixa-backend.onrender.com';
+      if (
+        trimmed.startsWith('http://localhost') ||
+        trimmed.startsWith('http://127.0.0.1') ||
+        trimmed.startsWith('http://10.') ||
+        trimmed.startsWith('http://192.168.')
+      ) {
+        sanitizedVideoUrl = trimmed.replace(/^https?:\/\/[^\/]+/, prodBase);
+      } else if (trimmed.startsWith('/')) {
+        sanitizedVideoUrl = `${prodBase}${trimmed}`;
+      } else {
+        sanitizedVideoUrl = trimmed;
+      }
+    }
+
     // Clean public output: omit admin-internal prompts/generation keys
     res.json({
       success: true,
@@ -138,12 +166,12 @@ export async function getPublicStory(req: Request, res: Response): Promise<void>
         monumentId: story.monumentId,
         monumentSlug: story.monumentSlug,
         language: story.language,
-        status: story.status,
+        status: story.status === 'PUBLISHED' || sanitizedVideoUrl ? 'PUBLISHED' : story.status,
         title: story.title,
         shortIntroduction: story.shortIntroduction,
         duration: story.duration,
         thumbnailUrl: story.thumbnailUrl,
-        videoUrl: story.videoUrl,
+        videoUrl: sanitizedVideoUrl,
         audioUrl: story.audioUrl,
         subtitlesUrl: story.subtitlesUrl,
         sections: story.sections,
@@ -164,7 +192,7 @@ export async function getPublicStory(req: Request, res: Response): Promise<void>
 // ADMIN API: Get Admin Draft / Management Details
 export async function getAdminStory(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
     const language = (req.query.language as StoryLanguage) || 'en';
 
     const monument = await findMonumentByIdOrSlug(monumentId);
@@ -203,7 +231,7 @@ export async function getAdminStory(req: Request, res: Response): Promise<void> 
 // ADMIN API: Update Admin Draft
 export async function updateAdminStory(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
     const { title, shortIntroduction, sections, sources, script, scenes, videoUrl, thumbnailUrl } = req.body;
     const language = (req.query.language as StoryLanguage) || 'en';
 
@@ -237,6 +265,12 @@ export async function updateAdminStory(req: Request, res: Response): Promise<voi
       }
     }
 
+    // Auto-publish when valid video is attached so users can view it immediately
+    if (story.videoUrl && story.status !== 'PUBLISHED') {
+      story.status = 'PUBLISHED';
+      story.publishedAt = story.publishedAt || new Date();
+    }
+
     // Increment story version if structural changes made
     story.storyVersion = (story.storyVersion || 1) + 1;
     if (title !== undefined) story.title = title;
@@ -258,9 +292,9 @@ export async function updateAdminStory(req: Request, res: Response): Promise<voi
       story.scenes = Array.from(sceneMap.values()).sort((a, b) => a.sceneNumber - b.sceneNumber);
     }
 
-    // Reset status to DRAFT if previously failed or edited
+    // Reset status to DRAFT if previously failed or edited without video
     if (story.status === 'FAILED') {
-      story.status = 'DRAFT';
+      story.status = story.videoUrl ? 'PUBLISHED' : 'DRAFT';
       story.errorMessage = undefined;
     }
 
@@ -279,7 +313,7 @@ export async function updateAdminStory(req: Request, res: Response): Promise<voi
 // ADMIN API: AI Source Content Extraction
 export async function generateStoryFromSource(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
     const { sourceUrl } = req.body;
 
     if (!sourceUrl) {
@@ -329,7 +363,7 @@ export async function generateStoryFromSource(req: Request, res: Response): Prom
 // ADMIN API: AI Script & Scene Generation
 export async function generateScript(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
 
     const monument = await findMonumentByIdOrSlug(monumentId);
     if (!monument) {
@@ -365,7 +399,7 @@ export async function generateScript(req: Request, res: Response): Promise<void>
 // ADMIN API: Media Generation with Lock & Idempotency
 export async function generateMedia(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
 
     const monument = await findMonumentByIdOrSlug(monumentId);
     if (!monument) {
@@ -415,7 +449,7 @@ export async function generateMedia(req: Request, res: Response): Promise<void> 
 // ADMIN API: Publish Story
 export async function publishStory(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
 
     const monument = await findMonumentByIdOrSlug(monumentId);
     if (!monument) {
@@ -467,7 +501,7 @@ export async function publishStory(req: Request, res: Response): Promise<void> {
 // ADMIN API: Unpublish Story
 export async function unpublishStory(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
 
     const monument = await findMonumentByIdOrSlug(monumentId);
     if (!monument) {
@@ -495,7 +529,7 @@ export async function unpublishStory(req: Request, res: Response): Promise<void>
 // ADMIN API: Upload Multipart Video File
 export async function uploadVideo(req: Request, res: Response): Promise<void> {
   try {
-    const { monumentId } = req.params;
+    const monumentId = req.params.monumentId || req.params.id;
     const language = (req.query.language as StoryLanguage) || 'en';
 
     const monument = await findMonumentByIdOrSlug(monumentId);
@@ -522,7 +556,7 @@ export async function uploadVideo(req: Request, res: Response): Promise<void> {
         monumentId: monument._id,
         monumentSlug: monument.slug || monument.name.toLowerCase().replace(/\s+/g, '-'),
         language,
-        status: 'DRAFT',
+        status: 'PUBLISHED',
         title: `${monument.name} — Heritage Story`,
         shortIntroduction: `Discover the rich history, architectural features, and enduring legacy of ${monument.name}.`,
         sections: getDefaultStorySections(),
@@ -531,6 +565,8 @@ export async function uploadVideo(req: Request, res: Response): Promise<void> {
     }
 
     story.videoUrl = videoUrlToSave;
+    story.status = 'PUBLISHED';
+    story.publishedAt = story.publishedAt || new Date();
     story.updatedBy = (req as any).user?.email || 'admin';
     story.storyVersion = (story.storyVersion || 1) + 1;
     await story.save();
