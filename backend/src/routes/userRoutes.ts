@@ -46,8 +46,18 @@ const profileStorage = multer.diskStorage({
 });
 
 const profileFileFilter = (req: any, file: any, cb: any) => {
-  const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  if (allowedMimeTypes.includes(file.mimetype)) {
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  const allowedMime = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/heic',
+    'image/heif',
+    'application/octet-stream'
+  ];
+  const allowedExt = ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'];
+  if (allowedMime.includes(file.mimetype) || allowedExt.includes(ext) || (!file.mimetype && allowedExt.includes(ext)) || (file.mimetype && file.mimetype.startsWith('image/'))) {
     cb(null, true);
   } else {
     cb(new Error('Invalid file type. Only JPEG, PNG, and WebP are allowed.'), false);
@@ -58,7 +68,7 @@ const uploadProfile = multer({
   storage: profileStorage,
   fileFilter: profileFileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 10 * 1024 * 1024 // 10MB limit for modern mobile camera photos
   }
 });
 

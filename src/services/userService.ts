@@ -564,57 +564,83 @@ export const uploadAdminAvatarData = async (
   activeUserId?: string
 ): Promise<{ success: boolean; data?: any; message?: string }> => {
   const { getApiUrl } = require('./api');
+  const { Platform } = require('react-native');
   const apiURL = getApiUrl();
   const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
   const url = `${baseUrl}/api/admin/profile/avatar`;
 
-  const headers: Record<string, string> = {
-    'Authorization': `Bearer ${authToken}`,
-  };
-  if (activeUserId) {
-    headers['x-user-id'] = activeUserId;
+  let fileUri = imageUri;
+  if (Platform.OS === 'android' && !fileUri.startsWith('file://') && !fileUri.startsWith('content://')) {
+    fileUri = `file://${fileUri}`;
   }
 
-  console.log(`[AVATAR-UPLOAD] Uploading ${imageUri} to ${url}`);
+  const fileName = fileUri.split('/').pop() || `avatar-${Date.now()}.jpg`;
+  const lower = fileName.toLowerCase();
+  let mimeType = 'image/jpeg';
+  if (lower.endsWith('.png')) mimeType = 'image/png';
+  else if (lower.endsWith('.webp')) mimeType = 'image/webp';
+  else if (lower.endsWith('.heic')) mimeType = 'image/heic';
+  else if (lower.endsWith('.heif')) mimeType = 'image/heif';
 
-  try {
-    const FileSystem = require('expo-file-system/legacy');
-    const uploadResult = await FileSystem.uploadAsync(url, imageUri, {
-      httpMethod: 'POST',
-      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-      fieldName: 'avatar',
-      headers,
-    });
+  console.log(`[AVATAR-UPLOAD] Uploading avatar ${fileName} (${mimeType}) to ${url}`);
 
-    console.log(`[AVATAR-UPLOAD] HTTP Status: ${uploadResult.status}`);
-    if (uploadResult.status >= 200 && uploadResult.status < 300) {
-      const data = JSON.parse(uploadResult.body);
-      console.log('[AVATAR-UPLOAD] Upload Success:', data.message || 'Avatar saved');
-      return data;
-    } else {
-      throw new Error(`Upload failed with HTTP status ${uploadResult.status}`);
+  const formData = new FormData();
+  formData.append('avatar', {
+    uri: fileUri,
+    name: fileName,
+    type: mimeType,
+  } as any);
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    if (activeUserId) {
+      xhr.setRequestHeader('x-user-id', activeUserId);
     }
-  } catch (fsErr) {
-    console.warn('[AVATAR-UPLOAD] FileSystem uploadAsync failed, falling back to FormData fetch:', fsErr);
-    const formData = new FormData();
-    const fileName = imageUri.split('/').pop() || 'avatar.jpg';
-    formData.append('avatar', {
-      uri: imageUri,
-      name: fileName,
-      type: 'image/jpeg',
-    } as any);
+    xhr.timeout = 60000;
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        ...(activeUserId ? { 'x-user-id': activeUserId } : {}),
-      },
-      body: formData,
-    });
-    const data = await res.json();
-    return data;
-  }
+    xhr.onload = () => {
+      let resData: any = {};
+      try {
+        resData = JSON.parse(xhr.responseText || '{}');
+      } catch (e) {
+        resData = { message: xhr.responseText || 'Invalid response from server' };
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({
+          success: true,
+          data: resData.data,
+          message: resData.message || 'Avatar saved successfully',
+        });
+      } else {
+        resolve({
+          success: false,
+          data: undefined,
+          message: resData.message || resData.error || `Upload failed with status ${xhr.status}`,
+        });
+      }
+    };
+
+    xhr.onerror = () => {
+      resolve({
+        success: false,
+        data: undefined,
+        message: 'Unable to connect to the server.',
+      });
+    };
+
+    xhr.ontimeout = () => {
+      resolve({
+        success: false,
+        data: undefined,
+        message: 'Upload timed out. Please try again.',
+      });
+    };
+
+    xhr.send(formData);
+  });
 };
 
 export const fetchAuditLogsForExport = async (

@@ -598,25 +598,38 @@ export const uploadProfilePhoto = async (req: Request, res: Response, next: Next
     }
 
     const newFilePath = req.file.path;
-    const fileMime = req.file.mimetype?.toLowerCase();
-    try {
-      if (fileMime !== 'image/webp') {
-        // Validate file format integrity using Jimp
+    const fileMime = req.file.mimetype?.toLowerCase() || '';
+    const ext = path.extname(req.file.originalname || '').toLowerCase();
+
+    // Validate format integrity:
+    // Only run Jimp for JPEG/PNG since Jimp 0.16 does not natively parse WebP or HEIC
+    const isStandardJimpFormat = ['image/jpeg', 'image/jpg', 'image/png'].includes(fileMime) || ['.jpg', '.jpeg', '.png'].includes(ext);
+    const isOtherAllowedFormat = ['image/webp', 'image/heic', 'image/heif'].includes(fileMime) || ['.webp', '.heic', '.heif'].includes(ext);
+
+    if (isStandardJimpFormat) {
+      try {
         const image = await Jimp.read(newFilePath);
         const mime = image.getMIME().toLowerCase();
         const allowed = ['image/jpeg', 'image/png'];
         if (!allowed.includes(mime)) {
           throw new Error('Unsupported image format.');
         }
-      }
-    } catch (jimpError) {
-      console.warn('[HERIXA-SECURITY] Invalid or corrupted image uploaded:', req.file.filename);
-      // Delete the invalid file immediately
-      fs.unlink(newFilePath, (err) => {
-        if (err) {
-          console.error('[HERIXA-STORAGE] Failed to delete invalid uploaded file:', err.message);
+      } catch (jimpError: any) {
+        console.warn('[HERIXA-SECURITY] Invalid or corrupted image uploaded:', req.file.filename, jimpError.message);
+        if (fs.existsSync(newFilePath)) {
+          try { fs.unlinkSync(newFilePath); } catch (_) {}
         }
-      });
+        res.status(400).json({
+          success: false,
+          message: 'Invalid or corrupted image file. Only JPEG, PNG, and WebP are supported.',
+        });
+        return;
+      }
+    } else if (!isOtherAllowedFormat && !fileMime.startsWith('image/')) {
+      console.warn('[HERIXA-SECURITY] Unsupported mime or extension:', fileMime, ext);
+      if (fs.existsSync(newFilePath)) {
+        try { fs.unlinkSync(newFilePath); } catch (_) {}
+      }
       res.status(400).json({
         success: false,
         message: 'Invalid or corrupted image file. Only JPEG, PNG, and WebP are supported.',
@@ -626,6 +639,9 @@ export const uploadProfilePhoto = async (req: Request, res: Response, next: Next
 
     const user = await User.findById(userId);
     if (!user) {
+      if (fs.existsSync(newFilePath)) {
+        try { fs.unlinkSync(newFilePath); } catch (_) {}
+      }
       res.status(404).json({ success: false, message: 'User not found.' });
       return;
     }

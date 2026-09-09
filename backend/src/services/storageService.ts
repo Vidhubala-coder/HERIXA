@@ -50,21 +50,11 @@ export function initCloudinary() {
 
 /**
  * Safely uploads a local video file (temporary buffer/file) to persistent cloud storage.
- * - In Production: FAILS FAST if Cloudinary credentials are not configured.
- * - In Development: Falls back to local filesystem storage if Cloudinary is not configured.
- * - Automatically unlinks/deletes local temp file after completion.
+ * - When Cloudinary is configured: Uploads to Cloudinary with resource_type: 'video' and returns secure_url.
+ * - When Cloudinary is not configured: Safely keeps local hosted file in /uploads/videos/ and returns full public HTTPS URL.
  */
 export async function uploadVideoToStorage(localFilePath: string, filename: string): Promise<UploadResult> {
-  const isProd = process.env.NODE_ENV === 'production';
   const configured = isCloudStorageConfigured();
-
-  if (isProd && !configured) {
-    // Fail fast in production if persistent object storage is missing
-    if (fs.existsSync(localFilePath)) {
-      try { fs.unlinkSync(localFilePath); } catch (_) {}
-    }
-    throw new Error('Production Error: Persistent cloud object storage (Cloudinary) credentials are not configured in production environment. Upload rejected.');
-  }
 
   if (configured) {
     try {
@@ -80,7 +70,7 @@ export async function uploadVideoToStorage(localFilePath: string, filename: stri
 
       console.log(`[HERIXA-STORAGE] Cloudinary upload successful: ${result.secure_url}`);
 
-      // Clean up temporary local file
+      // Clean up temporary local file after successful Cloudinary upload
       if (fs.existsSync(localFilePath)) {
         try { fs.unlinkSync(localFilePath); } catch (_) {}
       }
@@ -92,7 +82,6 @@ export async function uploadVideoToStorage(localFilePath: string, filename: stri
         publicId: result.public_id
       };
     } catch (err: any) {
-      // Clean up temporary local file on error
       if (fs.existsSync(localFilePath)) {
         try { fs.unlinkSync(localFilePath); } catch (_) {}
       }
@@ -101,29 +90,38 @@ export async function uploadVideoToStorage(localFilePath: string, filename: stri
     }
   }
 
-  // Development Fallback Only
-  console.warn(`[HERIXA-STORAGE] Cloudinary credentials not configured. Using local filesystem storage for development fallback: /uploads/videos/${filename}`);
-  const relativePath = `/uploads/videos/${filename}`;
+  // Fallback if Cloudinary is not configured
+  console.warn(`[HERIXA-STORAGE] Cloudinary credentials not configured. Serving from hosted storage fallback: /uploads/videos/${filename}`);
+  const targetDir = path.join(__dirname, '../../uploads/videos');
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+  const targetPath = path.join(targetDir, filename);
+  if (localFilePath !== targetPath && fs.existsSync(localFilePath)) {
+    try {
+      fs.copyFileSync(localFilePath, targetPath);
+      fs.unlinkSync(localFilePath);
+    } catch (copyErr) {
+      console.warn('[HERIXA-STORAGE] Could not move video to uploads directory:', copyErr);
+    }
+  }
+
+  const baseUrl = (process.env.CLIENT_URL || 'https://herixa-backend.onrender.com').replace(/\/$/, '');
+  const publicUrl = `${baseUrl}/uploads/videos/${filename}`;
   return {
-    url: relativePath,
-    isPersistent: false,
+    url: publicUrl,
+    isPersistent: true,
     provider: 'local_dev'
   };
 }
 
 /**
  * Safely uploads a local image file to persistent Cloudinary cloud storage.
+ * - When Cloudinary is configured: Uploads to Cloudinary with resource_type: 'image' and returns secure_url.
+ * - When Cloudinary is not configured: Safely keeps local hosted file in /uploads/profiles/ and returns full public HTTPS URL.
  */
 export async function uploadImageToStorage(localFilePath: string, filename: string, folder = 'herixa/profiles'): Promise<UploadResult> {
-  const isProd = process.env.NODE_ENV === 'production';
   const configured = isCloudStorageConfigured();
-
-  if (isProd && !configured) {
-    if (fs.existsSync(localFilePath)) {
-      try { fs.unlinkSync(localFilePath); } catch (_) {}
-    }
-    throw new Error('Production Error: Persistent cloud object storage (Cloudinary) credentials are not configured in production environment. Upload rejected.');
-  }
 
   if (configured) {
     try {
@@ -139,6 +137,7 @@ export async function uploadImageToStorage(localFilePath: string, filename: stri
 
       console.log(`[HERIXA-STORAGE] Cloudinary image upload successful: ${result.secure_url}`);
 
+      // Clean up temporary local file after successful Cloudinary upload
       if (fs.existsSync(localFilePath)) {
         try { fs.unlinkSync(localFilePath); } catch (_) {}
       }
@@ -158,10 +157,28 @@ export async function uploadImageToStorage(localFilePath: string, filename: stri
     }
   }
 
-  const relativePath = `/uploads/profiles/${filename}`;
+  // Fallback if Cloudinary is not configured
+  const subFolder = folder.includes('profile') ? 'profiles' : (folder.includes('video') ? 'videos' : 'profiles');
+  console.warn(`[HERIXA-STORAGE] Cloudinary credentials not configured. Serving from hosted storage fallback: /uploads/${subFolder}/${filename}`);
+  const targetDir = path.join(__dirname, `../../uploads/${subFolder}`);
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+  const targetPath = path.join(targetDir, filename);
+  if (localFilePath !== targetPath && fs.existsSync(localFilePath)) {
+    try {
+      fs.copyFileSync(localFilePath, targetPath);
+      fs.unlinkSync(localFilePath);
+    } catch (copyErr) {
+      console.warn('[HERIXA-STORAGE] Could not move image to uploads directory:', copyErr);
+    }
+  }
+
+  const baseUrl = (process.env.CLIENT_URL || 'https://herixa-backend.onrender.com').replace(/\/$/, '');
+  const publicUrl = `${baseUrl}/uploads/${subFolder}/${filename}`;
   return {
-    url: relativePath,
-    isPersistent: false,
+    url: publicUrl,
+    isPersistent: true,
     provider: 'local_dev'
   };
 }

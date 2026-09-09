@@ -773,46 +773,62 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
       console.log('[HERIXA-PHOTO] Image selected');
 
-      // 1. Prepare & compress the photo via ImageManipulator
       const pickedAsset = result.assets[0];
-      const manipulated = await ImageManipulator.manipulateAsync(
-        pickedAsset.uri,
-        [{ resize: { width: 500, height: 500 } }],
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-      );
+      let uploadUri = pickedAsset.uri;
+      let uploadName = pickedAsset.fileName || `photo-${Date.now()}.jpg`;
+      let uploadMime = pickedAsset.mimeType || '';
 
-      // Normalize URI (decode URI-encoded parts like spaces or %2540 for Android/Expo)
-      let uploadUri = manipulated.uri;
-      if (Platform.OS === 'android') {
-        uploadUri = decodeURIComponent(manipulated.uri);
+      // 1. Prepare & compress the photo via ImageManipulator
+      try {
+        const manipulated = await ImageManipulator.manipulateAsync(
+          pickedAsset.uri,
+          [{ resize: { width: 600, height: 600 } }],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        if (manipulated?.uri) {
+          uploadUri = manipulated.uri;
+          uploadName = `photo-${Date.now()}.jpg`;
+          uploadMime = 'image/jpeg';
+        }
+      } catch (manipErr) {
+        console.warn('[HERIXA-PHOTO] ImageManipulator skipped/failed, using original asset:', manipErr);
       }
-      if (uploadUri && !uploadUri.startsWith('file://') && !uploadUri.startsWith('content://')) {
+
+      // Ensure valid Android URI prefix
+      if (Platform.OS === 'android' && !uploadUri.startsWith('file://') && !uploadUri.startsWith('content://')) {
         uploadUri = `file://${uploadUri}`;
       }
 
-      // Check file existence and size using legacy/compatible getInfoAsync
-      const fileInfo = await getInfoAsync(uploadUri);
-      if (!fileInfo.exists) {
-        throw new Error(`Compressed image file does not exist at: ${uploadUri}`);
+      // Derive and validate MIME type — never pass null, undefined, or generic stream
+      const lowerName = uploadName.toLowerCase();
+      if (!uploadMime || uploadMime === 'null' || uploadMime === 'undefined' || uploadMime === 'application/octet-stream') {
+        if (lowerName.endsWith('.png')) uploadMime = 'image/png';
+        else if (lowerName.endsWith('.webp')) uploadMime = 'image/webp';
+        else if (lowerName.endsWith('.heic')) uploadMime = 'image/heic';
+        else if (lowerName.endsWith('.heif')) uploadMime = 'image/heif';
+        else uploadMime = 'image/jpeg';
       }
 
-      // Check size limit: 5 MB
-      if (fileInfo.size && fileInfo.size > 5 * 1024 * 1024) {
-        Alert.alert('Oversized Image', 'Please select an image smaller than 5 MB.');
-        setIsUploadingPhoto(false);
-        return;
+      // Check file size if available
+      try {
+        const fileInfo = await getInfoAsync(uploadUri);
+        if (fileInfo.exists && fileInfo.size && fileInfo.size > 10 * 1024 * 1024) {
+          Alert.alert('Oversized Image', 'Please select an image smaller than 10 MB.');
+          setIsUploadingPhoto(false);
+          return;
+        }
+      } catch (_) {
+        // Safe skip if getInfoAsync unsupported for specific content URI
       }
 
-      console.log('[HERIXA-PHOTO] Image validation passed');
+      console.log('[HERIXA-PHOTO] Image validation passed, mime:', uploadMime);
 
-      // 2. Build FormData payload
+      // 2. Build FormData payload with strictly valid file object
       const formData = new FormData();
-      const uriParts = uploadUri.split('/');
-      const fileName = uriParts[uriParts.length - 1];
       formData.append('photo', {
         uri: uploadUri,
-        name: fileName || 'photo.jpg',
-        type: 'image/jpeg',
+        name: uploadName,
+        type: uploadMime,
       } as any);
 
       if (authToken) {
