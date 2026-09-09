@@ -472,6 +472,80 @@ export interface ImageRecognitionResponse {
   errorDetails?: string;
 }
 
+export interface AiReadinessResult {
+  isReady: boolean;
+  isCold: boolean;
+  status: string;
+}
+
+export const checkAiReadiness = async (timeoutMs = 4000): Promise<AiReadinessResult> => {
+  const aiHealthUrl = 'https://herixa-ai.onrender.com/health';
+  try {
+    const res = await fetch(aiHealthUrl, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const isReady = data?.status === 'READY' && (data?.modelLoaded === true || data?.model_loaded === true);
+      return {
+        isReady,
+        isCold: !isReady,
+        status: data?.status || 'UNKNOWN'
+      };
+    }
+    return { isReady: false, isCold: true, status: `HTTP_${res.status}` };
+  } catch (err: any) {
+    // If direct AI ping timed out or failed, try backend proxy endpoint as fallback
+    try {
+      const backendHealthRes = await apiFetch('/api/monuments/recognize/health', {
+        method: 'GET',
+        timeout: 4000
+      });
+      const status = backendHealthRes?.ai_recognition?.status;
+      const modelReady = backendHealthRes?.ai_recognition?.modelReady === true;
+      const isReady = status === 'READY' && modelReady;
+      return {
+        isReady,
+        isCold: !isReady,
+        status: status || 'COLD'
+      };
+    } catch (_) {
+      return { isReady: false, isCold: true, status: 'COLD_START' };
+    }
+  }
+};
+
+export const waitForAiReady = async (
+  onProgress?: (elapsedSec: number) => void,
+  maxWaitMs = 75000,
+  pollIntervalMs = 2500
+): Promise<boolean> => {
+  const start = Date.now();
+  console.log('[HERIXA-AI] Waiting for AI service readiness...');
+
+  while (Date.now() - start < maxWaitMs) {
+    const readiness = await checkAiReadiness(4000);
+    if (readiness.isReady) {
+      console.log(`[HERIXA-AI] AI transitioned to READY after ${Date.now() - start}ms.`);
+      return true;
+    }
+
+    if (onProgress) {
+      const elapsedSec = Math.round((Date.now() - start) / 1000);
+      onProgress(elapsedSec);
+    }
+
+    const remaining = maxWaitMs - (Date.now() - start);
+    if (remaining <= 0) break;
+    await new Promise(resolve => setTimeout(resolve, Math.min(pollIntervalMs, remaining)));
+  }
+
+  console.warn(`[HERIXA-AI] Timed out waiting for AI readiness after ${maxWaitMs}ms.`);
+  return false;
+};
+
 export const recognizeMonumentFromImage = async (
   base64Image: string,
   options?: RequestInit & { timeout?: number; latitude?: number; longitude?: number; viewType?: string; preferredLanguage?: string | null }

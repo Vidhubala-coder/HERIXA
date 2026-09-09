@@ -61,11 +61,14 @@ export async function uploadVideoToStorage(localFilePath: string, filename: stri
       initCloudinary();
       console.log(`[HERIXA-STORAGE] Uploading video '${filename}' to Cloudinary persistent storage...`);
 
-      const result = await cloudinary.uploader.upload(localFilePath, {
+      // Use upload_large with chunking for video assets to support large video streams and prevent timeouts
+      const uploader = (cloudinary.uploader.upload_large || cloudinary.uploader.upload).bind(cloudinary.uploader);
+      const result = await uploader(localFilePath, {
         resource_type: 'video',
         folder: 'herixa/videos',
         public_id: path.parse(filename).name,
-        overwrite: true
+        overwrite: true,
+        chunk_size: 6000000
       });
 
       console.log(`[HERIXA-STORAGE] Cloudinary upload successful: ${result.secure_url}`);
@@ -92,6 +95,10 @@ export async function uploadVideoToStorage(localFilePath: string, filename: stri
 
   // Fallback if Cloudinary is not configured
   console.warn(`[HERIXA-STORAGE] Cloudinary credentials not configured. Serving from hosted storage fallback: /uploads/videos/${filename}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('[HERIXA-STORAGE] WARNING: In production without Cloudinary, uploaded video will be lost on container restart. Configure CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME on Render dashboard.');
+  }
+
   const targetDir = path.join(__dirname, '../../uploads/videos');
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
@@ -110,7 +117,7 @@ export async function uploadVideoToStorage(localFilePath: string, filename: stri
   const publicUrl = `${baseUrl}/uploads/videos/${filename}`;
   return {
     url: publicUrl,
-    isPersistent: true,
+    isPersistent: false,
     provider: 'local_dev'
   };
 }

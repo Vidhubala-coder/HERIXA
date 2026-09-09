@@ -5,6 +5,14 @@ export const getVideoUrl = (url?: string): string => {
   const trimmed = url.trim();
   if (!trimmed) return '';
 
+  // Cloudinary persistent URLs: ensure HTTPS and preserve directly
+  if (trimmed.includes('cloudinary.com')) {
+    if (trimmed.startsWith('http://')) {
+      return trimmed.replace('http://', 'https://');
+    }
+    return trimmed;
+  }
+
   const apiURL = getApiUrl();
   const baseUrl = apiURL.endsWith('/') ? apiURL.slice(0, -1) : apiURL;
 
@@ -26,7 +34,15 @@ export const getVideoUrl = (url?: string): string => {
     }
   }
 
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+  if (trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('http://')) {
+    // If it's pointing to herixa-backend.onrender.com with http, upgrade to https
+    if (trimmed.includes('herixa-backend.onrender.com')) {
+      return trimmed.replace('http://', 'https://');
+    }
     return trimmed;
   }
 
@@ -107,7 +123,7 @@ export const heritageVideoService = {
   // Public GET (Zero Gemini execution)
   async getPublicStory(monumentId: string, language: StoryLanguage = 'en'): Promise<HeritageStoryData | null> {
     try {
-      const res = await apiFetch(`/api/monuments/${monumentId}/heritage-story?language=${language}`, {
+      const res = await apiFetch(`/api/monuments/${monumentId}/heritage-story?language=${language}&_t=${Date.now()}`, {
         method: 'GET'
       });
       return res?.data || null;

@@ -17,7 +17,12 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, BORDER_RADIUS, TYPOGRAPHY } from '../constants/theme';
 import ARViewport from '../components/ar/ARViewport';
-import { recognizeMonumentFromImage, ImageRecognitionResponse } from '../services/monumentService';
+import {
+  recognizeMonumentFromImage,
+  ImageRecognitionResponse,
+  checkAiReadiness,
+  waitForAiReady
+} from '../services/monumentService';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList, RootStackParamList, RecognitionResultData } from '../navigation/types';
@@ -59,9 +64,54 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
         throw new Error('Image processing failed.');
       }
 
+      // Check AI readiness before sending heavy recognition request
+      setStatusMessage('Checking AI service readiness...');
+      const initialReadiness = await checkAiReadiness(3000);
+
+      if (!initialReadiness.isReady) {
+        // AI is cold / asleep on cloud: enter "Warming Up" state and poll until ready
+        setStatusMessage('AI Service Warming Up...');
+        const isReady = await waitForAiReady((elapsedSec) => {
+          setStatusMessage(`AI Service Warming Up (${elapsedSec}s)...`);
+        }, 75000, 2500);
+
+        if (!isReady) {
+          setScanErrorTitle('AI Service Warming Up');
+          setScanError('HERIXA AI service took too long to wake up. Please tap SCAN AGAIN in a few moments.');
+          return;
+        }
+      }
+
+      // AI is ready: automatically proceed to recognition
       setStatusMessage('Analyzing Heritage...');
 
-      const result: ImageRecognitionResponse = await recognizeMonumentFromImage(manipulated.base64);
+      let result: ImageRecognitionResponse = await recognizeMonumentFromImage(manipulated.base64);
+
+      // If backend returned cold-start gateway status during recognition, wait and auto-retry once
+      if (!result.success) {
+        const errorMsg = result.reason || result.message || '';
+        const isWarmingOrCold =
+          result.errorDetails === 'MODEL_INITIALIZING' ||
+          result.errorDetails === 'GATEWAY_ERROR' ||
+          result.errorDetails === 'MODEL_UNAVAILABLE' ||
+          errorMsg.includes('waking up') ||
+          errorMsg.includes('initializing') ||
+          errorMsg.includes('unavailable') ||
+          errorMsg.includes('502') ||
+          errorMsg.includes('503');
+
+        if (isWarmingOrCold) {
+          setStatusMessage('AI Service Warming Up...');
+          const isReady = await waitForAiReady((elapsedSec) => {
+            setStatusMessage(`AI Service Warming Up (${elapsedSec}s)...`);
+          }, 60000, 2500);
+
+          if (isReady) {
+            setStatusMessage('Analyzing Heritage...');
+            result = await recognizeMonumentFromImage(manipulated.base64);
+          }
+        }
+      }
 
       if (!result.success) {
         const errorMsg = result.reason || result.message || 'AI heritage recognition service is initializing.';
@@ -230,8 +280,14 @@ export const SmartScanScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.overlayModal}>
               <View style={styles.loaderBox}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loaderTitle}>Analyzing Heritage...</Text>
-                <Text style={styles.loaderText}>{statusMessage}</Text>
+                <Text style={styles.loaderTitle}>
+                  {statusMessage.toLowerCase().includes('warming') ? 'AI Service Warming Up' : 'Analyzing Heritage...'}
+                </Text>
+                <Text style={styles.loaderText}>
+                  {statusMessage.toLowerCase().includes('warming')
+                    ? `${statusMessage}\nRecognition will start automatically once ready.`
+                    : statusMessage}
+                </Text>
               </View>
             </View>
           )}

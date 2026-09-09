@@ -78,35 +78,100 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <style>
           * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-          video { width: 100%; height: 100%; object-fit: contain; }
+          body { margin: 0; background: #000; display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw; overflow: hidden; }
+          video { width: 100%; height: 100%; max-height: 100vh; object-fit: contain; background: #000; }
         </style>
       </head>
       <body>
-        <video id="v" controls playsinline preload="metadata" poster="${poster}">
+        <video id="v" controls playsinline webkit-playsinline preload="metadata" poster="${poster}" crossorigin="anonymous">
           <source id="v-src" src="${videoUrl}" type="video/mp4">
           Your browser does not support HTML5 video.
         </video>
         <script>
-          const v = document.getElementById('v');
-          const src = document.getElementById('v-src');
-          function notifyError(msg) {
-            if (window.ReactNativeWebView) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'VIDEO_ERROR', detail: msg }));
+          (function() {
+            var v = document.getElementById('v');
+            var src = document.getElementById('v-src');
+            var hasSignaledError = false;
+            var loadTimer = null;
+
+            function postToRN(data) {
+              try {
+                if (window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
+                  window.ReactNativeWebView.postMessage(JSON.stringify(data));
+                }
+              } catch (e) {}
             }
-          }
-          if (src) {
-            src.addEventListener('error', function() {
-              const code = v && v.error ? (v.error.message || 'Error code: ' + v.error.code) : 'Failed to load video resource.';
-              notifyError(code);
-            });
-          }
-          if (v) {
-            v.addEventListener('error', function() {
-              const code = v.error ? (v.error.message || 'Error code: ' + v.error.code) : 'Video playback failed.';
-              notifyError(code);
-            });
-          }
+
+            function notifyError(detail) {
+              if (hasSignaledError) return;
+              hasSignaledError = true;
+              if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+              postToRN({ type: 'VIDEO_ERROR', detail: detail || 'Video playback failed.' });
+            }
+
+            function clearTimer() {
+              if (loadTimer) {
+                clearTimeout(loadTimer);
+                loadTimer = null;
+              }
+            }
+
+            // 12-second loading timeout to prevent infinite loading state
+            loadTimer = setTimeout(function() {
+              if (v && v.readyState < 2) {
+                notifyError('Video loading timed out. The video file could not be buffered.');
+              }
+            }, 12000);
+
+            if (v) {
+              v.addEventListener('canplay', function() {
+                clearTimer();
+                postToRN({ type: 'VIDEO_CAN_PLAY' });
+              });
+
+              v.addEventListener('canplaythrough', function() {
+                clearTimer();
+                postToRN({ type: 'VIDEO_CAN_PLAY_THROUGH' });
+              });
+
+              v.addEventListener('loadeddata', function() {
+                clearTimer();
+              });
+
+              v.addEventListener('error', function() {
+                clearTimer();
+                var msg = 'Video playback error.';
+                if (v.error) {
+                  switch (v.error.code) {
+                    case 1: msg = 'Video loading aborted by user.'; break;
+                    case 2: msg = 'Network error while loading video.'; break;
+                    case 3: msg = 'Video decoding failed (unsupported codec).'; break;
+                    case 4: msg = 'Video format not supported or file not found (404).'; break;
+                    default: msg = v.error.message || ('Video error code: ' + v.error.code);
+                  }
+                }
+                notifyError(msg);
+              });
+
+              v.addEventListener('stalled', function() {
+                if (v.readyState === 0) {
+                  setTimeout(function() {
+                    if (v.readyState === 0 && !hasSignaledError) {
+                      notifyError('Media transfer stalled. Please check your connection.');
+                    }
+                  }, 6000);
+                }
+              });
+            }
+
+            if (src) {
+              src.addEventListener('error', function() {
+                clearTimer();
+                var code = (v && v.error && v.error.message) ? v.error.message : 'Failed to load video resource (HTTP error or file missing).';
+                notifyError(code);
+              });
+            }
+          })();
         </script>
       </body>
       </html>
@@ -228,7 +293,10 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
                     <View style={styles.videoWrapper}>
                       <WebView
                         originWhitelist={['*']}
-                        source={{ html: renderVideoHtml(story.videoUrl!, story.thumbnailUrl) }}
+                        source={{
+                          html: renderVideoHtml(story.videoUrl!, story.thumbnailUrl),
+                          baseUrl: 'https://herixa-backend.onrender.com'
+                        }}
                         style={styles.webViewPlayer}
                         allowsInlineMediaPlayback={true}
                         mediaPlaybackRequiresUserAction={false}
@@ -236,6 +304,8 @@ export const HeritageStorySection: React.FC<HeritageStorySectionProps> = ({
                         javaScriptEnabled={true}
                         allowsFullscreenVideo={true}
                         mixedContentMode="always"
+                        androidHardwareAccelerationDisabled={false}
+                        androidLayerType="hardware"
                         onMessage={(event) => {
                           try {
                             const data = JSON.parse(event.nativeEvent.data);
